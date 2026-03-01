@@ -369,7 +369,28 @@ const intoOperands = new Set([
 
 type CachedScript = { stackSize: number, tokens: TraceToken[], params: string[] }
 
-const cachedScripts = new Map<string, CachedScript>()
+const CACHED_SCRIPTS_MAX_SIZE = 100
+
+class BoundedMap<K, V> extends Map<K, V> {
+  private readonly maxSize: number
+
+  constructor(maxSize: number) {
+    super()
+    this.maxSize = maxSize
+  }
+
+  set(key: K, value: V): this {
+    if (this.maxSize > 0 && this.size >= this.maxSize && !this.has(key)) {
+      const firstKey = this.keys().next().value
+      if (firstKey !== undefined) {
+        this.delete(firstKey)
+      }
+    }
+    return super.set(key, value)
+  }
+}
+
+const cachedScripts: Map<string, CachedScript> = new BoundedMap<string, CachedScript>(CACHED_SCRIPTS_MAX_SIZE)
 const stdlib = new Map<string, Trace>()
 
 export class Trace {

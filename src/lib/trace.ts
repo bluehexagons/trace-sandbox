@@ -420,10 +420,11 @@ export class Trace {
     }
 
     // script parameters
-    match = /^\[((,?[a-zA-Z_][\w]*)*),?(\.\.\.)?\]/.exec(stringLeft)
+    // Using non-nested quantifiers to avoid ReDoS
+    match = /^\[([a-zA-Z_][\w]*(?:,[a-zA-Z_][\w]*)*)?,?(\.\.\.)?\]/.exec(stringLeft)
     if (match !== null) {
-      params = match[1].split(',')
-      stackSize = match[3] === '...' ? -1 : params.length
+      params = match[1] ? match[1].split(',') : []
+      stackSize = match[2] === '...' ? -1 : params.length
       stringLeft = stringLeft.substring(match[0].length)
     } else {
       match = /^\[([0-9]+)\]/.exec(stringLeft)

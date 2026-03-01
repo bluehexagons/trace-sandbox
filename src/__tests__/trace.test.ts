@@ -93,7 +93,7 @@ describe('trace language', () => {
     it('collects echo (@…@) output via logger override', () => {
       const logs: string[] = []
       const t = Trace.parse('x = 42; @=x@; x')
-      t.logger = (_token: number, ...args: unknown[]) =>
+      t.logger = (_token: string, ...args: unknown[]) =>
         logs.push(args.map(String).join(' '))
       t.run()
       expect(logs.some(l => l.includes('42'))).toBe(true)

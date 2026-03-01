@@ -116,6 +116,7 @@ function App() {
             {examples.map((ex, i) => (
               <li key={i}>
                 <button
+                  type="button"
                   className={`example-btn${selectedExample === i ? ' active' : ''}`}
                   onClick={() => loadExample(i)}
                 >
@@ -169,7 +170,7 @@ function App() {
 
           {/* Run button */}
           <div className="run-row">
-            <button className="run-btn" onClick={runCode}>
+            <button type="button" className="run-btn" onClick={runCode}>
               ▶ Run
             </button>
           </div>

@@ -367,7 +367,7 @@ const intoOperands = new Set([
   TokenKind.startGroup,
 ])
 
-type CachedScript = { stackSize: number, tokens: TraceToken[] }
+type CachedScript = { stackSize: number, tokens: TraceToken[], params: string[] }
 
 const cachedScripts = new Map<string, CachedScript>()
 const stdlib = new Map<string, Trace>()
@@ -394,7 +394,7 @@ export class Trace {
     this.params = params
     this.stackSize = stackSize
     if (!cachedScripts.has(body)) {
-      cachedScripts.set(body, {stackSize, tokens})
+      cachedScripts.set(body, {stackSize, tokens, params})
     }
   }
 
@@ -412,7 +412,7 @@ export class Trace {
 
     if (cachedScripts.has(preprocessed)) {
       const cached = cachedScripts.get(preprocessed) as CachedScript
-      return new Trace(preprocessed, cached.tokens, params, cached.stackSize)
+      return new Trace(preprocessed, cached.tokens, cached.params, cached.stackSize)
     }
 
     if (stringLeft.length === 0) {
@@ -567,7 +567,7 @@ export class Trace {
     rand: () => number = Math.random,
     executionLimit = 1000,
     executionStart: number = performance.now()
-  ) {
+  ): number | null {
     const frames = [] as StackFrame[]
     let split: string[] = []
     let fn = ''
@@ -576,9 +576,9 @@ export class Trace {
     let value: (number | null) = null
     const stackSize = this.stackSize === -1 ? args.length + 1 : this.stackSize
     let f: StackFrame = new StackFrame(this.tokens, stackSize)
-    const stack = f.stack as Float64Array
+    const stack = f.stack as Float64Array | null
 
-    if (stackSize > 0) {
+    if (stackSize > 0 && stack !== null) {
       stack[0] = stackSize - 1
 
       for (let i = 0; i < stackSize && i < args.length; i++) {

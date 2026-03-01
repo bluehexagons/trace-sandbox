@@ -1,4 +1,5 @@
 import { useState, useCallback, useRef } from 'react'
+import type { KeyboardEvent } from 'react'
 import { Trace } from './lib/trace'
 import { examples } from './examples'
 import './App.css'
@@ -25,10 +26,14 @@ function App() {
         : []
 
       const t = Trace.parse(code)
-      // Collect @echo@ output
-      t.logger = (msg: string) => logs.push(msg)
-      // Suppress error logger to capture cleanly
-      t.errorLogger = (msg: string) => logs.push(`⚠ ${msg}`)
+      // Collect @echo@ output — forward all arguments the interpreter passes
+      t.logger = (...msgs: unknown[]) => {
+        logs.push(msgs.map(m => String(m)).join(' '))
+      }
+      // Capture error output in the console panel
+      t.errorLogger = (...msgs: unknown[]) => {
+        logs.push(`⚠ ${msgs.map(m => String(m)).join(' ')}`)
+      }
 
       const start = performance.now()
       const output = t.run(parsedArgs)
@@ -46,7 +51,7 @@ function App() {
   }, [code, args])
 
   const handleKeyDown = useCallback(
-    (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    (e: KeyboardEvent<HTMLTextAreaElement>) => {
       if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
         e.preventDefault()
         runCode()

@@ -626,11 +626,17 @@ export class Trace {
         case TokenKind.beep:
           // beeps are the logging feature
           if (t.string.startsWith('&') && t.string.length > 1) {
+            const stack = f.stack as Float64Array | null
             if (/[0-9]/.test(t.string[1])) {
-              this.logger('token ' + f.i + ':', '&' + t.string.substring(1), (f.stack as Float64Array)[parseInt(t.string.substring(1), 10)])
+              const index = parseInt(t.string.substring(1), 10)
+              const stackValue =
+                stack && index >= 0 && index < stack.length ? stack[index] : undefined
+              this.logger('token ' + f.i + ':', '&' + t.string.substring(1), stackValue)
             } else {
               const v = vars.get(t.string.substring(1)) as number
-              this.logger('token ' + f.i + ':', '&' + v, (f.stack as Float64Array)[v])
+              const stackValue =
+                stack && v >= 0 && v < stack.length ? stack[v] : undefined
+              this.logger('token ' + f.i + ':', '&' + v, stackValue)
             }
           } else if (t.string.startsWith('=')) {
             this.logger('token ' + f.i + ':', t.string.substring(1), vars.get(t.string.substring(1)))

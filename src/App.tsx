@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef } from 'react'
 import type { KeyboardEvent } from 'react'
-import { Trace } from './lib/trace'
+import { Trace } from 'trace'
 import { examples } from './examples'
 import './App.css'
 

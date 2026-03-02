@@ -45,7 +45,7 @@ To enable GitHub Pages for this repository, go to **Settings → Pages** and cho
 >
 > [github.com/bluehexagons/trace](https://github.com/bluehexagons/trace) · MIT License
 
-The trace interpreter is vendored in `src/lib/trace.ts` (adapted from the original TypeScript source to run in the browser by removing the Node.js `perf_hooks` import — the browser's native `performance` API is used instead).
+The trace interpreter is imported from the `trace` npm package (GitHub: bluehexagons/trace).
 
 ## License
 

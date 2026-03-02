@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { Trace, runTrace } from '../lib/trace'
+import { Trace, runTrace } from 'trace'
 
 describe('trace language', () => {
   describe('basic arithmetic', () => {

@@ -2,6 +2,7 @@ import { useState, useCallback, useRef } from 'react'
 import type { KeyboardEvent } from 'react'
 import { Trace } from 'trace'
 import { examples } from './examples'
+import Docs from './Docs'
 import './App.css'
 
 interface RunResult {
@@ -11,7 +12,10 @@ interface RunResult {
   error: string | null
 }
 
+type View = 'playground' | 'docs'
+
 function App() {
+  const [view, setView] = useState<View>('playground')
   const [code, setCode] = useState(examples[0].code)
   const [args, setArgs] = useState(examples[0].args ?? '')
   const [result, setResult] = useState<RunResult | null>(null)
@@ -26,11 +30,9 @@ function App() {
         : []
 
       const t = Trace.parse(code)
-      // Collect @echo@ output — forward all arguments the interpreter passes
       t.logger = (...msgs: unknown[]) => {
         logs.push(msgs.map(m => String(m)).join(' '))
       }
-      // Capture error output in the console panel
       t.errorLogger = (...msgs: unknown[]) => {
         logs.push(`⚠ ${msgs.map(m => String(m)).join(' ')}`)
       }
@@ -56,7 +58,6 @@ function App() {
         e.preventDefault()
         runCode()
       }
-      // Allow Tab key to insert spaces instead of leaving the field
       if (e.key === 'Tab') {
         e.preventDefault()
         const el = e.currentTarget
@@ -83,20 +84,26 @@ function App() {
 
   return (
     <div className="app">
-      {/* ── Header ─────────────────────────────────────────── */}
       <header className="header">
         <div className="header-inner">
           <h1 className="logo">
             <span className="logo-accent">trace</span> sandbox
           </h1>
           <nav className="header-links">
-            <a
-              href="https://github.com/bluehexagons/trace"
-              target="_blank"
-              rel="noopener noreferrer"
+            <button
+              type="button"
+              className={`header-btn${view === 'docs' ? ' active' : ''}`}
+              onClick={() => setView('docs')}
             >
               Language docs
-            </a>
+            </button>
+            <button
+              type="button"
+              className={`header-btn${view === 'playground' ? ' active' : ''}`}
+              onClick={() => setView('playground')}
+            >
+              Playground
+            </button>
             <a
               href="https://github.com/bluehexagons/trace-sandbox"
               target="_blank"
@@ -108,112 +115,109 @@ function App() {
         </div>
       </header>
 
-      <main className="main">
-        {/* ── Left column: examples ──────────────────────── */}
-        <aside className="sidebar">
-          <h2 className="sidebar-title">Examples</h2>
-          <ul className="example-list">
-            {examples.map((ex, i) => (
-              <li key={i}>
-                <button
-                  type="button"
-                  className={`example-btn${selectedExample === i ? ' active' : ''}`}
-                  onClick={() => loadExample(i)}
-                >
-                  <span className="example-name">{ex.name}</span>
-                  <span className="example-desc">{ex.description}</span>
-                </button>
-              </li>
-            ))}
-          </ul>
-        </aside>
+      {view === 'docs' ? (
+        <Docs />
+      ) : (
+        <main className="main">
+          <aside className="sidebar">
+            <h2 className="sidebar-title">Examples</h2>
+            <ul className="example-list">
+              {examples.map((ex, i) => (
+                <li key={i}>
+                  <button
+                    type="button"
+                    className={`example-btn${selectedExample === i ? ' active' : ''}`}
+                    onClick={() => loadExample(i)}
+                  >
+                    <span className="example-name">{ex.name}</span>
+                    <span className="example-desc">{ex.description}</span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </aside>
 
-        {/* ── Right column: editor + output ──────────────── */}
-        <div className="workspace">
-          {/* Editor */}
-          <section className="editor-section">
-            <div className="editor-toolbar">
-              <span className="section-label">Script</span>
-              <span className="hint">Ctrl+Enter to run</span>
-            </div>
-            <textarea
-              ref={textareaRef}
-              className="editor"
-              value={code}
-              onChange={e => setCode(e.target.value)}
-              onKeyDown={handleKeyDown}
-              spellCheck={false}
-              autoComplete="off"
-              autoCorrect="off"
-              autoCapitalize="off"
-              placeholder="Enter trace code here…"
-              aria-label="trace script editor"
-            />
-          </section>
-
-          {/* Arguments */}
-          <section className="args-section">
-            <label className="section-label" htmlFor="args-input">
-              Arguments
-              <span className="hint"> (space-separated numbers, e.g. 1 2 3)</span>
-            </label>
-            <input
-              id="args-input"
-              className="args-input"
-              type="text"
-              value={args}
-              onChange={e => setArgs(e.target.value)}
-              placeholder="Optional: pass numbers to &1, &2, …"
-              aria-label="script arguments"
-            />
-          </section>
-
-          {/* Run button */}
-          <div className="run-row">
-            <button type="button" className="run-btn" onClick={runCode}>
-              ▶ Run
-            </button>
-          </div>
-
-          {/* Output */}
-          {result !== null && (
-            <section className="output-section">
-              <div className="output-toolbar">
-                <span className="section-label">Output</span>
-                {result.error === null && (
-                  <span className="timing">{result.time.toFixed(2)} ms</span>
-                )}
+          <div className="workspace">
+            <section className="editor-section">
+              <div className="editor-toolbar">
+                <span className="section-label">Script</span>
+                <span className="hint">Ctrl+Enter to run</span>
               </div>
+              <textarea
+                ref={textareaRef}
+                className="editor"
+                value={code}
+                onChange={e => setCode(e.target.value)}
+                onKeyDown={handleKeyDown}
+                spellCheck={false}
+                autoComplete="off"
+                autoCorrect="off"
+                autoCapitalize="off"
+                placeholder="Enter trace code here…"
+                aria-label="trace script editor"
+              />
+            </section>
 
-              {result.error ? (
-                <div className="output output-error">
-                  <span className="error-label">Error</span>
-                  <pre>{result.error}</pre>
-                </div>
-              ) : (
-                <div className="output">
-                  <div className="result-line">
-                    <span className="result-label">Result</span>
-                    <span className="result-value">
-                      {result.output === null ? 'null' : String(result.output)}
-                    </span>
-                  </div>
-                  {result.logs.length > 0 && (
-                    <div className="log-section">
-                      <span className="log-label">Console</span>
-                      <pre className="log-output">
-                        {result.logs.join('\n')}
-                      </pre>
-                    </div>
+            <section className="args-section">
+              <label className="section-label" htmlFor="args-input">
+                Arguments
+                <span className="hint"> (space-separated numbers, e.g. 1 2 3)</span>
+              </label>
+              <input
+                id="args-input"
+                className="args-input"
+                type="text"
+                value={args}
+                onChange={e => setArgs(e.target.value)}
+                placeholder="Optional: pass numbers to &1, &2, …"
+                aria-label="script arguments"
+              />
+            </section>
+
+            <div className="run-row">
+              <button type="button" className="run-btn" onClick={runCode}>
+                ▶ Run
+              </button>
+            </div>
+
+            {result !== null && (
+              <section className="output-section">
+                <div className="output-toolbar">
+                  <span className="section-label">Output</span>
+                  {result.error === null && (
+                    <span className="timing">{result.time.toFixed(2)} ms</span>
                   )}
                 </div>
-              )}
-            </section>
-          )}
-        </div>
-      </main>
 
-      {/* ── Footer ─────────────────────────────────────── */}
+                {result.error ? (
+                  <div className="output output-error">
+                    <span className="error-label">Error</span>
+                    <pre>{result.error}</pre>
+                  </div>
+                ) : (
+                  <div className="output">
+                    <div className="result-line">
+                      <span className="result-label">Result</span>
+                      <span className="result-value">
+                        {result.output === null ? 'null' : String(result.output)}
+                      </span>
+                    </div>
+                    {result.logs.length > 0 && (
+                      <div className="log-section">
+                        <span className="log-label">Console</span>
+                        <pre className="log-output">
+                          {result.logs.join('\n')}
+                        </pre>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </section>
+            )}
+          </div>
+        </main>
+      )}
+
       <footer className="footer">
         <p>
           trace language by{' '}

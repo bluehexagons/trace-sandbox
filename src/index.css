@@ -69,6 +69,18 @@ a:hover { text-decoration: underline; }
 }
 .header-links a { color: var(--text-dim); }
 .header-links a:hover { color: var(--text); }
+.header-btn {
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  cursor: pointer;
+  font-size: inherit;
+  font-family: inherit;
+  padding: 0;
+  transition: color 0.15s;
+}
+.header-btn:hover { color: var(--text); }
+.header-btn.active { color: var(--accent2); }
 
 /* ── Main ───────────────────────────────────────────────── */
 .main {

@@ -99,4 +99,48 @@ describe('trace language', () => {
       expect(logs.some(l => l.includes('42'))).toBe(true)
     })
   })
+
+  describe('arrays', () => {
+    it('creates array and reads size', () => {
+      expect(runTrace('arr = [3]; arr')).toBe(3)
+    })
+
+    it('reads array element', () => {
+      expect(runTrace('arr = [3]; arr[1] = 10; arr[1]')).toBe(10)
+    })
+
+    it('writes array element', () => {
+      expect(runTrace('arr = [3]; arr[1] = 10; arr[2] = 20; arr[1] + arr[2]')).toBe(30)
+    })
+
+    it('supports compound assignment on array elements', () => {
+      expect(runTrace('arr = [3]; arr[1] = 5; arr[1] += 3; arr[1]')).toBe(8)
+    })
+  })
+
+  describe('syntax errors', () => {
+    it('throws error for invalid syntax', () => {
+      expect(() => Trace.parse('1 > < 2')).toThrow()
+    })
+
+    it('error message includes offset and pointer', () => {
+      try {
+        Trace.parse('1 > < 2')
+      } catch (e) {
+        const msg = e instanceof Error ? e.message : String(e)
+        expect(msg).toContain('offset')
+        expect(msg).toContain('^')
+      }
+    })
+  })
+
+  describe('first-class functions', () => {
+    it('stores function reference in variable', () => {
+      expect(runTrace('double(x) => { x * 2 }; f = double; f(5)')).toBe(10)
+    })
+
+    it('passes function as argument', () => {
+      expect(runTrace('double(x) => { x * 2 }; apply(fn, x) => { fn(x) }; apply(double, 5)')).toBe(10)
+    })
+  })
 })

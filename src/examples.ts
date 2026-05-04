@@ -62,4 +62,29 @@ export const examples: Example[] = [
     description: '1|2|3|4 randomly selects one of the values.',
     code: '1|2|3|4',
   },
+  {
+    name: 'Basic Arrays',
+    description: 'Create a fixed-size array, assign values, and read them. Arrays are 1-indexed (index 0 returns size).',
+    code: 'arr = [3]; arr[1] = 10; arr[2] = 20; arr[3] = 30; arr[1] + arr[2] + arr[3]',
+  },
+  {
+    name: 'Array with Loop',
+    description: 'Fill an array using a loop and sum the elements.',
+    code: 'arr = [5]; i = 1; i <= 5 ? ()=>{arr[i] = i * 2; i++ <= 5 ? () : 0}; s = 0; j = 1; j <= arr[0] ? ()=>{s += arr[j]; j++ <= arr[0] ? () : s}',
+  },
+  {
+    name: 'Syntax Error',
+    description: 'A script with invalid syntax shows an error with the location marked.',
+    code: '1 > < 2',
+  },
+  {
+    name: 'First-Class Functions',
+    description: 'Store function references in variables and pass them as arguments.',
+    code: 'double(x) => { x * 2 }; f = double; f(5)',
+  },
+  {
+    name: 'Stdlib Loop',
+    description: 'Use the standard library while loop (enable stdlib in options).',
+    code: 'i = 0; while(i < 3, i++); i',
+  },
 ]

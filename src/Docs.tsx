@@ -14,7 +14,7 @@ const sections = [
           one-liners and recursive patterns over traditional control flow.
         </p>
         <ul>
-          <li><strong>Version:</strong> 0.1.0</li>
+           <li><strong>Version:</strong> Latest (post-v0.1.0)</li>
           <li><strong>License:</strong> MIT</li>
           <li><strong>Repository:</strong> <a href="https://github.com/bluehexagons/trace" target="_blank" rel="noopener noreferrer">github.com/bluehexagons/trace</a></li>
         </ul>
@@ -198,6 +198,68 @@ const sections = [
     ),
   },
   {
+    title: 'Arrays',
+    content: (
+      <div>
+        <p>Trace supports fixed-size arrays. Arrays are 1-indexed (index 0 stores the size).</p>
+        <h4>Creating Arrays</h4>
+        <pre><code>{"arr = [5]       # 5-element array, all initialized to 0\narr = [n]       # Size can be any expression"}</code></pre>
+        <h4>Reading & Writing</h4>
+        <pre><code>{"arr[1] = 10     # Write value 10 to element 1\narr[1]          # Read element at index 1\narr[0]          # Returns array size (5 in above example)\narr            # Reading without index also returns size"}</code></pre>
+        <h4>Array Operations</h4>
+        <pre><code>{"arr = [3]; arr[1] = 10; arr[2] = 20; arr[3] = 30;\narr[1] + arr[2] + arr[3]  # Returns 60"}</code></pre>
+        <p>Compound assignment works: <code>arr[i] += 5</code>, <code>arr[i] *= 2</code>, etc.</p>
+        <p>In default mode, out-of-bounds reads return <code>0</code>. In strict mode, they throw errors.</p>
+      </div>
+    ),
+  },
+  {
+    title: 'Syntax Errors',
+    content: (
+      <div>
+        <p>Trace provides detailed parse error messages with location indicators.</p>
+        <pre><code>{"Trace.parse('1 > < 2')\n# Throws: \"Syntax error at offset 2: unexpected operator\n#           1><2\n#             ^\""}</code></pre>
+        <p>Error format shows the offset in preprocessed source, with a <code>^</code> pointer to the exact position.</p>
+      </div>
+    ),
+  },
+  {
+    title: 'First-Class Functions',
+    content: (
+      <div>
+        <p>Functions can be stored in variables and passed as arguments.</p>
+        <pre><code>{"double(x) => { x * 2 }\nf = double          # Store function reference\nf(5)              # Call via reference - returns 10\n\napply(fn, x) => { fn(x) }\napply(double, 5)  # Pass function as argument - returns 10"}</code></pre>
+      </div>
+    ),
+  },
+  {
+    title: 'Standard Library',
+    content: (
+      <div>
+        <p>Optional stdlib functions available via <code>stdlib</code> option in <code>runTraceWithOptions()</code>.</p>
+        <h4>Loop Functions</h4>
+        <pre><code>{"i = 0; while(i < 3, i++); i              # Returns 3\nfor(i = 0, i < 5, { i++ }); i            # Returns 5\ndo i = 0; dowhile(i++, i < 3); i        # Returns 3"}</code></pre>
+        <h4>Array Functions</h4>
+        <table className="doc-table">
+          <thead>
+            <tr><th>Function</th><th>Description</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>foreach(arr, fn)</code></td><td>Call fn(elem, index) for each element</td></tr>
+            <tr><td><code>mapmut(arr, fn)</code></td><td>Replace elements with fn(elem, index) in place</td></tr>
+            <tr><td><code>map(arr, fn)</code></td><td>Return new array with fn(elem, index)</td></tr>
+            <tr><td><code>reduce(arr, fn, init?)</code></td><td>Fold with fn(acc, elem, index)</td></tr>
+            <tr><td><code>sort(arr, cmp?)</code></td><td>Sort in place (default ascending)</td></tr>
+            <tr><td><code>sum(arr)</code></td><td>Return total of all elements</td></tr>
+            <tr><td><code>find(arr, pred)</code></td><td>Return 1-based index of first match (0 if none)</td></tr>
+          </tbody>
+        </table>
+        <h4>Enabling Stdlib</h4>
+        <pre><code>{"runTraceWithOptions('i = 0; while(i < 3, i++); i', {\n  stdlib: { loops: true, arrays: true }\n});"}</code></pre>
+      </div>
+    ),
+  },
+  {
     title: 'New in v0.1.0',
     content: (
       <div>
@@ -253,7 +315,7 @@ export default function Docs() {
     <div className="docs">
       <header className="docs-header">
         <h1><span className="logo-accent">trace</span> language docs</h1>
-        <p className="docs-version">Version 0.1.0</p>
+        <p className="docs-version">Latest Version</p>
       </header>
       <div className="docs-content">
         {sections.map((section) => (

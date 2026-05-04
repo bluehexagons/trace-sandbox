@@ -13,7 +13,7 @@
   "dependencies": {
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
-    "trace": "github:bluehexagons/trace#v0.1.0"
+    "trace": "github:bluehexagons/trace#9e918d073d1d7f33e77d766b7ca4d8926347cf0e"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

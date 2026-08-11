@@ -1,8 +1,11 @@
-import { useState, useCallback, useRef } from 'react'
+import { useState, useCallback, useEffect, useRef } from 'react'
 import type { KeyboardEvent } from 'react'
 import { examples, exampleSections } from './examples'
 import AnimationPlayer from './AnimationPlayer'
 import Docs from './Docs'
+import InteractiveControls from './InteractiveControls'
+import { writeArgumentValue } from './interactive'
+import type { InteractiveControl } from './interactive'
 import { runTraceScript } from './traceRunner'
 import './App.css'
 
@@ -16,13 +19,28 @@ function App() {
   const [selectedExample, setSelectedExample] = useState(0)
   const [runRevision, setRunRevision] = useState(0)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const autoRunTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const activeExample = examples[selectedExample]
   const activeSection = exampleSections.find(section => section.id === activeExample.section)
 
-  const runCode = useCallback(() => {
-    setResult(runTraceScript(code, args))
+  const clearScheduledRun = useCallback(() => {
+    if (autoRunTimeoutRef.current !== null) {
+      clearTimeout(autoRunTimeoutRef.current)
+      autoRunTimeoutRef.current = null
+    }
+  }, [])
+
+  const executeCode = useCallback((argumentInput: string) => {
+    setResult(runTraceScript(code, argumentInput))
     setRunRevision(revision => revision + 1)
-  }, [code, args])
+  }, [code])
+
+  const runCode = useCallback(() => {
+    clearScheduledRun()
+    executeCode(args)
+  }, [args, clearScheduledRun, executeCode])
+
+  useEffect(() => clearScheduledRun, [clearScheduledRun])
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent<HTMLTextAreaElement>) => {
@@ -46,12 +64,30 @@ function App() {
   )
 
   const loadExample = (index: number) => {
+    clearScheduledRun()
     const ex = examples[index]
     setSelectedExample(index)
     setCode(ex.code)
     setArgs(ex.args ?? '')
     setResult(null)
     textareaRef.current?.focus()
+  }
+
+  const updateControl = (control: InteractiveControl, value: number) => {
+    if (activeExample.controls === undefined || !Number.isFinite(value)) {
+      return
+    }
+
+    const nextArgs = writeArgumentValue(args, control, value, activeExample.controls.items)
+    setArgs(nextArgs)
+
+    if (activeExample.controls.autoRun) {
+      clearScheduledRun()
+      autoRunTimeoutRef.current = setTimeout(() => {
+        autoRunTimeoutRef.current = null
+        executeCode(nextArgs)
+      }, 140)
+    }
   }
 
   return (
@@ -115,7 +151,12 @@ function App() {
                             onClick={() => loadExample(index)}
                             aria-current={selectedExample === index ? 'step' : undefined}
                           >
-                            <span className="example-name">{example.name}</span>
+                            <span className="example-name">
+                              {example.name}
+                              {example.controls !== undefined && (
+                                <span className="interactive-badge">Interactive</span>
+                              )}
+                            </span>
                             <span className="example-desc">{example.description}</span>
                           </button>
                         </li>
@@ -182,7 +223,10 @@ function App() {
                 ref={textareaRef}
                 className="editor"
                 value={code}
-                onChange={e => setCode(e.target.value)}
+                onChange={event => {
+                  clearScheduledRun()
+                  setCode(event.target.value)
+                }}
                 onKeyDown={handleKeyDown}
                 spellCheck={false}
                 autoComplete="off"
@@ -194,6 +238,15 @@ function App() {
               />
             </section>
 
+            {activeExample.controls !== undefined && (
+              <InteractiveControls
+                args={args}
+                controls={activeExample.controls}
+                exampleId={activeExample.id}
+                onChange={updateControl}
+              />
+            )}
+
             <section className="args-section">
               <label className="section-label" htmlFor="args-input">
                 Arguments
@@ -204,7 +257,10 @@ function App() {
                 className="args-input"
                 type="text"
                 value={args}
-                onChange={e => setArgs(e.target.value)}
+                onChange={event => {
+                  clearScheduledRun()
+                  setArgs(event.target.value)
+                }}
                 placeholder="Optional: pass numbers to &1, &2, …"
                 aria-label="script arguments"
               />

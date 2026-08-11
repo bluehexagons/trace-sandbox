@@ -9,9 +9,10 @@ An interactive playground for the experimental [**trace**](https://github.com/bl
 ## Features
 
 - **In-browser REPL** — write and run trace scripts instantly, no install needed.
-- **Guided learning path** — 24 editable lessons progress from expressions and control flow to arrays, higher-order functions, and debugging.
+- **Guided learning path** — 26 editable lessons progress from expressions and control flow to arrays, higher-order functions, and debugging.
 - **Larger systems** — complete examples include Euclid's algorithm, a statistics scanner, an event-driven vending machine, and a tiny factorial virtual machine.
 - **Animated output** — advanced simulations emit frames that render as orbital trails, a chaotic attractor, a wave field, and a cellular automaton.
+- **Interactive parameters** — sliders and numeric inputs rerun selected lessons so model behavior can be explored without rewriting code.
 - **Lesson notes** — every example identifies its concepts, expected result, and a follow-up experiment.
 - **Argument support** — pass space-separated numbers to scripts that use `[...]` parameter lists.
 - **Echo output** — `@…@` log statements show up in a console panel below the result.

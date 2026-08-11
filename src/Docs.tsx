@@ -152,6 +152,31 @@ const sections = [
     ),
   },
   {
+    title: 'Interactive Arguments',
+    content: (
+      <div>
+        <p>
+          Some sandbox lessons expose script arguments as sliders or numeric inputs. Moving a
+          control updates the corresponding argument and reruns the current code after a short
+          delay.
+        </p>
+        <pre><code>{`[growth, seed]
+population = seed;
+population = growth * population * (1 - population)`}</code></pre>
+        <ul>
+          <li>The controls and the Arguments field represent the same numeric values.</li>
+          <li>You can still edit the argument list directly or change how the script uses it.</li>
+          <li>Slider limits keep the supplied examples in useful numerical and visual ranges.</li>
+        </ul>
+        <p>
+          Controls are a sandbox feature backed by ordinary Trace parameters; they do not add new
+          language syntax. The animated orbital, Lorenz, wave, automaton, logistic-map, and
+          predator–prey lessons use them to expose model behavior.
+        </p>
+      </div>
+    ),
+  },
+  {
     title: 'Functions',
     content: (
       <div>

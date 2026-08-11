@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { examples, exampleSections } from '../examples'
+import { readArgumentValue } from '../interactive'
 import { parseArguments, runTraceScript } from '../traceRunner'
 
 describe('trace runner', () => {
@@ -53,6 +54,21 @@ describe('guided examples', () => {
     for (const section of exampleSections) {
       expect(examples.some(example => example.section === section.id)).toBe(true)
     }
+
+    for (const example of examples) {
+      const argumentIndexes = example.controls?.items.map(control => control.argumentIndex) ?? []
+      expect(new Set(argumentIndexes).size).toBe(argumentIndexes.length)
+
+      for (const control of example.controls?.items ?? []) {
+        expect(readArgumentValue(example.args ?? '', control.argumentIndex, NaN)).toBe(
+          control.defaultValue,
+        )
+        expect(control.argumentIndex).toBeGreaterThanOrEqual(0)
+        expect(control.min).toBeLessThanOrEqual(control.defaultValue)
+        expect(control.max).toBeGreaterThanOrEqual(control.defaultValue)
+        expect(control.step).toBeGreaterThan(0)
+      }
+    }
   })
 
   for (const example of examples) {
@@ -79,6 +95,48 @@ describe('guided examples', () => {
           }
         } else {
           expect(result.animationFrames[0].values[example.animation.channel].length).toBeGreaterThan(1)
+        }
+      }
+    })
+  }
+
+  for (const example of examples.filter(example => example.controls !== undefined)) {
+    it(`keeps ${example.name} within its declared interactive ranges`, () => {
+      const controls = example.controls?.items ?? []
+      const combinations = 2 ** controls.length
+      const masks = example.animation?.kind === 'scene'
+        ? Array.from({ length: combinations }, (_, mask) => mask)
+        : [0, combinations - 1]
+
+      for (const mask of masks) {
+        const args: number[] = []
+        controls.forEach((control, index) => {
+          args[control.argumentIndex] = mask & (1 << index) ? control.max : control.min
+        })
+
+        const result = runTraceScript(example.code, args.join(' '))
+        expect(result.error).toBeNull()
+
+        for (const frame of result.animationFrames) {
+          for (const values of Object.values(frame.values)) {
+            expect(values.every(Number.isFinite)).toBe(true)
+          }
+
+          if (example.animation?.kind === 'scene') {
+            for (const point of example.animation.points) {
+              const x = frame.values[point.x][0]
+              const y = frame.values[point.y][0]
+              expect(x).toBeGreaterThanOrEqual(example.animation.xMin)
+              expect(x).toBeLessThanOrEqual(example.animation.xMax)
+              expect(y).toBeGreaterThanOrEqual(example.animation.yMin)
+              expect(y).toBeLessThanOrEqual(example.animation.yMax)
+            }
+          } else if (example.animation?.kind === 'wave') {
+            for (const value of frame.values[example.animation.channel]) {
+              expect(value).toBeGreaterThanOrEqual(example.animation.min)
+              expect(value).toBeLessThanOrEqual(example.animation.max)
+            }
+          }
         }
       }
     })

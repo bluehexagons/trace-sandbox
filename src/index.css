@@ -153,8 +153,22 @@ a:hover { text-decoration: underline; }
 .example-btn:hover { background: var(--surface2); }
 .example-btn.active { background: var(--surface2); box-shadow: inset 2px 0 0 var(--accent); }
 .example-name {
+  align-items: center;
+  display: flex;
+  gap: 0.4rem;
   font-size: 0.875rem;
   font-weight: 500;
+}
+.interactive-badge {
+  background: rgba(74, 222, 128, 0.08);
+  border: 1px solid rgba(74, 222, 128, 0.2);
+  border-radius: 999px;
+  color: var(--green);
+  font-size: 0.55rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  padding: 0.08rem 0.35rem;
+  text-transform: uppercase;
 }
 .example-desc {
   font-size: 0.75rem;
@@ -255,6 +269,95 @@ a:hover { text-decoration: underline; }
 }
 .lesson-notes strong {
   color: var(--text);
+}
+
+/* ── Interactive lesson controls ────────────────────────── */
+.interactive-panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1rem 1.1rem;
+}
+.interactive-heading {
+  align-items: flex-start;
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+  margin-bottom: 0.85rem;
+}
+.interactive-heading h3 {
+  font-size: 0.9rem;
+  margin-bottom: 0.15rem;
+}
+.interactive-heading p,
+.interactive-heading > span {
+  color: var(--text-dim);
+  font-size: 0.74rem;
+}
+.interactive-heading > span {
+  background: rgba(74, 222, 128, 0.08);
+  border: 1px solid rgba(74, 222, 128, 0.2);
+  border-radius: 999px;
+  color: var(--green);
+  flex-shrink: 0;
+  padding: 0.2rem 0.5rem;
+}
+.interactive-grid {
+  display: grid;
+  gap: 0.65rem;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+}
+.interactive-control {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.7rem;
+}
+.interactive-label-row {
+  align-items: baseline;
+  display: flex;
+  gap: 0.5rem;
+  justify-content: space-between;
+}
+.interactive-label-row label {
+  font-size: 0.78rem;
+  font-weight: 650;
+}
+.interactive-label-row output {
+  color: var(--accent2);
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+}
+.interactive-control > p {
+  color: var(--text-dim);
+  font-size: 0.68rem;
+  line-height: 1.35;
+  margin: 0.2rem 0 0.6rem;
+  min-height: 1.85em;
+}
+.interactive-inputs {
+  align-items: center;
+  display: flex;
+  gap: 0.6rem;
+}
+.interactive-inputs input[type='range'] {
+  accent-color: var(--accent);
+  flex: 1;
+  min-width: 80px;
+}
+.interactive-number {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  padding: 0.3rem 0.4rem;
+  width: 5.2rem;
+}
+.interactive-number:focus {
+  border-color: var(--accent);
+  outline: none;
 }
 
 /* ── Labels / hints ─────────────────────────────────────── */
@@ -424,4 +527,6 @@ a:hover { text-decoration: underline; }
   .example-desc { display: none; }
   .lesson-heading { flex-direction: column; }
   .lesson-notes { grid-template-columns: 1fr; }
+  .interactive-heading { flex-direction: column; gap: 0.4rem; }
+  .interactive-grid { grid-template-columns: 1fr; }
 }

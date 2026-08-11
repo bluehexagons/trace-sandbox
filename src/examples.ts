@@ -1,4 +1,5 @@
 import type { AnimationSpec } from './animation'
+import type { InteractiveControls } from './interactive'
 
 export const exampleSections = [
   {
@@ -29,7 +30,7 @@ export const exampleSections = [
   {
     id: 'animations',
     title: '6. Animated output',
-    description: 'Emit frame channels that the playground turns into live visualizations.',
+    description: 'Emit frame channels and tune live parameters to explore visual systems.',
   },
 ] as const
 
@@ -48,6 +49,7 @@ export interface Example {
   expectedValue?: number
   expectsError?: boolean
   animation?: AnimationSpec
+  controls?: InteractiveControls
 }
 
 export const examples: Example[] = [
@@ -203,7 +205,7 @@ total`,
     section: 'data',
     name: 'Named script parameters',
     description: 'Give incoming arguments readable names at the top of a script.',
-    concepts: ['script parameters', 'arguments', 'echo'],
+    concepts: ['script parameters', 'arguments', 'interactive inputs', 'echo'],
     expected: '26 — the perimeter of an 8 by 5 rectangle.',
     challenge: 'Add a third depth argument and return the volume of a box.',
     code: `[width, height]
@@ -213,6 +215,34 @@ perimeter = 2 * (width + height);
 perimeter`,
     args: '8 5',
     expectedValue: 26,
+    controls: {
+      description: 'Change the dimensions; the values are passed to [width, height].',
+      autoRun: true,
+      items: [
+        {
+          id: 'width',
+          label: 'Width',
+          description: 'The rectangle’s horizontal dimension.',
+          argumentIndex: 0,
+          kind: 'range',
+          defaultValue: 8,
+          min: 1,
+          max: 30,
+          step: 1,
+        },
+        {
+          id: 'height',
+          label: 'Height',
+          description: 'The rectangle’s vertical dimension.',
+          argumentIndex: 1,
+          kind: 'range',
+          defaultValue: 5,
+          min: 1,
+          max: 30,
+          step: 1,
+        },
+      ],
+    },
   },
   {
     id: 'variadic-sum',
@@ -500,18 +530,20 @@ step()`,
     section: 'animations',
     name: 'Three-body orbital system',
     description: 'Integrate three independent bodies around a gravity well and render their paths.',
-    concepts: ['animation frames', 'Euler integration', 'gravity', 'state vectors'],
+    concepts: ['animation frames', 'interactive parameters', 'Euler integration', 'gravity', 'state vectors'],
     expected: '144 frames of three differently shaped orbits around a central star.',
     challenge: 'Change body 3’s velocity to 0.7 and watch its orbit become more eccentric.',
     code: `# @frame@ begins a visual frame. Named echoes are its channels.
+[gravityInput, timeStepInput, outerSpeedInput]
 steps = 144;
 frame = 0;
-dt = 0.18;
-gravity = 48;
+gravity = gravityInput;
+dt = timeStepInput;
+outerSpeed = outerSpeedInput;
 
 x1 = 18;  y1 = 0;   vx1 = 0;     vy1 = 1.64;
 x2 = 0;   y2 = 28;  vx2 = -1.31; vy2 = 0;
-x3 = -38; y3 = 0;   vx3 = 0;     vy3 = -1.05;
+x3 = -38; y3 = 0;   vx3 = 0;     vy3 = -outerSpeed;
 
 simulate() => {
   @frame@;
@@ -548,16 +580,17 @@ simulate() => {
 };
 
 simulate()`,
+    args: '48 0.18 1.05',
     expectedValue: 144,
     animation: {
       kind: 'scene',
       title: 'Orbital system',
       description: 'A symplectic Euler step updates velocity before position on every frame.',
       framesPerSecond: 24,
-      xMin: -50,
-      xMax: 50,
-      yMin: -50,
-      yMax: 50,
+      xMin: -65,
+      xMax: 65,
+      yMin: -65,
+      yMax: 65,
       trailLength: 100,
       showOrigin: true,
       points: [
@@ -566,21 +599,61 @@ simulate()`,
         { x: 'x3', y: 'y3', color: '#4ade80', label: 'Outer body', radius: 1.9 },
       ],
     },
+    controls: {
+      description: 'Tune the integration and rerun the model to reshape all three trajectories.',
+      autoRun: true,
+      items: [
+        {
+          id: 'gravity',
+          label: 'Gravity',
+          description: 'Strength of the central attraction.',
+          argumentIndex: 0,
+          kind: 'range',
+          defaultValue: 48,
+          min: 20,
+          max: 80,
+          step: 1,
+        },
+        {
+          id: 'time-step',
+          label: 'Time step',
+          description: 'Simulation time advanced by each frame.',
+          argumentIndex: 1,
+          kind: 'range',
+          defaultValue: 0.18,
+          min: 0.05,
+          max: 0.3,
+          step: 0.01,
+        },
+        {
+          id: 'outer-speed',
+          label: 'Outer speed',
+          description: 'Initial tangential speed of the green body.',
+          argumentIndex: 2,
+          kind: 'range',
+          defaultValue: 1.05,
+          min: 0.6,
+          max: 1.5,
+          step: 0.01,
+        },
+      ],
+    },
   },
   {
     id: 'lorenz-attractor',
     section: 'animations',
     name: 'Lorenz strange attractor',
     description: 'Integrate a chaotic differential system and draw its evolving phase-space path.',
-    concepts: ['chaos', 'differential equations', 'time stepping', 'phase space'],
+    concepts: ['chaos', 'interactive parameters', 'differential equations', 'time stepping', 'phase space'],
     expected: '280 frames tracing the attractor’s two characteristic lobes.',
     challenge: 'Change rho from 28 to 20 and compare the long-term behavior.',
     code: `# Lorenz system: tiny changes eventually produce different paths.
+[rhoInput, sigmaInput, timeStepInput]
 steps = 280;
 frame = 0;
-dt = 0.008;
-sigma = 10;
-rho = 28;
+dt = timeStepInput;
+sigma = sigmaInput;
+rho = rhoInput;
 beta = 2.6666667;
 x = 0.1;
 y = 0;
@@ -603,19 +676,59 @@ simulate() => {
 };
 
 simulate()`,
+    args: '28 10 0.008',
     expectedValue: 280,
     animation: {
       kind: 'scene',
       title: 'Lorenz attractor · x/z projection',
       description: 'The trail reveals a deterministic system whose trajectory never exactly repeats.',
       framesPerSecond: 30,
-      xMin: -25,
-      xMax: 25,
+      xMin: -35,
+      xMax: 35,
       yMin: 0,
-      yMax: 55,
+      yMax: 75,
       trailLength: 220,
       points: [
         { x: 'x', y: 'z', color: '#a89bff', label: 'System state', radius: 1.1 },
+      ],
+    },
+    controls: {
+      description: 'Explore how system constants change the attractor and its sensitivity.',
+      autoRun: true,
+      items: [
+        {
+          id: 'rho',
+          label: 'Rho',
+          description: 'Moves the system between stable and chaotic regimes.',
+          argumentIndex: 0,
+          kind: 'range',
+          defaultValue: 28,
+          min: 10,
+          max: 35,
+          step: 0.5,
+        },
+        {
+          id: 'sigma',
+          label: 'Sigma',
+          description: 'Controls how quickly x follows y.',
+          argumentIndex: 1,
+          kind: 'range',
+          defaultValue: 10,
+          min: 5,
+          max: 15,
+          step: 0.5,
+        },
+        {
+          id: 'time-step',
+          label: 'Time step',
+          description: 'Numerical integration step; large values lose accuracy.',
+          argumentIndex: 2,
+          kind: 'number',
+          defaultValue: 0.008,
+          min: 0.002,
+          max: 0.01,
+          step: 0.001,
+        },
       ],
     },
   },
@@ -624,10 +737,14 @@ simulate()`,
     section: 'animations',
     name: 'Damped wave solver',
     description: 'Evolve a one-dimensional wave across arrays and emit every sample in every frame.',
-    concepts: ['finite differences', 'double buffering', 'arrays', 'wave propagation'],
+    concepts: ['finite differences', 'interactive parameters', 'double buffering', 'arrays', 'wave propagation'],
     expected: '72 frames of a pulse splitting, reflecting, and gradually losing energy.',
     challenge: 'Change the 0.2 coupling term to 0.35 and compare the propagation speed.',
-    code: `size = 41;
+    code: `[couplingInput, dampingInput, pulseHeightInput]
+coupling = couplingInput;
+damping = dampingInput;
+pulseHeight = pulseHeightInput;
+size = 41;
 steps = 72;
 current = [size];
 previous = [size];
@@ -636,7 +753,7 @@ next = [size];
 initialize() => {
   distance = i - 21;
   distance < 0 ? distance = -distance;
-  current[i] = distance < 5 ? 1 - distance / 5 : 0;
+  current[i] = distance < 5 ? pulseHeight * (1 - distance / 5) : 0;
   previous[i] = current[i];
   i++ <= size ? >initialize() : 0
 };
@@ -649,7 +766,7 @@ emitSamples() => {
 
 calculateNext() => {
   laplacian = current[i - 1] - 2 * current[i] + current[i + 1];
-  next[i] = (2 * current[i] - previous[i] + 0.2 * laplacian) * 0.997;
+  next[i] = (2 * current[i] - previous[i] + coupling * laplacian) * damping;
   i++ < size ? >calculateNext() : 0
 };
 
@@ -678,6 +795,7 @@ i = 1;
 initialize();
 frame = 0;
 simulate()`,
+    args: '0.2 0.997 1',
     expectedValue: 72,
     animation: {
       kind: 'wave',
@@ -685,21 +803,62 @@ simulate()`,
       description: 'Each polyline contains 41 sample echoes; older frames fade behind the newest one.',
       framesPerSecond: 18,
       channel: 'sample',
-      min: -1.2,
-      max: 1.2,
+      min: -1.5,
+      max: 1.5,
       trailLength: 5,
       color: '#38bdf8',
     },
+    controls: {
+      description: 'Change propagation, damping, and the initial pulse, then watch the field respond.',
+      autoRun: true,
+      items: [
+        {
+          id: 'coupling',
+          label: 'Coupling',
+          description: 'How strongly each sample pulls on its neighbors.',
+          argumentIndex: 0,
+          kind: 'range',
+          defaultValue: 0.2,
+          min: 0.05,
+          max: 0.45,
+          step: 0.01,
+        },
+        {
+          id: 'damping',
+          label: 'Damping',
+          description: 'Energy retained by the field on every step.',
+          argumentIndex: 1,
+          kind: 'range',
+          defaultValue: 0.997,
+          min: 0.98,
+          max: 1,
+          step: 0.001,
+        },
+        {
+          id: 'pulse-height',
+          label: 'Pulse height',
+          description: 'Amplitude of the initial triangular disturbance.',
+          argumentIndex: 2,
+          kind: 'range',
+          defaultValue: 1,
+          min: 0.2,
+          max: 1.4,
+          step: 0.1,
+        },
+      ],
+    },
   },
   {
-    id: 'rule-30',
+    id: 'elementary-cellular-automaton',
     section: 'animations',
-    name: 'Rule 30 cellular automaton',
-    description: 'Generate complex, asymmetric structure from one cell and a three-neighbor rule.',
-    concepts: ['cellular automata', 'double buffering', 'boolean algebra', 'emergence'],
+    name: 'Interactive cellular automaton',
+    description: 'Choose any elementary rule and grow its structure from one live cell.',
+    concepts: ['cellular automata', 'interactive input', 'double buffering', 'boolean algebra', 'emergence'],
     expected: '41 generations growing from a single live cell.',
-    challenge: 'Replace the update with left ^ right to discover a different automaton.',
-    code: `size = 41;
+    challenge: 'Compare rules 30, 90, 110, and 184; look for symmetry, repetition, and movement.',
+    code: `[ruleInput]
+rule = ruleInput;
+size = 41;
 steps = 41;
 current = [size];
 next = [size];
@@ -715,7 +874,9 @@ calculateNext() => {
   left = current[i - 1];
   center = current[i];
   right = current[i + 1];
-  next[i] = left ^ (center || right);
+  neighborhood = left * 4 + center * 2 + right;
+  bit = 2 ** neighborhood;
+  next[i] = rule %% (bit * 2) >= bit;
   i++ < size ? >calculateNext() : 0
 };
 
@@ -741,15 +902,196 @@ simulate() => {
 
 frame = 0;
 simulate()`,
+    args: '30',
     expectedValue: 41,
     animation: {
       kind: 'cells',
-      title: 'Rule 30 evolution',
-      description: 'Every emitted frame becomes a row, revealing order and randomness from one rule.',
+      title: 'Elementary cellular automaton',
+      description: 'Each rule number encodes eight neighborhood outcomes as bits.',
       framesPerSecond: 12,
       channel: 'cell',
       historyRows: 41,
       color: '#a89bff',
+    },
+    controls: {
+      description: 'Enter a Wolfram rule number from 0 to 255 and compare the resulting universe.',
+      autoRun: true,
+      items: [
+        {
+          id: 'rule',
+          label: 'Rule number',
+          description: 'Try 30 for chaos, 90 for a fractal, or 110 for complex structures.',
+          argumentIndex: 0,
+          kind: 'number',
+          defaultValue: 30,
+          min: 0,
+          max: 255,
+          step: 1,
+        },
+      ],
+    },
+  },
+  {
+    id: 'logistic-map',
+    section: 'animations',
+    name: 'Interactive logistic map',
+    description: 'Turn one growth parameter and watch a population settle, oscillate, or become chaotic.',
+    concepts: ['discrete dynamics', 'interactive parameters', 'feedback', 'period doubling', 'chaos'],
+    expected: '180 iterations plotting population against time.',
+    challenge: 'Move growth slowly from 3.0 toward 4.0 and look for each period-doubling transition.',
+    code: `[growthInput, seedInput]
+growth = growthInput;
+population = seedInput;
+steps = 180;
+frame = 0;
+
+iterate() => {
+  @frame@;
+  iteration = frame;
+  @=iteration@;
+  @=population@;
+
+  population = growth * population * (1 - population);
+  frame++;
+  frame < steps ? >iterate() : frame
+};
+
+iterate()`,
+    args: '3.82 0.2',
+    expectedValue: 180,
+    animation: {
+      kind: 'scene',
+      title: 'Logistic map · population over time',
+      description: 'The same equation produces equilibrium, cycles, or chaos as growth changes.',
+      framesPerSecond: 30,
+      xMin: 0,
+      xMax: 180,
+      yMin: 0,
+      yMax: 1,
+      trailLength: 180,
+      points: [
+        { x: 'iteration', y: 'population', color: '#f472b6', label: 'Population', radius: 0.8 },
+      ],
+    },
+    controls: {
+      description: 'Small growth changes can completely reorganize the long-term trajectory.',
+      autoRun: true,
+      items: [
+        {
+          id: 'growth',
+          label: 'Growth rate',
+          description: 'The control parameter responsible for period doubling and chaos.',
+          argumentIndex: 0,
+          kind: 'range',
+          defaultValue: 3.82,
+          min: 2.5,
+          max: 4,
+          step: 0.01,
+        },
+        {
+          id: 'seed',
+          label: 'Initial population',
+          description: 'Starting population as a fraction of carrying capacity.',
+          argumentIndex: 1,
+          kind: 'range',
+          defaultValue: 0.2,
+          min: 0.01,
+          max: 0.99,
+          step: 0.01,
+        },
+      ],
+    },
+  },
+  {
+    id: 'predator-prey',
+    section: 'animations',
+    name: 'Predator–prey phase portrait',
+    description: 'Couple two populations and visualize the repeating chase between them.',
+    concepts: ['coupled systems', 'interactive parameters', 'feedback loops', 'phase portrait', 'Euler integration'],
+    expected: '260 frames tracing prey against predator population.',
+    challenge: 'Raise predation pressure, then find initial populations that keep the orbit on screen.',
+    code: `[preyInput, predatorInput, predationInput]
+prey = preyInput;
+predators = predatorInput;
+predation = predationInput;
+preyGrowth = 1;
+predatorDeath = 1.2;
+conversion = 0.1;
+dt = 0.02;
+steps = 260;
+frame = 0;
+
+simulate() => {
+  @frame@;
+  @=prey@;
+  @=predators@;
+
+  preyChange = preyGrowth * prey - predation * prey * predators;
+  predatorChange = conversion * prey * predators - predatorDeath * predators;
+  prey += preyChange * dt;
+  predators += predatorChange * dt;
+  prey < 0 ? prey = 0;
+  predators < 0 ? predators = 0;
+
+  frame++;
+  frame < steps ? >simulate() : frame
+};
+
+simulate()`,
+    args: '10 5 0.1',
+    expectedValue: 260,
+    animation: {
+      kind: 'scene',
+      title: 'Predator–prey phase portrait',
+      description: 'Neither axis is time: the trail shows how both populations co-evolve.',
+      framesPerSecond: 30,
+      xMin: 0,
+      xMax: 35,
+      yMin: 0,
+      yMax: 40,
+      trailLength: 240,
+      points: [
+        { x: 'prey', y: 'predators', color: '#4ade80', label: 'Population state', radius: 1.1 },
+      ],
+    },
+    controls: {
+      description: 'Set the initial populations and the strength of encounters between them.',
+      autoRun: true,
+      items: [
+        {
+          id: 'prey',
+          label: 'Initial prey',
+          description: 'Starting size of the prey population.',
+          argumentIndex: 0,
+          kind: 'range',
+          defaultValue: 10,
+          min: 6,
+          max: 18,
+          step: 0.5,
+        },
+        {
+          id: 'predators',
+          label: 'Initial predators',
+          description: 'Starting size of the predator population.',
+          argumentIndex: 1,
+          kind: 'range',
+          defaultValue: 5,
+          min: 3.5,
+          max: 10,
+          step: 0.5,
+        },
+        {
+          id: 'predation',
+          label: 'Predation pressure',
+          description: 'How often prey–predator encounters remove prey.',
+          argumentIndex: 2,
+          kind: 'range',
+          defaultValue: 0.1,
+          min: 0.08,
+          max: 0.16,
+          step: 0.01,
+        },
+      ],
     },
   },
 ]

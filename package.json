@@ -11,24 +11,24 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "react": "^19.2.0",
-    "react-dom": "^19.2.0",
-    "trace": "github:bluehexagons/trace#9e918d073d1d7f33e77d766b7ca4d8926347cf0e"
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "trace": "github:bluehexagons/trace#12fcf66c4bd53d633e419c7339b739e4f2d8d368"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
-    "@types/node": "^25.6.0",
-    "@types/react": "^19.2.7",
-    "@types/react-dom": "^19.2.3",
-    "@vitejs/plugin-react": "^6.0.1",
-    "@vitest/coverage-v8": "^4.1.5",
-    "eslint": "^10.3.0",
+    "@types/node": "^25.9.5",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.4",
+    "@vitejs/plugin-react": "^6.0.5",
+    "@vitest/coverage-v8": "^4.1.10",
+    "eslint": "^10.8.1",
     "eslint-plugin-react-hooks": "^7.0.1",
-    "eslint-plugin-react-refresh": "^0.5.2",
-    "globals": "^17.6.0",
+    "eslint-plugin-react-refresh": "^0.5.4",
+    "globals": "^17.9.0",
     "typescript": "^6.0.3",
-    "typescript-eslint": "^8.59.1",
-    "vite": "^8.0.10",
-    "vitest": "^4.1.5"
+    "typescript-eslint": "^8.67.0",
+    "vite": "^8.2.1",
+    "vitest": "^4.1.10"
   }
 }

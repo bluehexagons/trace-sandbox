@@ -1,16 +1,9 @@
 import { useState, useCallback, useRef } from 'react'
 import type { KeyboardEvent } from 'react'
-import { Trace } from 'trace'
 import { examples } from './examples'
 import Docs from './Docs'
+import { runTraceScript } from './traceRunner'
 import './App.css'
-
-interface RunResult {
-  output: number | null
-  logs: string[]
-  time: number
-  error: string | null
-}
 
 type View = 'playground' | 'docs'
 
@@ -18,38 +11,12 @@ function App() {
   const [view, setView] = useState<View>('playground')
   const [code, setCode] = useState(examples[0].code)
   const [args, setArgs] = useState(examples[0].args ?? '')
-  const [result, setResult] = useState<RunResult | null>(null)
+  const [result, setResult] = useState<ReturnType<typeof runTraceScript> | null>(null)
   const [selectedExample, setSelectedExample] = useState(0)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
   const runCode = useCallback(() => {
-    const logs: string[] = []
-    try {
-      const parsedArgs = args.trim()
-        ? args.trim().split(/\s+/).map(Number).filter(n => !isNaN(n))
-        : []
-
-      const t = Trace.parse(code)
-      t.logger = (...msgs: unknown[]) => {
-        logs.push(msgs.map(m => String(m)).join(' '))
-      }
-      t.errorLogger = (...msgs: unknown[]) => {
-        logs.push(`⚠ ${msgs.map(m => String(m)).join(' ')}`)
-      }
-
-      const start = performance.now()
-      const output = t.run(parsedArgs)
-      const time = performance.now() - start
-
-      setResult({ output, logs, time, error: null })
-    } catch (e) {
-      setResult({
-        output: null,
-        logs,
-        time: 0,
-        error: e instanceof Error ? e.message : String(e),
-      })
-    }
+    setResult(runTraceScript(code, args))
   }, [code, args])
 
   const handleKeyDown = useCallback(
@@ -123,7 +90,7 @@ function App() {
             <h2 className="sidebar-title">Examples</h2>
             <ul className="example-list">
               {examples.map((ex, i) => (
-                <li key={i}>
+                <li key={ex.name}>
                   <button
                     type="button"
                     className={`example-btn${selectedExample === i ? ' active' : ''}`}

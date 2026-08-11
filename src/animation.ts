@@ -2,10 +2,22 @@ export interface AnimationFrame {
   values: Record<string, number[]>
 }
 
+export interface MemoryAnimationChannel {
+  channel: string
+  array: string
+}
+
+export interface LiveAnimationExecution {
+  mode: 'live'
+  frameCount: number
+  memoryChannels?: MemoryAnimationChannel[]
+}
+
 interface AnimationBase {
   title: string
   description: string
   framesPerSecond: number
+  execution?: LiveAnimationExecution
 }
 
 export interface ScenePoint {

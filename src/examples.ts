@@ -530,56 +530,51 @@ step()`,
     section: 'animations',
     name: 'Three-body orbital system',
     description: 'Integrate three independent bodies around a gravity well and render their paths.',
-    concepts: ['animation frames', 'interactive parameters', 'Euler integration', 'gravity', 'state vectors'],
+    concepts: ['live ticks', 'persistent memory', 'interactive parameters', 'Euler integration', 'gravity'],
     expected: '144 frames of three differently shaped orbits around a central star.',
     challenge: 'Change body 3’s velocity to 0.7 and watch its orbit become more eccentric.',
-    code: `# @frame@ begins a visual frame. Named echoes are its channels.
+    code: `# This script advances one frame each time the host runs it.
 [gravityInput, timeStepInput, outerSpeedInput]
-steps = 144;
-frame = 0;
-gravity = gravityInput;
-dt = timeStepInput;
-outerSpeed = outerSpeedInput;
-
-x1 = 18;  y1 = 0;   vx1 = 0;     vy1 = 1.64;
-x2 = 0;   y2 = 28;  vx2 = -1.31; vy2 = 0;
-x3 = -38; y3 = 0;   vx3 = 0;     vy3 = -outerSpeed;
-
-simulate() => {
-  @frame@;
-  @=x1@; @=y1@;
-  @=x2@; @=y2@;
-  @=x3@; @=y3@;
-
-  radiusSquared1 = x1 * x1 + y1 * y1;
-  radius1 = radiusSquared1 ** 0.5;
-  force1 = gravity / (radiusSquared1 * radius1);
-  vx1 -= x1 * force1 * dt;
-  vy1 -= y1 * force1 * dt;
-  x1 += vx1 * dt;
-  y1 += vy1 * dt;
-
-  radiusSquared2 = x2 * x2 + y2 * y2;
-  radius2 = radiusSquared2 ** 0.5;
-  force2 = gravity / (radiusSquared2 * radius2);
-  vx2 -= x2 * force2 * dt;
-  vy2 -= y2 * force2 * dt;
-  x2 += vx2 * dt;
-  y2 += vy2 * dt;
-
-  radiusSquared3 = x3 * x3 + y3 * y3;
-  radius3 = radiusSquared3 ** 0.5;
-  force3 = gravity / (radiusSquared3 * radius3);
-  vx3 -= x3 * force3 * dt;
-  vy3 -= y3 * force3 * dt;
-  x3 += vx3 * dt;
-  y3 += vy3 * dt;
-
-  frame++;
-  frame < steps ? >simulate() : frame
+initialized == 0 ? () => {
+  gravity = gravityInput;
+  dt = timeStepInput;
+  outerSpeed = outerSpeedInput;
+  frame = 0;
+  x1 = 18;  y1 = 0;   vx1 = 0;     vy1 = 1.64;
+  x2 = 0;   y2 = 28;  vx2 = -1.31; vy2 = 0;
+  x3 = -38; y3 = 0;   vx3 = 0;     vy3 = -outerSpeed;
+  initialized = 1
 };
 
-simulate()`,
+@=x1@; @=y1@;
+@=x2@; @=y2@;
+@=x3@; @=y3@;
+
+radiusSquared1 = x1 * x1 + y1 * y1;
+radius1 = radiusSquared1 ** 0.5;
+force1 = gravity / (radiusSquared1 * radius1);
+vx1 -= x1 * force1 * dt;
+vy1 -= y1 * force1 * dt;
+x1 += vx1 * dt;
+y1 += vy1 * dt;
+
+radiusSquared2 = x2 * x2 + y2 * y2;
+radius2 = radiusSquared2 ** 0.5;
+force2 = gravity / (radiusSquared2 * radius2);
+vx2 -= x2 * force2 * dt;
+vy2 -= y2 * force2 * dt;
+x2 += vx2 * dt;
+y2 += vy2 * dt;
+
+radiusSquared3 = x3 * x3 + y3 * y3;
+radius3 = radiusSquared3 ** 0.5;
+force3 = gravity / (radiusSquared3 * radius3);
+vx3 -= x3 * force3 * dt;
+vy3 -= y3 * force3 * dt;
+x3 += vx3 * dt;
+y3 += vy3 * dt;
+
+frame++`,
     args: '48 0.18 1.05',
     expectedValue: 144,
     animation: {
@@ -587,6 +582,7 @@ simulate()`,
       title: 'Orbital system',
       description: 'A symplectic Euler step updates velocity before position on every frame.',
       framesPerSecond: 24,
+      execution: { mode: 'live', frameCount: 144 },
       xMin: -65,
       xMax: 65,
       yMin: -65,
@@ -644,38 +640,34 @@ simulate()`,
     section: 'animations',
     name: 'Lorenz strange attractor',
     description: 'Integrate a chaotic differential system and draw its evolving phase-space path.',
-    concepts: ['chaos', 'interactive parameters', 'differential equations', 'time stepping', 'phase space'],
+    concepts: ['chaos', 'persistent memory', 'differential equations', 'live time stepping', 'phase space'],
     expected: '280 frames tracing the attractor’s two characteristic lobes.',
     challenge: 'Change rho from 28 to 20 and compare the long-term behavior.',
-    code: `# Lorenz system: tiny changes eventually produce different paths.
+    code: `# Lorenz system: the host preserves state between ticks.
 [rhoInput, sigmaInput, timeStepInput]
-steps = 280;
-frame = 0;
-dt = timeStepInput;
-sigma = sigmaInput;
-rho = rhoInput;
-beta = 2.6666667;
-x = 0.1;
-y = 0;
-z = 0;
-
-simulate() => {
-  @frame@;
-  @=x@;
-  @=z@;
-
-  dx = sigma * (y - x);
-  dy = x * (rho - z) - y;
-  dz = x * y - beta * z;
-  x += dx * dt;
-  y += dy * dt;
-  z += dz * dt;
-
-  frame++;
-  frame < steps ? >simulate() : frame
+initialized == 0 ? () => {
+  frame = 0;
+  dt = timeStepInput;
+  sigma = sigmaInput;
+  rho = rhoInput;
+  beta = 2.6666667;
+  x = 0.1;
+  y = 0;
+  z = 0;
+  initialized = 1
 };
 
-simulate()`,
+@=x@;
+@=z@;
+
+dx = sigma * (y - x);
+dy = x * (rho - z) - y;
+dz = x * y - beta * z;
+x += dx * dt;
+y += dy * dt;
+z += dz * dt;
+
+frame++`,
     args: '28 10 0.008',
     expectedValue: 280,
     animation: {
@@ -683,6 +675,7 @@ simulate()`,
       title: 'Lorenz attractor · x/z projection',
       description: 'The trail reveals a deterministic system whose trajectory never exactly repeats.',
       framesPerSecond: 30,
+      execution: { mode: 'live', frameCount: 280 },
       xMin: -35,
       xMax: 35,
       yMin: 0,
@@ -736,32 +729,17 @@ simulate()`,
     id: 'damped-wave',
     section: 'animations',
     name: 'Damped wave solver',
-    description: 'Evolve a one-dimensional wave across arrays and emit every sample in every frame.',
-    concepts: ['finite differences', 'interactive parameters', 'double buffering', 'arrays', 'wave propagation'],
+    description: 'Evolve a one-dimensional wave and render its current array directly from memory.',
+    concepts: ['finite differences', 'memory-backed output', 'double buffering', 'arrays', 'wave propagation'],
     expected: '72 frames of a pulse splitting, reflecting, and gradually losing energy.',
     challenge: 'Change the 0.2 coupling term to 0.35 and compare the propagation speed.',
     code: `[couplingInput, dampingInput, pulseHeightInput]
-coupling = couplingInput;
-damping = dampingInput;
-pulseHeight = pulseHeightInput;
-size = 41;
-steps = 72;
-current = [size];
-previous = [size];
-next = [size];
-
 initialize() => {
   distance = i - 21;
   distance < 0 ? distance = -distance;
   current[i] = distance < 5 ? pulseHeight * (1 - distance / 5) : 0;
   previous[i] = current[i];
   i++ <= size ? >initialize() : 0
-};
-
-emitSamples() => {
-  sample = current[i];
-  @=sample@;
-  i++ <= size ? >emitSamples() : 0
 };
 
 calculateNext() => {
@@ -776,32 +754,45 @@ copyNext() => {
   i++ <= size ? >copyNext() : 0
 };
 
-simulate() => {
-  @frame@;
-  i = 1;
-  emitSamples();
+advance() => {
   # Index 0 stores array size, so boundaries are fixed explicitly.
   next[1] = 0;
   next[size] = 0;
   i = 2;
   calculateNext();
   i = 1;
-  copyNext();
-  frame++;
-  frame < steps ? >simulate() : frame
+  copyNext()
 };
 
-i = 1;
-initialize();
-frame = 0;
-simulate()`,
+initialized == 0 ? () => {
+  coupling = couplingInput;
+  damping = dampingInput;
+  pulseHeight = pulseHeightInput;
+  size = 41;
+  current = [size];
+  previous = [size];
+  next = [size];
+  i = 1;
+  initialize();
+  frame = 0;
+  initialized = 1
+};
+
+# Leave the initial pulse untouched for the first rendered tick.
+frame > 0 ? advance();
+frame++`,
     args: '0.2 0.997 1',
     expectedValue: 72,
     animation: {
       kind: 'wave',
       title: 'Finite-difference wave',
-      description: 'Each polyline contains 41 sample echoes; older frames fade behind the newest one.',
+      description: 'Each polyline reads 41 samples from the current array; older frames fade behind it.',
       framesPerSecond: 18,
+      execution: {
+        mode: 'live',
+        frameCount: 72,
+        memoryChannels: [{ channel: 'sample', array: 'current' }],
+      },
       channel: 'sample',
       min: -1.5,
       max: 1.5,
@@ -853,23 +844,10 @@ simulate()`,
     section: 'animations',
     name: 'Interactive cellular automaton',
     description: 'Choose any elementary rule and grow its structure from one live cell.',
-    concepts: ['cellular automata', 'interactive input', 'double buffering', 'boolean algebra', 'emergence'],
+    concepts: ['cellular automata', 'memory-backed output', 'double buffering', 'boolean algebra', 'emergence'],
     expected: '41 generations growing from a single live cell.',
     challenge: 'Compare rules 30, 90, 110, and 184; look for symmetry, repetition, and movement.',
     code: `[ruleInput]
-rule = ruleInput;
-size = 41;
-steps = 41;
-current = [size];
-next = [size];
-current[21] = 1;
-
-emitCells() => {
-  cell = current[i];
-  @=cell@;
-  i++ <= size ? >emitCells() : 0
-};
-
 calculateNext() => {
   left = current[i - 1];
   center = current[i];
@@ -885,23 +863,28 @@ copyNext() => {
   i++ <= size ? >copyNext() : 0
 };
 
-simulate() => {
-  @frame@;
-  i = 1;
-  emitCells();
+advance() => {
   # Keep the edges dead; arr[0] is the array size, not a cell.
   next[1] = 0;
   next[size] = 0;
   i = 2;
   calculateNext();
   i = 1;
-  copyNext();
-  frame++;
-  frame < steps ? >simulate() : frame
+  copyNext()
 };
 
-frame = 0;
-simulate()`,
+initialized == 0 ? () => {
+  rule = ruleInput;
+  size = 41;
+  current = [size];
+  next = [size];
+  current[21] = 1;
+  frame = 0;
+  initialized = 1
+};
+
+frame > 0 ? advance();
+frame++`,
     args: '30',
     expectedValue: 41,
     animation: {
@@ -909,6 +892,11 @@ simulate()`,
       title: 'Elementary cellular automaton',
       description: 'Each rule number encodes eight neighborhood outcomes as bits.',
       framesPerSecond: 12,
+      execution: {
+        mode: 'live',
+        frameCount: 41,
+        memoryChannels: [{ channel: 'cell', array: 'current' }],
+      },
       channel: 'cell',
       historyRows: 41,
       color: '#a89bff',
@@ -936,27 +924,23 @@ simulate()`,
     section: 'animations',
     name: 'Interactive logistic map',
     description: 'Turn one growth parameter and watch a population settle, oscillate, or become chaotic.',
-    concepts: ['discrete dynamics', 'interactive parameters', 'feedback', 'period doubling', 'chaos'],
+    concepts: ['discrete dynamics', 'persistent memory', 'feedback', 'period doubling', 'chaos'],
     expected: '180 iterations plotting population against time.',
     challenge: 'Move growth slowly from 3.0 toward 4.0 and look for each period-doubling transition.',
     code: `[growthInput, seedInput]
-growth = growthInput;
-population = seedInput;
-steps = 180;
-frame = 0;
-
-iterate() => {
-  @frame@;
-  iteration = frame;
-  @=iteration@;
-  @=population@;
-
-  population = growth * population * (1 - population);
-  frame++;
-  frame < steps ? >iterate() : frame
+initialized == 0 ? () => {
+  growth = growthInput;
+  population = seedInput;
+  frame = 0;
+  initialized = 1
 };
 
-iterate()`,
+iteration = frame;
+@=iteration@;
+@=population@;
+
+population = growth * population * (1 - population);
+frame++`,
     args: '3.82 0.2',
     expectedValue: 180,
     animation: {
@@ -964,6 +948,7 @@ iterate()`,
       title: 'Logistic map · population over time',
       description: 'The same equation produces equilibrium, cycles, or chaos as growth changes.',
       framesPerSecond: 30,
+      execution: { mode: 'live', frameCount: 180 },
       xMin: 0,
       xMax: 180,
       yMin: 0,
@@ -1007,37 +992,33 @@ iterate()`,
     section: 'animations',
     name: 'Predator–prey phase portrait',
     description: 'Couple two populations and visualize the repeating chase between them.',
-    concepts: ['coupled systems', 'interactive parameters', 'feedback loops', 'phase portrait', 'Euler integration'],
+    concepts: ['coupled systems', 'persistent memory', 'feedback loops', 'phase portrait', 'Euler integration'],
     expected: '260 frames tracing prey against predator population.',
     challenge: 'Raise predation pressure, then find initial populations that keep the orbit on screen.',
     code: `[preyInput, predatorInput, predationInput]
-prey = preyInput;
-predators = predatorInput;
-predation = predationInput;
-preyGrowth = 1;
-predatorDeath = 1.2;
-conversion = 0.1;
-dt = 0.02;
-steps = 260;
-frame = 0;
-
-simulate() => {
-  @frame@;
-  @=prey@;
-  @=predators@;
-
-  preyChange = preyGrowth * prey - predation * prey * predators;
-  predatorChange = conversion * prey * predators - predatorDeath * predators;
-  prey += preyChange * dt;
-  predators += predatorChange * dt;
-  prey < 0 ? prey = 0;
-  predators < 0 ? predators = 0;
-
-  frame++;
-  frame < steps ? >simulate() : frame
+initialized == 0 ? () => {
+  prey = preyInput;
+  predators = predatorInput;
+  predation = predationInput;
+  preyGrowth = 1;
+  predatorDeath = 1.2;
+  conversion = 0.1;
+  dt = 0.02;
+  frame = 0;
+  initialized = 1
 };
 
-simulate()`,
+@=prey@;
+@=predators@;
+
+preyChange = preyGrowth * prey - predation * prey * predators;
+predatorChange = conversion * prey * predators - predatorDeath * predators;
+prey += preyChange * dt;
+predators += predatorChange * dt;
+prey < 0 ? prey = 0;
+predators < 0 ? predators = 0;
+
+frame++`,
     args: '10 5 0.1',
     expectedValue: 260,
     animation: {
@@ -1045,6 +1026,7 @@ simulate()`,
       title: 'Predator–prey phase portrait',
       description: 'Neither axis is time: the trail shows how both populations co-evolve.',
       framesPerSecond: 30,
+      execution: { mode: 'live', frameCount: 260 },
       xMin: 0,
       xMax: 35,
       yMin: 0,

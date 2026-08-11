@@ -157,8 +157,7 @@ const sections = [
       <div>
         <p>
           Some sandbox lessons expose script arguments as sliders or numeric inputs. Moving a
-          control updates the corresponding argument and reruns the current code after a short
-          delay.
+          control updates the corresponding argument and starts a fresh run after a short delay.
         </p>
         <pre><code>{`[growth, seed]
 population = seed;
@@ -227,32 +226,31 @@ population = growth * population * (1 - population)`}</code></pre>
     content: (
       <div>
         <p>
-          The sandbox can turn ordinary Trace echo output into animation frames. Emit the text
-          marker <code>@frame@</code>, then emit named numeric values for the renderer to collect
-          as channels in that frame.
+          Animated lessons run their Trace code once per playback tick. Each run shares one
+          persistent memory environment, so variables and arrays continue from the preceding
+          frame instead of pre-rendering the whole animation up front.
         </p>
-        <pre><code>{`frame = 0;
-x = 0;
-
-animate() => {
-  @frame@;  # Begin a frame
-  @=x@;     # Add x to this frame
-  x += 2;
-  frame++;
-  frame < 30 ? >animate() : frame
+        <pre><code>{`initialized == 0 ? () => {
+  frame = 0;
+  x = 0;
+  initialized = 1
 };
 
-animate()`}</code></pre>
-        <h4>Frame Protocol</h4>
+@=x@;       # Add x to this tick's frame
+x += 2;
+frame++`}</code></pre>
+        <h4>Live Frame Protocol</h4>
         <ul>
-          <li>Each <code>@frame@</code> starts a new frame.</li>
+          <li>The host executes the edited script once for every playback tick.</li>
+          <li>An initialization guard sets up state only on the first tick.</li>
           <li><code>@=x@</code> adds one numeric value to channel <code>x</code>.</li>
-          <li>Echo the same name repeatedly to build a vector, such as every cell in a row.</li>
-          <li>Playback controls appear when an Animated output example produces at least one frame.</li>
+          <li>Scalar channels use named echoes, while dense output can be read directly from a Trace array.</li>
+          <li>Pause and replay use generated frames; code runs only when playback reaches a new frame.</li>
         </ul>
         <p>
-          This is a sandbox convention built on normal echo statements, not additional Trace
-          syntax. Open the Animated output lessons to see particle, waveform, and cellular renderers.
+          Live playback is a sandbox convention built on <code>TraceMemory</code>, not additional
+          language syntax. The wave and cellular-automaton lessons expose their current arrays as
+          memory-backed channels, avoiding a loop of repeated echo statements.
         </p>
       </div>
     ),

@@ -11,6 +11,7 @@ import './AnimationPlayer.css'
 interface AnimationPlayerProps {
   frames: AnimationFrame[]
   spec: AnimationSpec
+  onTick?: () => AnimationFrame | null
 }
 
 const clamp = (value: number, min: number, max: number) =>
@@ -141,29 +142,40 @@ function CellsFrame({
   )
 }
 
-export default function AnimationPlayer({ frames, spec }: AnimationPlayerProps) {
+export default function AnimationPlayer({ frames, spec, onTick }: AnimationPlayerProps) {
+  const [liveFrames, setLiveFrames] = useState(frames)
   const [frameIndex, setFrameIndex] = useState(0)
   const [isPlaying, setIsPlaying] = useState(() =>
     typeof window === 'undefined' ? false : !window.matchMedia('(prefers-reduced-motion: reduce)').matches,
   )
+  const availableFrames = onTick === undefined ? frames : liveFrames
+  const totalFrames = spec.execution?.frameCount ?? availableFrames.length
 
   useEffect(() => {
-    if (!isPlaying || frames.length < 2) {
+    if (!isPlaying || totalFrames < 2) {
       return
     }
 
     const interval = window.setInterval(() => {
-      setFrameIndex(current => {
-        if (current >= frames.length - 1) {
-          setIsPlaying(false)
-          return current
+      if (frameIndex < availableFrames.length - 1) {
+        setFrameIndex(frameIndex + 1)
+        return
+      }
+
+      if (onTick !== undefined && availableFrames.length < totalFrames) {
+        const nextFrame = onTick()
+        if (nextFrame !== null) {
+          setLiveFrames(current => [...current, nextFrame])
+          setFrameIndex(frameIndex + 1)
+          return
         }
-        return current + 1
-      })
+      }
+
+      setIsPlaying(false)
     }, 1000 / spec.framesPerSecond)
 
     return () => window.clearInterval(interval)
-  }, [frames.length, isPlaying, spec.framesPerSecond])
+  }, [availableFrames.length, frameIndex, isPlaying, onTick, spec.framesPerSecond, totalFrames])
 
   const restart = () => {
     setFrameIndex(0)
@@ -173,7 +185,7 @@ export default function AnimationPlayer({ frames, spec }: AnimationPlayerProps) 
   const togglePlayback = () => {
     if (isPlaying) {
       setIsPlaying(false)
-    } else if (frameIndex === frames.length - 1) {
+    } else if (frameIndex === availableFrames.length - 1 && availableFrames.length >= totalFrames) {
       restart()
     } else {
       setIsPlaying(true)
@@ -188,18 +200,18 @@ export default function AnimationPlayer({ frames, spec }: AnimationPlayerProps) 
           <p>{spec.description}</p>
         </div>
         <span className="animation-frame-count">
-          Frame {frameIndex + 1} / {frames.length}
+          Frame {frameIndex + 1} / {totalFrames}
         </span>
       </div>
 
       {spec.kind === 'scene' && (
-        <SceneFrame frames={frames} spec={spec} frameIndex={frameIndex} />
+        <SceneFrame frames={availableFrames} spec={spec} frameIndex={frameIndex} />
       )}
       {spec.kind === 'wave' && (
-        <WaveFrame frames={frames} spec={spec} frameIndex={frameIndex} />
+        <WaveFrame frames={availableFrames} spec={spec} frameIndex={frameIndex} />
       )}
       {spec.kind === 'cells' && (
-        <CellsFrame frames={frames} spec={spec} frameIndex={frameIndex} />
+        <CellsFrame frames={availableFrames} spec={spec} frameIndex={frameIndex} />
       )}
 
       <div className="animation-controls">
@@ -210,7 +222,7 @@ export default function AnimationPlayer({ frames, spec }: AnimationPlayerProps) 
         <input
           type="range"
           min="0"
-          max={frames.length - 1}
+          max={availableFrames.length - 1}
           value={frameIndex}
           onChange={event => {
             setFrameIndex(Number(event.target.value))

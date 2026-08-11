@@ -1,7 +1,27 @@
 import { describe, expect, it } from 'vitest'
 import { examples, exampleSections } from '../examples'
+import type { Example } from '../examples'
 import { readArgumentValue } from '../interactive'
-import { parseArguments, runTraceScript } from '../traceRunner'
+import { createTraceTickSession, parseArguments, runTraceScript } from '../traceRunner'
+
+const runExample = (example: Example, argumentInput = example.args ?? '') => {
+  const execution = example.animation?.execution
+  if (execution?.mode !== 'live') {
+    return runTraceScript(example.code, argumentInput)
+  }
+
+  const session = createTraceTickSession(example.code, argumentInput, execution.memoryChannels)
+  const animationFrames = []
+  let result = session.tick()
+  animationFrames.push(...result.animationFrames)
+
+  for (let frame = 1; frame < execution.frameCount && result.error === null; frame++) {
+    result = session.tick()
+    animationFrames.push(...result.animationFrames)
+  }
+
+  return { ...result, animationFrames }
+}
 
 describe('trace runner', () => {
   it('parses whitespace-separated finite numeric arguments', () => {
@@ -35,6 +55,33 @@ describe('trace runner', () => {
       { values: { x: [3] } },
     ])
     expect(result.logs).toEqual([])
+  })
+
+  it('runs one tick at a time with persistent state and memory-backed channels', () => {
+    const session = createTraceTickSession(
+      'initialized == 0 ? () => { output = [2]; output[2] = 3; initialized = 1 }; output[1] += output[2]; output[1]',
+      '',
+      [{ channel: 'samples', array: 'output' }],
+    )
+
+    expect(session.tick()).toMatchObject({
+      output: 3,
+      animationFrames: [{ values: { samples: [3, 3] } }],
+      error: null,
+    })
+    expect(session.tick()).toMatchObject({
+      output: 6,
+      animationFrames: [{ values: { samples: [6, 3] } }],
+      error: null,
+    })
+  })
+
+  it('reports a missing memory-backed animation array', () => {
+    const result = createTraceTickSession('1', '', [
+      { channel: 'samples', array: 'missing' },
+    ]).tick()
+
+    expect(result.error).toContain('missing Trace array "missing"')
   })
 
   it('returns parse errors in the playground result shape', () => {
@@ -73,7 +120,7 @@ describe('guided examples', () => {
 
   for (const example of examples) {
     it(`runs ${example.name}`, () => {
-      const result = runTraceScript(example.code, example.args ?? '')
+      const result = runExample(example)
 
       if (example.expectsError) {
         expect(result.error).not.toBeNull()
@@ -114,7 +161,7 @@ describe('guided examples', () => {
           args[control.argumentIndex] = mask & (1 << index) ? control.max : control.min
         })
 
-        const result = runTraceScript(example.code, args.join(' '))
+        const result = runExample(example, args.join(' '))
         expect(result.error).toBeNull()
 
         for (const frame of result.animationFrames) {

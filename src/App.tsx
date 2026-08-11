@@ -6,7 +6,8 @@ import Docs from './Docs'
 import InteractiveControls from './InteractiveControls'
 import { writeArgumentValue } from './interactive'
 import type { InteractiveControl } from './interactive'
-import { runTraceScript } from './traceRunner'
+import { createTraceTickSession, runTraceScript } from './traceRunner'
+import type { TraceTickSession } from './traceRunner'
 import './App.css'
 
 type View = 'playground' | 'docs'
@@ -20,6 +21,7 @@ function App() {
   const [runRevision, setRunRevision] = useState(0)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const autoRunTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const tickSessionRef = useRef<TraceTickSession | null>(null)
   const activeExample = examples[selectedExample]
   const activeSection = exampleSections.find(section => section.id === activeExample.section)
 
@@ -31,9 +33,38 @@ function App() {
   }, [])
 
   const executeCode = useCallback((argumentInput: string) => {
-    setResult(runTraceScript(code, argumentInput))
+    const execution = activeExample.animation?.execution
+    if (execution?.mode === 'live') {
+      const session = createTraceTickSession(code, argumentInput, execution.memoryChannels)
+      const firstTick = session.tick()
+      tickSessionRef.current = firstTick.error === null ? session : null
+      setResult(firstTick)
+    } else {
+      tickSessionRef.current = null
+      setResult(runTraceScript(code, argumentInput))
+    }
     setRunRevision(revision => revision + 1)
-  }, [code])
+  }, [activeExample.animation?.execution, code])
+
+  const runAnimationTick = useCallback(() => {
+    const session = tickSessionRef.current
+    if (session === null) {
+      return null
+    }
+
+    const tick = session.tick()
+    if (tick.error !== null) {
+      tickSessionRef.current = null
+    }
+    setResult(current => ({
+      output: tick.output,
+      logs: [...(current?.logs ?? []), ...tick.logs],
+      animationFrames: current?.animationFrames ?? [],
+      time: (current?.time ?? 0) + tick.time,
+      error: tick.error,
+    }))
+    return tick.error === null ? tick.animationFrames[0] ?? null : null
+  }, [])
 
   const runCode = useCallback(() => {
     clearScheduledRun()
@@ -41,6 +72,9 @@ function App() {
   }, [args, clearScheduledRun, executeCode])
 
   useEffect(() => clearScheduledRun, [clearScheduledRun])
+  useEffect(() => () => {
+    tickSessionRef.current = null
+  }, [])
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent<HTMLTextAreaElement>) => {
@@ -65,6 +99,7 @@ function App() {
 
   const loadExample = (index: number) => {
     clearScheduledRun()
+    tickSessionRef.current = null
     const ex = examples[index]
     setSelectedExample(index)
     setCode(ex.code)
@@ -79,6 +114,7 @@ function App() {
     }
 
     const nextArgs = writeArgumentValue(args, control, value, activeExample.controls.items)
+    tickSessionRef.current = null
     setArgs(nextArgs)
 
     if (activeExample.controls.autoRun) {
@@ -215,7 +251,9 @@ function App() {
                 <span className="section-label">Script</span>
                 <span className="hint">
                   {activeExample.animation
-                    ? 'Ctrl+Enter · @frame@ + named echoes render below'
+                    ? activeExample.animation.execution?.mode === 'live'
+                      ? 'Ctrl+Enter · code runs once per playback tick'
+                      : 'Ctrl+Enter · @frame@ + named echoes render below'
                     : 'Ctrl+Enter to run'}
                 </span>
               </div>
@@ -225,6 +263,7 @@ function App() {
                 value={code}
                 onChange={event => {
                   clearScheduledRun()
+                  tickSessionRef.current = null
                   setCode(event.target.value)
                 }}
                 onKeyDown={handleKeyDown}
@@ -259,6 +298,7 @@ function App() {
                 value={args}
                 onChange={event => {
                   clearScheduledRun()
+                  tickSessionRef.current = null
                   setArgs(event.target.value)
                 }}
                 placeholder="Optional: pass numbers to &1, &2, …"
@@ -279,12 +319,19 @@ function App() {
                 <section className="animation-section">
                   <div className="output-toolbar">
                     <span className="section-label">Animation output</span>
-                    <span className="hint">Rendered from {result.animationFrames.length} emitted frames</span>
+                    <span className="hint">
+                      {activeExample.animation.execution?.mode === 'live'
+                        ? 'Generated live from persistent Trace memory'
+                        : `Rendered from ${result.animationFrames.length} emitted frames`}
+                    </span>
                   </div>
                   <AnimationPlayer
                     key={runRevision}
                     frames={result.animationFrames}
                     spec={activeExample.animation}
+                    onTick={activeExample.animation.execution?.mode === 'live'
+                      ? runAnimationTick
+                      : undefined}
                   />
                 </section>
               )}

@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { examples, exampleSections } from '../examples'
 import { parseArguments, runTraceScript } from '../traceRunner'
 
 describe('trace runner', () => {
@@ -29,4 +30,30 @@ describe('trace runner', () => {
     })
     expect(runTraceScript('1 > < 2', '').error).toContain('offset')
   })
+})
+
+describe('guided examples', () => {
+  it('has a unique id and a populated section for every lesson', () => {
+    expect(new Set(examples.map(example => example.id)).size).toBe(examples.length)
+
+    for (const section of exampleSections) {
+      expect(examples.some(example => example.section === section.id)).toBe(true)
+    }
+  })
+
+  for (const example of examples) {
+    it(`runs ${example.name}`, () => {
+      const result = runTraceScript(example.code, example.args ?? '')
+
+      if (example.expectsError) {
+        expect(result.error).not.toBeNull()
+        return
+      }
+
+      expect(result.error).toBeNull()
+      if (example.expectedValue !== undefined) {
+        expect(result.output).toBeCloseTo(example.expectedValue, 10)
+      }
+    })
+  }
 })

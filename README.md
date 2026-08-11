@@ -9,7 +9,9 @@ An interactive playground for the experimental [**trace**](https://github.com/bl
 ## Features
 
 - **In-browser REPL** — write and run trace scripts instantly, no install needed.
-- **Example programs** — 11 examples covering arithmetic, variables, conditionals, loops, functions, arguments, echo/debug output, randomness, and more.
+- **Guided learning path** — 20 editable lessons progress from expressions and control flow to arrays, higher-order functions, and debugging.
+- **Larger systems** — complete examples include Euclid's algorithm, a statistics scanner, an event-driven vending machine, and a tiny factorial virtual machine.
+- **Lesson notes** — every example identifies its concepts, expected result, and a follow-up experiment.
 - **Argument support** — pass space-separated numbers to scripts that use `[...]` parameter lists.
 - **Echo output** — `@…@` log statements show up in a console panel below the result.
 - **Keyboard shortcut** — press **Ctrl+Enter** (or **⌘+Enter**) to run the current script.

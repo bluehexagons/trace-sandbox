@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef } from 'react'
 import type { KeyboardEvent } from 'react'
-import { examples } from './examples'
+import { examples, exampleSections } from './examples'
 import Docs from './Docs'
 import { runTraceScript } from './traceRunner'
 import './App.css'
@@ -14,6 +14,8 @@ function App() {
   const [result, setResult] = useState<ReturnType<typeof runTraceScript> | null>(null)
   const [selectedExample, setSelectedExample] = useState(0)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const activeExample = examples[selectedExample]
+  const activeSection = exampleSections.find(section => section.id === activeExample.section)
 
   const runCode = useCallback(() => {
     setResult(runTraceScript(code, args))
@@ -87,24 +89,83 @@ function App() {
       ) : (
         <main className="main">
           <aside className="sidebar">
-            <h2 className="sidebar-title">Examples</h2>
-            <ul className="example-list">
-              {examples.map((ex, i) => (
-                <li key={ex.name}>
-                  <button
-                    type="button"
-                    className={`example-btn${selectedExample === i ? ' active' : ''}`}
-                    onClick={() => loadExample(i)}
-                  >
-                    <span className="example-name">{ex.name}</span>
-                    <span className="example-desc">{ex.description}</span>
-                  </button>
-                </li>
-              ))}
-            </ul>
+            <h2 className="sidebar-title">Learning path</h2>
+            <p className="sidebar-intro">
+              Start with expressions, then build toward complete systems. Every lesson is editable.
+            </p>
+            <nav className="example-nav" aria-label="Trace example lessons">
+              {exampleSections.map(section => {
+                const sectionExamples = examples
+                  .map((example, index) => ({ example, index }))
+                  .filter(({ example }) => example.section === section.id)
+
+                return (
+                  <section className="example-group" key={section.id}>
+                    <h3>{section.title}</h3>
+                    <p>{section.description}</p>
+                    <ol className="example-list">
+                      {sectionExamples.map(({ example, index }) => (
+                        <li key={example.id}>
+                          <button
+                            type="button"
+                            className={`example-btn${selectedExample === index ? ' active' : ''}`}
+                            onClick={() => loadExample(index)}
+                            aria-current={selectedExample === index ? 'step' : undefined}
+                          >
+                            <span className="example-name">{example.name}</span>
+                            <span className="example-desc">{example.description}</span>
+                          </button>
+                        </li>
+                      ))}
+                    </ol>
+                  </section>
+                )
+              })}
+            </nav>
           </aside>
 
           <div className="workspace">
+            <section className="lesson-card" aria-labelledby="active-lesson-title">
+              <div className="lesson-heading">
+                <div>
+                  <p className="lesson-position">
+                    {activeSection?.title} · Lesson {selectedExample + 1} of {examples.length}
+                  </p>
+                  <h2 id="active-lesson-title">{activeExample.name}</h2>
+                  <p className="lesson-description">{activeExample.description}</p>
+                </div>
+                <div className="lesson-nav-buttons" aria-label="Lesson navigation">
+                  <button
+                    type="button"
+                    onClick={() => loadExample(selectedExample - 1)}
+                    disabled={selectedExample === 0}
+                  >
+                    ← Previous
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => loadExample(selectedExample + 1)}
+                    disabled={selectedExample === examples.length - 1}
+                  >
+                    Next →
+                  </button>
+                </div>
+              </div>
+              <ul className="concept-list" aria-label="Concepts in this lesson">
+                {activeExample.concepts.map(concept => (
+                  <li key={concept}>{concept}</li>
+                ))}
+              </ul>
+              <div className="lesson-notes">
+                <p>
+                  <strong>Expected:</strong> {activeExample.expected}
+                </p>
+                <p>
+                  <strong>Try it:</strong> {activeExample.challenge}
+                </p>
+              </div>
+            </section>
+
             <section className="editor-section">
               <div className="editor-toolbar">
                 <span className="section-label">Script</span>
@@ -122,6 +183,7 @@ function App() {
                 autoCapitalize="off"
                 placeholder="Enter trace code here…"
                 aria-label="trace script editor"
+                rows={Math.min(26, Math.max(9, code.split('\n').length + 1))}
               />
             </section>
 

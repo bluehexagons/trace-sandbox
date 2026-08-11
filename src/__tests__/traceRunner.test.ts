@@ -17,9 +17,23 @@ describe('trace runner', () => {
     expect(runTraceScript('[...] x = &1; @=x@; x * 2', '21')).toEqual({
       output: 42,
       logs: expect.arrayContaining([expect.stringContaining('21')]),
+      animationFrames: [],
       time: expect.any(Number),
       error: null,
     })
+  })
+
+  it('collects frame markers and repeated named values as animation channels', () => {
+    const result = runTraceScript(
+      '@frame@; x = 1; @=x@; x = 2; @=x@; @frame@; x = 3; @=x@; 3',
+      '',
+    )
+
+    expect(result.animationFrames).toEqual([
+      { values: { x: [1, 2] } },
+      { values: { x: [3] } },
+    ])
+    expect(result.logs).toEqual([])
   })
 
   it('returns parse errors in the playground result shape', () => {
@@ -53,6 +67,19 @@ describe('guided examples', () => {
       expect(result.error).toBeNull()
       if (example.expectedValue !== undefined) {
         expect(result.output).toBeCloseTo(example.expectedValue, 10)
+      }
+
+      if (example.animation !== undefined) {
+        expect(result.animationFrames.length).toBe(example.expectedValue)
+
+        if (example.animation.kind === 'scene') {
+          for (const point of example.animation.points) {
+            expect(result.animationFrames[0].values[point.x]).toHaveLength(1)
+            expect(result.animationFrames[0].values[point.y]).toHaveLength(1)
+          }
+        } else {
+          expect(result.animationFrames[0].values[example.animation.channel].length).toBeGreaterThan(1)
+        }
       }
     })
   }

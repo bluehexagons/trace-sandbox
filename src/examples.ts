@@ -1,3 +1,5 @@
+import type { AnimationSpec } from './animation'
+
 export const exampleSections = [
   {
     id: 'foundations',
@@ -24,6 +26,11 @@ export const exampleSections = [
     title: '5. Larger systems',
     description: 'Put the pieces together in algorithms, simulations, and an interpreter.',
   },
+  {
+    id: 'animations',
+    title: '6. Animated output',
+    description: 'Emit frame channels that the playground turns into live visualizations.',
+  },
 ] as const
 
 export type ExampleSectionId = (typeof exampleSections)[number]['id']
@@ -40,6 +47,7 @@ export interface Example {
   args?: string
   expectedValue?: number
   expectsError?: boolean
+  animation?: AnimationSpec
 }
 
 export const examples: Example[] = [
@@ -486,5 +494,262 @@ accumulator = 0;
 running = 1;
 step()`,
     expectedValue: 720,
+  },
+  {
+    id: 'orbital-system',
+    section: 'animations',
+    name: 'Three-body orbital system',
+    description: 'Integrate three independent bodies around a gravity well and render their paths.',
+    concepts: ['animation frames', 'Euler integration', 'gravity', 'state vectors'],
+    expected: '144 frames of three differently shaped orbits around a central star.',
+    challenge: 'Change body 3’s velocity to 0.7 and watch its orbit become more eccentric.',
+    code: `# @frame@ begins a visual frame. Named echoes are its channels.
+steps = 144;
+frame = 0;
+dt = 0.18;
+gravity = 48;
+
+x1 = 18;  y1 = 0;   vx1 = 0;     vy1 = 1.64;
+x2 = 0;   y2 = 28;  vx2 = -1.31; vy2 = 0;
+x3 = -38; y3 = 0;   vx3 = 0;     vy3 = -1.05;
+
+simulate() => {
+  @frame@;
+  @=x1@; @=y1@;
+  @=x2@; @=y2@;
+  @=x3@; @=y3@;
+
+  radiusSquared1 = x1 * x1 + y1 * y1;
+  radius1 = radiusSquared1 ** 0.5;
+  force1 = gravity / (radiusSquared1 * radius1);
+  vx1 -= x1 * force1 * dt;
+  vy1 -= y1 * force1 * dt;
+  x1 += vx1 * dt;
+  y1 += vy1 * dt;
+
+  radiusSquared2 = x2 * x2 + y2 * y2;
+  radius2 = radiusSquared2 ** 0.5;
+  force2 = gravity / (radiusSquared2 * radius2);
+  vx2 -= x2 * force2 * dt;
+  vy2 -= y2 * force2 * dt;
+  x2 += vx2 * dt;
+  y2 += vy2 * dt;
+
+  radiusSquared3 = x3 * x3 + y3 * y3;
+  radius3 = radiusSquared3 ** 0.5;
+  force3 = gravity / (radiusSquared3 * radius3);
+  vx3 -= x3 * force3 * dt;
+  vy3 -= y3 * force3 * dt;
+  x3 += vx3 * dt;
+  y3 += vy3 * dt;
+
+  frame++;
+  frame < steps ? >simulate() : frame
+};
+
+simulate()`,
+    expectedValue: 144,
+    animation: {
+      kind: 'scene',
+      title: 'Orbital system',
+      description: 'A symplectic Euler step updates velocity before position on every frame.',
+      framesPerSecond: 24,
+      xMin: -50,
+      xMax: 50,
+      yMin: -50,
+      yMax: 50,
+      trailLength: 100,
+      showOrigin: true,
+      points: [
+        { x: 'x1', y: 'y1', color: '#60a5fa', label: 'Inner body', radius: 1.5 },
+        { x: 'x2', y: 'y2', color: '#f472b6', label: 'Middle body', radius: 1.7 },
+        { x: 'x3', y: 'y3', color: '#4ade80', label: 'Outer body', radius: 1.9 },
+      ],
+    },
+  },
+  {
+    id: 'lorenz-attractor',
+    section: 'animations',
+    name: 'Lorenz strange attractor',
+    description: 'Integrate a chaotic differential system and draw its evolving phase-space path.',
+    concepts: ['chaos', 'differential equations', 'time stepping', 'phase space'],
+    expected: '280 frames tracing the attractor’s two characteristic lobes.',
+    challenge: 'Change rho from 28 to 20 and compare the long-term behavior.',
+    code: `# Lorenz system: tiny changes eventually produce different paths.
+steps = 280;
+frame = 0;
+dt = 0.008;
+sigma = 10;
+rho = 28;
+beta = 2.6666667;
+x = 0.1;
+y = 0;
+z = 0;
+
+simulate() => {
+  @frame@;
+  @=x@;
+  @=z@;
+
+  dx = sigma * (y - x);
+  dy = x * (rho - z) - y;
+  dz = x * y - beta * z;
+  x += dx * dt;
+  y += dy * dt;
+  z += dz * dt;
+
+  frame++;
+  frame < steps ? >simulate() : frame
+};
+
+simulate()`,
+    expectedValue: 280,
+    animation: {
+      kind: 'scene',
+      title: 'Lorenz attractor · x/z projection',
+      description: 'The trail reveals a deterministic system whose trajectory never exactly repeats.',
+      framesPerSecond: 30,
+      xMin: -25,
+      xMax: 25,
+      yMin: 0,
+      yMax: 55,
+      trailLength: 220,
+      points: [
+        { x: 'x', y: 'z', color: '#a89bff', label: 'System state', radius: 1.1 },
+      ],
+    },
+  },
+  {
+    id: 'damped-wave',
+    section: 'animations',
+    name: 'Damped wave solver',
+    description: 'Evolve a one-dimensional wave across arrays and emit every sample in every frame.',
+    concepts: ['finite differences', 'double buffering', 'arrays', 'wave propagation'],
+    expected: '72 frames of a pulse splitting, reflecting, and gradually losing energy.',
+    challenge: 'Change the 0.2 coupling term to 0.35 and compare the propagation speed.',
+    code: `size = 41;
+steps = 72;
+current = [size];
+previous = [size];
+next = [size];
+
+initialize() => {
+  distance = i - 21;
+  distance < 0 ? distance = -distance;
+  current[i] = distance < 5 ? 1 - distance / 5 : 0;
+  previous[i] = current[i];
+  i++ <= size ? >initialize() : 0
+};
+
+emitSamples() => {
+  sample = current[i];
+  @=sample@;
+  i++ <= size ? >emitSamples() : 0
+};
+
+calculateNext() => {
+  laplacian = current[i - 1] - 2 * current[i] + current[i + 1];
+  next[i] = (2 * current[i] - previous[i] + 0.2 * laplacian) * 0.997;
+  i++ < size ? >calculateNext() : 0
+};
+
+copyNext() => {
+  previous[i] = current[i];
+  current[i] = next[i];
+  i++ <= size ? >copyNext() : 0
+};
+
+simulate() => {
+  @frame@;
+  i = 1;
+  emitSamples();
+  # Index 0 stores array size, so boundaries are fixed explicitly.
+  next[1] = 0;
+  next[size] = 0;
+  i = 2;
+  calculateNext();
+  i = 1;
+  copyNext();
+  frame++;
+  frame < steps ? >simulate() : frame
+};
+
+i = 1;
+initialize();
+frame = 0;
+simulate()`,
+    expectedValue: 72,
+    animation: {
+      kind: 'wave',
+      title: 'Finite-difference wave',
+      description: 'Each polyline contains 41 sample echoes; older frames fade behind the newest one.',
+      framesPerSecond: 18,
+      channel: 'sample',
+      min: -1.2,
+      max: 1.2,
+      trailLength: 5,
+      color: '#38bdf8',
+    },
+  },
+  {
+    id: 'rule-30',
+    section: 'animations',
+    name: 'Rule 30 cellular automaton',
+    description: 'Generate complex, asymmetric structure from one cell and a three-neighbor rule.',
+    concepts: ['cellular automata', 'double buffering', 'boolean algebra', 'emergence'],
+    expected: '41 generations growing from a single live cell.',
+    challenge: 'Replace the update with left ^ right to discover a different automaton.',
+    code: `size = 41;
+steps = 41;
+current = [size];
+next = [size];
+current[21] = 1;
+
+emitCells() => {
+  cell = current[i];
+  @=cell@;
+  i++ <= size ? >emitCells() : 0
+};
+
+calculateNext() => {
+  left = current[i - 1];
+  center = current[i];
+  right = current[i + 1];
+  next[i] = left ^ (center || right);
+  i++ < size ? >calculateNext() : 0
+};
+
+copyNext() => {
+  current[i] = next[i];
+  i++ <= size ? >copyNext() : 0
+};
+
+simulate() => {
+  @frame@;
+  i = 1;
+  emitCells();
+  # Keep the edges dead; arr[0] is the array size, not a cell.
+  next[1] = 0;
+  next[size] = 0;
+  i = 2;
+  calculateNext();
+  i = 1;
+  copyNext();
+  frame++;
+  frame < steps ? >simulate() : frame
+};
+
+frame = 0;
+simulate()`,
+    expectedValue: 41,
+    animation: {
+      kind: 'cells',
+      title: 'Rule 30 evolution',
+      description: 'Every emitted frame becomes a row, revealing order and randomness from one rule.',
+      framesPerSecond: 12,
+      channel: 'cell',
+      historyRows: 41,
+      color: '#a89bff',
+    },
   },
 ]

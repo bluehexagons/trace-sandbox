@@ -1,0 +1,123 @@
+.animation-player {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.animation-copy {
+  align-items: flex-start;
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+  padding: 0.85rem 1rem;
+}
+
+.animation-copy h3 {
+  font-size: 0.9rem;
+  margin-bottom: 0.15rem;
+}
+
+.animation-copy p,
+.animation-frame-count {
+  color: var(--text-dim);
+  font-size: 0.75rem;
+}
+
+.animation-frame-count {
+  flex-shrink: 0;
+  font-family: var(--font-mono);
+}
+
+.animation-canvas {
+  background: #090b12;
+  display: block;
+  height: min(52vw, 430px);
+  min-height: 280px;
+  width: 100%;
+}
+
+.animation-cells {
+  image-rendering: pixelated;
+}
+
+.animation-background {
+  fill: #090b12;
+}
+
+.animation-axis,
+.animation-grid-line {
+  stroke: rgba(136, 144, 176, 0.16);
+  stroke-width: 0.2;
+}
+
+.animation-grid-line {
+  stroke-dasharray: 1 1;
+}
+
+.animation-origin {
+  fill: #facc15;
+  filter: drop-shadow(0 0 2px rgba(250, 204, 21, 0.8));
+}
+
+.animation-trail,
+.animation-wave {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.animation-trail {
+  opacity: 0.5;
+  stroke-width: 0.45;
+}
+
+.animation-wave {
+  stroke-width: 0.65;
+}
+
+.animation-controls {
+  align-items: center;
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.7rem 1rem;
+}
+
+.animation-controls button {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  color: var(--text);
+  cursor: pointer;
+  font-size: 0.75rem;
+  min-width: 4.25rem;
+  padding: 0.35rem 0.6rem;
+}
+
+.animation-controls button:hover {
+  border-color: var(--accent);
+}
+
+.animation-controls input {
+  accent-color: var(--accent);
+  flex: 1;
+  min-width: 80px;
+}
+
+@media (max-width: 768px) {
+  .animation-canvas {
+    height: 72vw;
+    min-height: 220px;
+  }
+
+  .animation-copy {
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animation-player * {
+    scroll-behavior: auto;
+  }
+}

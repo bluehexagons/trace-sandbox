@@ -1,6 +1,7 @@
 import { useState, useCallback, useRef } from 'react'
 import type { KeyboardEvent } from 'react'
 import { examples, exampleSections } from './examples'
+import AnimationPlayer from './AnimationPlayer'
 import Docs from './Docs'
 import { runTraceScript } from './traceRunner'
 import './App.css'
@@ -13,12 +14,14 @@ function App() {
   const [args, setArgs] = useState(examples[0].args ?? '')
   const [result, setResult] = useState<ReturnType<typeof runTraceScript> | null>(null)
   const [selectedExample, setSelectedExample] = useState(0)
+  const [runRevision, setRunRevision] = useState(0)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const activeExample = examples[selectedExample]
   const activeSection = exampleSections.find(section => section.id === activeExample.section)
 
   const runCode = useCallback(() => {
     setResult(runTraceScript(code, args))
+    setRunRevision(revision => revision + 1)
   }, [code, args])
 
   const handleKeyDown = useCallback(
@@ -169,7 +172,11 @@ function App() {
             <section className="editor-section">
               <div className="editor-toolbar">
                 <span className="section-label">Script</span>
-                <span className="hint">Ctrl+Enter to run</span>
+                <span className="hint">
+                  {activeExample.animation
+                    ? 'Ctrl+Enter · @frame@ + named echoes render below'
+                    : 'Ctrl+Enter to run'}
+                </span>
               </div>
               <textarea
                 ref={textareaRef}
@@ -208,6 +215,23 @@ function App() {
                 ▶ Run
               </button>
             </div>
+
+            {result !== null &&
+              result.error === null &&
+              activeExample.animation !== undefined &&
+              result.animationFrames.length > 0 && (
+                <section className="animation-section">
+                  <div className="output-toolbar">
+                    <span className="section-label">Animation output</span>
+                    <span className="hint">Rendered from {result.animationFrames.length} emitted frames</span>
+                  </div>
+                  <AnimationPlayer
+                    key={runRevision}
+                    frames={result.animationFrames}
+                    spec={activeExample.animation}
+                  />
+                </section>
+              )}
 
             {result !== null && (
               <section className="output-section">

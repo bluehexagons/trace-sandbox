@@ -198,6 +198,41 @@ const sections = [
     ),
   },
   {
+    title: 'Animated Output',
+    content: (
+      <div>
+        <p>
+          The sandbox can turn ordinary Trace echo output into animation frames. Emit the text
+          marker <code>@frame@</code>, then emit named numeric values for the renderer to collect
+          as channels in that frame.
+        </p>
+        <pre><code>{`frame = 0;
+x = 0;
+
+animate() => {
+  @frame@;  # Begin a frame
+  @=x@;     # Add x to this frame
+  x += 2;
+  frame++;
+  frame < 30 ? >animate() : frame
+};
+
+animate()`}</code></pre>
+        <h4>Frame Protocol</h4>
+        <ul>
+          <li>Each <code>@frame@</code> starts a new frame.</li>
+          <li><code>@=x@</code> adds one numeric value to channel <code>x</code>.</li>
+          <li>Echo the same name repeatedly to build a vector, such as every cell in a row.</li>
+          <li>Playback controls appear when an Animated output example produces at least one frame.</li>
+        </ul>
+        <p>
+          This is a sandbox convention built on normal echo statements, not additional Trace
+          syntax. Open the Animated output lessons to see particle, waveform, and cellular renderers.
+        </p>
+      </div>
+    ),
+  },
+  {
     title: 'Arrays',
     content: (
       <div>

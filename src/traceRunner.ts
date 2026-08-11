@@ -1,8 +1,10 @@
 import { Trace } from 'trace'
+import type { AnimationFrame } from './animation'
 
 export interface PlaygroundResult {
   output: number | null
   logs: string[]
+  animationFrames: AnimationFrame[]
   time: number
   error: string | null
 }
@@ -23,10 +25,32 @@ export function parseArguments(input: string): number[] {
 
 export function runTraceScript(code: string, argumentInput: string): PlaygroundResult {
   const logs: string[] = []
+  const animationFrames: AnimationFrame[] = []
 
   try {
     const trace = Trace.parse(code)
     trace.logger = (...messages: unknown[]) => {
+      const channel = messages[1]
+      const value = messages[2]
+
+      if (messages.length === 2 && channel === 'frame') {
+        animationFrames.push({ values: {} })
+        return
+      }
+
+      const currentFrame = animationFrames.at(-1)
+      if (
+        currentFrame !== undefined &&
+        typeof channel === 'string' &&
+        typeof value === 'number' &&
+        Number.isFinite(value)
+      ) {
+        const values = currentFrame.values[channel] ?? []
+        values.push(value)
+        currentFrame.values[channel] = values
+        return
+      }
+
       logs.push(messages.map(String).join(' '))
     }
     trace.errorLogger = (...messages: unknown[]) => {
@@ -38,6 +62,7 @@ export function runTraceScript(code: string, argumentInput: string): PlaygroundR
       return {
         output: null,
         logs,
+        animationFrames,
         time: execution.runtimeMs,
         error: execution.error ?? `Execution ${execution.status}.`,
       }
@@ -46,6 +71,7 @@ export function runTraceScript(code: string, argumentInput: string): PlaygroundR
     return {
       output: execution.value,
       logs,
+      animationFrames,
       time: execution.runtimeMs,
       error: null,
     }
@@ -53,6 +79,7 @@ export function runTraceScript(code: string, argumentInput: string): PlaygroundR
     return {
       output: null,
       logs,
+      animationFrames,
       time: 0,
       error: error instanceof Error ? error.message : String(error),
     }

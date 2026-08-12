@@ -1,29 +1,82 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
-import type { KeyboardEvent } from 'react'
+import type { KeyboardEvent, MouseEvent as ReactMouseEvent } from 'react'
 import { examples, exampleSections } from './examples'
+import type { Example } from './examples'
 import AnimationPlayer from './AnimationPlayer'
 import Docs from './Docs'
 import InteractiveControls from './InteractiveControls'
 import { writeArgumentValue } from './interactive'
 import type { InteractiveControl } from './interactive'
+import { buildExampleHref, buildSandboxHref, parseSandboxUrl } from './sandboxUrl'
 import { createTraceTickSession, runTraceScript } from './traceRunner'
 import type { TraceTickSession } from './traceRunner'
 import './App.css'
 
 type View = 'playground' | 'docs'
 
+const sharedSandboxExample: Example = {
+  id: 'shared-sandbox',
+  section: 'foundations' as const,
+  name: 'Shared sandbox',
+  description: 'An editable Trace script prepopulated from the URL.',
+  concepts: ['shareable URL', 'custom script'],
+  expected: 'The result of the shared script.',
+  challenge: 'Edit the script, then open a new link to share your changes.',
+  code: '',
+}
+
+const resolveSandboxLocation = (search: string) => {
+  const parsed = parseSandboxUrl(search)
+  const exampleIndex = parsed.exampleId === null
+    ? -1
+    : examples.findIndex(example => example.id === parsed.exampleId)
+
+  if (parsed.code !== null) {
+    return {
+      selectedExample: exampleIndex === -1 ? null : exampleIndex,
+      code: parsed.code,
+      args: parsed.args ?? (exampleIndex === -1 ? '' : examples[exampleIndex].args ?? ''),
+    }
+  }
+
+  const selectedExample = exampleIndex === -1 ? 0 : exampleIndex
+  const example = examples[selectedExample]
+  return {
+    selectedExample,
+    code: example.code,
+    args: parsed.args ?? example.args ?? '',
+  }
+}
+
+const currentSearch = () => typeof window === 'undefined' ? '' : window.location.search
+const currentUrl = () => typeof window === 'undefined'
+  ? 'https://example.invalid/'
+  : window.location.href
+
 function App() {
+  const [initialSandbox] = useState(() => resolveSandboxLocation(currentSearch()))
   const [view, setView] = useState<View>('playground')
-  const [code, setCode] = useState(examples[0].code)
-  const [args, setArgs] = useState(examples[0].args ?? '')
+  const [code, setCode] = useState(initialSandbox.code)
+  const [args, setArgs] = useState(initialSandbox.args)
   const [result, setResult] = useState<ReturnType<typeof runTraceScript> | null>(null)
-  const [selectedExample, setSelectedExample] = useState(0)
+  const [selectedExample, setSelectedExample] = useState<number | null>(
+    initialSandbox.selectedExample,
+  )
   const [runRevision, setRunRevision] = useState(0)
+  const [shareStatus, setShareStatus] = useState('')
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const autoRunTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const tickSessionRef = useRef<TraceTickSession | null>(null)
-  const activeExample = examples[selectedExample]
+  const activeExample = selectedExample === null
+    ? sharedSandboxExample
+    : examples[selectedExample]
   const activeSection = exampleSections.find(section => section.id === activeExample.section)
+  const canonicalExample = selectedExample === null ? null : examples[selectedExample]
+  const shareHref = buildSandboxHref({
+    exampleId: canonicalExample?.id,
+    code: canonicalExample !== null && code === canonicalExample.code ? undefined : code,
+    args: canonicalExample !== null && args === (canonicalExample.args ?? '') ? undefined : args,
+  }, currentUrl())
 
   const clearScheduledRun = useCallback(() => {
     if (autoRunTimeoutRef.current !== null) {
@@ -75,6 +128,22 @@ function App() {
   useEffect(() => () => {
     tickSessionRef.current = null
   }, [])
+  useEffect(() => {
+    const restoreLocation = () => {
+      const sandbox = resolveSandboxLocation(window.location.search)
+      clearScheduledRun()
+      tickSessionRef.current = null
+      setView('playground')
+      setSelectedExample(sandbox.selectedExample)
+      setCode(sandbox.code)
+      setArgs(sandbox.args)
+      setResult(null)
+      setShareStatus('')
+    }
+
+    window.addEventListener('popstate', restoreLocation)
+    return () => window.removeEventListener('popstate', restoreLocation)
+  }, [clearScheduledRun])
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent<HTMLTextAreaElement>) => {
@@ -101,11 +170,30 @@ function App() {
     clearScheduledRun()
     tickSessionRef.current = null
     const ex = examples[index]
+    window.history.pushState(null, '', buildExampleHref(ex.id, window.location.href))
     setSelectedExample(index)
     setCode(ex.code)
     setArgs(ex.args ?? '')
     setResult(null)
+    setShareStatus('')
     textareaRef.current?.focus()
+  }
+
+  const followExampleLink = (event: ReactMouseEvent<HTMLAnchorElement>, index: number) => {
+    if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
+      return
+    }
+    event.preventDefault()
+    loadExample(index)
+  }
+
+  const copySandboxLink = async () => {
+    try {
+      await navigator.clipboard.writeText(new URL(shareHref, window.location.href).href)
+      setShareStatus('Link copied')
+    } catch {
+      setShareStatus('Copy unavailable — use Open in new sandbox')
+    }
   }
 
   const updateControl = (control: InteractiveControl, value: number) => {
@@ -116,6 +204,7 @@ function App() {
     const nextArgs = writeArgumentValue(args, control, value, activeExample.controls.items)
     tickSessionRef.current = null
     setArgs(nextArgs)
+    setShareStatus('')
 
     if (activeExample.controls.autoRun) {
       clearScheduledRun()
@@ -181,11 +270,11 @@ function App() {
                     <ol className="example-list">
                       {sectionExamples.map(({ example, index }) => (
                         <li key={example.id}>
-                          <button
-                            type="button"
+                          <a
+                            href={buildExampleHref(example.id, currentUrl())}
                             className={`example-btn${selectedExample === index ? ' active' : ''}`}
-                            onClick={() => loadExample(index)}
-                            aria-current={selectedExample === index ? 'step' : undefined}
+                            onClick={event => followExampleLink(event, index)}
+                            aria-current={selectedExample === index ? 'page' : undefined}
                           >
                             <span className="example-name">
                               {example.name}
@@ -194,7 +283,7 @@ function App() {
                               )}
                             </span>
                             <span className="example-desc">{example.description}</span>
-                          </button>
+                          </a>
                         </li>
                       ))}
                     </ol>
@@ -209,27 +298,31 @@ function App() {
               <div className="lesson-heading">
                 <div>
                   <p className="lesson-position">
-                    {activeSection?.title} · Lesson {selectedExample + 1} of {examples.length}
+                    {selectedExample === null
+                      ? 'URL-prepopulated sandbox'
+                      : `${activeSection?.title} · Lesson ${selectedExample + 1} of ${examples.length}`}
                   </p>
                   <h2 id="active-lesson-title">{activeExample.name}</h2>
                   <p className="lesson-description">{activeExample.description}</p>
                 </div>
-                <div className="lesson-nav-buttons" aria-label="Lesson navigation">
-                  <button
-                    type="button"
-                    onClick={() => loadExample(selectedExample - 1)}
-                    disabled={selectedExample === 0}
-                  >
-                    ← Previous
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => loadExample(selectedExample + 1)}
-                    disabled={selectedExample === examples.length - 1}
-                  >
-                    Next →
-                  </button>
-                </div>
+                {selectedExample !== null && (
+                  <div className="lesson-nav-buttons" aria-label="Lesson navigation">
+                    <button
+                      type="button"
+                      onClick={() => loadExample(selectedExample - 1)}
+                      disabled={selectedExample === 0}
+                    >
+                      ← Previous
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => loadExample(selectedExample + 1)}
+                      disabled={selectedExample === examples.length - 1}
+                    >
+                      Next →
+                    </button>
+                  </div>
+                )}
               </div>
               <ul className="concept-list" aria-label="Concepts in this lesson">
                 {activeExample.concepts.map(concept => (
@@ -265,6 +358,7 @@ function App() {
                   clearScheduledRun()
                   tickSessionRef.current = null
                   setCode(event.target.value)
+                  setShareStatus('')
                 }}
                 onKeyDown={handleKeyDown}
                 spellCheck={false}
@@ -300,6 +394,7 @@ function App() {
                   clearScheduledRun()
                   tickSessionRef.current = null
                   setArgs(event.target.value)
+                  setShareStatus('')
                 }}
                 placeholder="Optional: pass numbers to &1, &2, …"
                 aria-label="script arguments"
@@ -310,6 +405,18 @@ function App() {
               <button type="button" className="run-btn" onClick={runCode}>
                 ▶ Run
               </button>
+              <a
+                className="sandbox-link"
+                href={shareHref}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Open in new sandbox ↗
+              </a>
+              <button type="button" className="sandbox-copy" onClick={copySandboxLink}>
+                Copy link
+              </button>
+              <span className="share-status" aria-live="polite">{shareStatus}</span>
             </div>
 
             {result !== null &&

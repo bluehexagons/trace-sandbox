@@ -176,6 +176,28 @@ population = growth * population * (1 - population)`}</code></pre>
     ),
   },
   {
+    title: 'Shareable Sandboxes',
+    content: (
+      <div>
+        <p>
+          Every lesson has a stable URL using its example id. The links in the learning path can
+          be copied, opened in another tab, or used with browser back and forward navigation.
+        </p>
+        <pre><code>{`?example=logistic-map`}</code></pre>
+        <p>
+          Use <strong>Open in new sandbox</strong> below the editor to create a URL containing the
+          current script and arguments. Opening it prepopulates a fresh sandbox without running
+          the shared code automatically.
+        </p>
+        <pre><code>{`?code=value%20%3D%205%3B%20value%20*%202&args=10%2020`}</code></pre>
+        <p>
+          A shared script can include an <code>example</code> parameter to retain that lesson’s
+          interactive controls and animation renderer.
+        </p>
+      </div>
+    ),
+  },
+  {
     title: 'Functions',
     content: (
       <div>

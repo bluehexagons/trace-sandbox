@@ -14,6 +14,7 @@ An interactive playground for the experimental [**trace**](https://github.com/bl
 - **Live animated output** — simulations execute one Trace tick at playback speed in persistent memory instead of pre-rendering every frame.
 - **Memory-backed channels** — waveform and cellular output is read directly from Trace arrays without repetitive echo loops.
 - **Interactive parameters** — sliders and numeric inputs rerun selected lessons so model behavior can be explored without rewriting code.
+- **Shareable URLs** — link directly to any lesson or open the current code and arguments in a prepopulated new sandbox.
 - **Lesson notes** — every example identifies its concepts, expected result, and a follow-up experiment.
 - **Argument support** — pass space-separated numbers to scripts that use `[...]` parameter lists.
 - **Echo output** — `@…@` log statements show up in a console panel below the result.

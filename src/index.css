@@ -149,8 +149,9 @@ a:hover { text-decoration: underline; }
   gap: 2px;
   transition: background 0.1s;
   color: var(--text);
+  text-decoration: none;
 }
-.example-btn:hover { background: var(--surface2); }
+.example-btn:hover { background: var(--surface2); text-decoration: none; }
 .example-btn.active { background: var(--surface2); box-shadow: inset 2px 0 0 var(--accent); }
 .example-name {
   align-items: center;
@@ -416,7 +417,12 @@ a:hover { text-decoration: underline; }
 .args-input::placeholder { color: var(--text-dim); }
 
 /* ── Run row ────────────────────────────────────────────── */
-.run-row { display: flex; }
+.run-row {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+}
 .run-btn {
   background: var(--accent);
   color: #fff;
@@ -431,6 +437,24 @@ a:hover { text-decoration: underline; }
 }
 .run-btn:hover { opacity: 0.9; }
 .run-btn:active { transform: scale(0.97); }
+.sandbox-link,
+.sandbox-copy {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.8125rem;
+  padding: 0.6rem 0.85rem;
+  text-decoration: none;
+}
+.sandbox-link:hover,
+.sandbox-copy:hover { border-color: var(--accent); text-decoration: none; }
+.share-status {
+  color: var(--green);
+  font-size: 0.75rem;
+}
 
 /* ── Output section ─────────────────────────────────────── */
 .output-section { display: flex; flex-direction: column; gap: 0.5rem; }

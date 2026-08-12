@@ -186,6 +186,10 @@ describe('guided examples', () => {
             expect(result.animationFrames[0].values[point.x]).toHaveLength(1)
             expect(result.animationFrames[0].values[point.y]).toHaveLength(1)
           }
+        } else if (example.animation.kind === 'series') {
+          for (const line of example.animation.lines) {
+            expect(result.animationFrames[0].values[line.channel]).toHaveLength(1)
+          }
         } else {
           expect(result.animationFrames[0].values[example.animation.channel].length).toBeGreaterThan(1)
         }
@@ -236,7 +240,7 @@ describe('guided examples', () => {
         control => control.kind !== 'trigger',
       )
       const combinations = 2 ** controls.length
-      const masks = example.animation?.kind === 'scene'
+      const masks = example.animation?.kind === 'scene' || example.animation?.kind === 'series'
         ? Array.from({ length: combinations }, (_, mask) => mask)
         : [0, combinations - 1]
 
@@ -262,6 +266,12 @@ describe('guided examples', () => {
               expect(x).toBeLessThanOrEqual(example.animation.xMax)
               expect(y).toBeGreaterThanOrEqual(example.animation.yMin)
               expect(y).toBeLessThanOrEqual(example.animation.yMax)
+            }
+          } else if (example.animation?.kind === 'series') {
+            for (const line of example.animation.lines) {
+              const value = frame.values[line.channel][0]
+              expect(value).toBeGreaterThanOrEqual(example.animation.yMin)
+              expect(value).toBeLessThanOrEqual(example.animation.yMax)
             }
           } else if (example.animation?.kind === 'wave') {
             for (const value of frame.values[example.animation.channel]) {

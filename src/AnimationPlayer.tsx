@@ -4,6 +4,7 @@ import type {
   AnimationSpec,
   CellsAnimation,
   SceneAnimation,
+  SeriesAnimation,
   WaveAnimation,
 } from './animation'
 import './AnimationPlayer.css'
@@ -26,12 +27,7 @@ function SceneFrame({
   frames,
   spec,
 }: AnimationPlayerProps & { frameIndex: number; spec: SceneAnimation }) {
-  const xSpan = spec.xMax - spec.xMin
-  const followedX = spec.followX === undefined
-    ? spec.xMax
-    : Math.max(spec.xMax, firstValue(frames[frameIndex], spec.followX))
-  const visibleXMin = followedX - xSpan
-  const toX = (value: number) => ((value - visibleXMin) / xSpan) * 100
+  const toX = (value: number) => ((value - spec.xMin) / (spec.xMax - spec.xMin)) * 100
   const toY = (value: number) => 100 - ((value - spec.yMin) / (spec.yMax - spec.yMin)) * 100
   const trailStart = Math.max(0, frameIndex - spec.trailLength + 1)
   const trail = frames.slice(trailStart, frameIndex + 1)
@@ -65,6 +61,58 @@ function SceneFrame({
             >
               <title>{point.label}</title>
             </circle>
+          </g>
+        )
+      })}
+    </svg>
+  )
+}
+
+function SeriesFrame({
+  frameIndex,
+  frames,
+  spec,
+}: AnimationPlayerProps & { frameIndex: number; spec: SeriesAnimation }) {
+  const historyStart = Math.max(0, frameIndex - spec.historyLength + 1)
+  const history = frames.slice(historyStart, frameIndex + 1)
+  const toX = (index: number) => history.length === 1
+    ? 50
+    : (index / (history.length - 1)) * 100
+  const toY = (value: number) =>
+    100 - ((clamp(value, spec.yMin, spec.yMax) - spec.yMin) / (spec.yMax - spec.yMin)) * 100
+
+  return (
+    <svg className="animation-canvas" viewBox="0 0 100 100" role="img" aria-label={spec.title}>
+      <rect className="animation-background" width="100" height="100" rx="2" />
+      {[25, 50, 75].map(y => (
+        <line key={y} className="animation-grid-line" x1="0" x2="100" y1={y} y2={y} />
+      ))}
+      {spec.lines.map(line => {
+        const points = history
+          .map((frame, index) =>
+            `${toX(index)},${toY(firstValue(frame, line.channel))}`,
+          )
+          .join(' ')
+        const current = history.at(-1)
+        const currentX = toX(history.length - 1)
+
+        return (
+          <g key={line.channel}>
+            <polyline
+              className="animation-series"
+              points={points}
+              style={{ stroke: line.color }}
+            />
+            {current !== undefined && (
+              <circle
+                cx={currentX}
+                cy={toY(firstValue(current, line.channel))}
+                fill={line.color}
+                r="0.9"
+              >
+                <title>{line.label}</title>
+              </circle>
+            )}
           </g>
         )
       })}
@@ -151,6 +199,7 @@ function CellsFrame({
 const retainedFrameCount = (spec: AnimationSpec) => {
   switch (spec.kind) {
   case 'scene': return Math.max(1, spec.trailLength)
+  case 'series': return Math.max(1, spec.historyLength)
   case 'wave': return Math.max(1, spec.trailLength)
   case 'cells': return Math.max(1, spec.historyRows)
   }
@@ -243,6 +292,20 @@ export default function AnimationPlayer({ frames, spec, onTick, onRestart }: Ani
       )}
       {spec.kind === 'cells' && (
         <CellsFrame frames={availableFrames} spec={spec} frameIndex={visibleFrameIndex} />
+      )}
+      {spec.kind === 'series' && (
+        <SeriesFrame frames={availableFrames} spec={spec} frameIndex={visibleFrameIndex} />
+      )}
+
+      {(spec.kind === 'scene' || spec.kind === 'series') && (
+        <div className="animation-legend" aria-label="Animation legend">
+          {(spec.kind === 'scene' ? spec.points : spec.lines).map(item => (
+            <span key={item.label}>
+              <i style={{ backgroundColor: item.color }} />
+              {item.label}
+            </span>
+          ))}
+        </div>
       )}
 
       <div className="animation-controls">

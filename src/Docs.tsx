@@ -278,6 +278,8 @@ frame++`}</code></pre>
           <li>An initialization guard sets up state only on the first tick.</li>
           <li><code>@=x@</code> adds one numeric value to channel <code>x</code>.</li>
           <li>Scalar channels use named echoes, while dense output can be read directly from a Trace array.</li>
+          <li>Time-series charts draw one labeled trail per channel, such as prey and predators.</li>
+          <li>Phase-space scenes combine two channels into one state trail, such as position/velocity.</li>
           <li>Pause stops execution, resume continues the same memory, and Reset starts fresh.</li>
         </ul>
         <p>

@@ -986,19 +986,16 @@ population = growth * population * (1 - population);
 frame++`,
     args: '3.82 0.2',
     animation: {
-      kind: 'scene',
+      kind: 'series',
       title: 'Logistic map · population over time',
       description: 'The same equation produces equilibrium, cycles, or chaos as growth changes.',
       framesPerSecond: 30,
       execution: { mode: 'live' },
-      xMin: 0,
-      xMax: 180,
-      followX: 'iteration',
       yMin: 0,
       yMax: 1,
-      trailLength: 180,
-      points: [
-        { x: 'iteration', y: 'population', color: '#f472b6', label: 'Population', radius: 0.8 },
+      historyLength: 180,
+      lines: [
+        { channel: 'population', color: '#f472b6', label: 'Population' },
       ],
     },
     controls: {
@@ -1033,10 +1030,10 @@ frame++`,
   {
     id: 'predator-prey',
     section: 'animations',
-    name: 'Predator–prey phase portrait',
-    description: 'Couple two populations and visualize the repeating chase between them.',
-    concepts: ['coupled systems', 'persistent memory', 'feedback loops', 'phase portrait', 'Euler integration'],
-    expected: 'A continuous phase portrait tracing prey against predator population.',
+    name: 'Predator–prey populations',
+    description: 'Compare two population histories as their coupled boom-and-bust cycle unfolds.',
+    concepts: ['coupled systems', 'persistent memory', 'feedback loops', 'time series', 'Euler integration'],
+    expected: 'Two offset population trails showing predators following changes in prey.',
     challenge: 'Release prey or predators mid-orbit and compare how each intervention shifts the cycle.',
     code: `[preyInput, predatorInput, predationInput]
 initialized == 0 ? prey = preyInput;
@@ -1071,18 +1068,17 @@ predators < 0 ? predators = 0;
 frame++`,
     args: '10 5 0.1',
     animation: {
-      kind: 'scene',
-      title: 'Predator–prey phase portrait',
-      description: 'Neither axis is time: the trail shows how both populations co-evolve.',
+      kind: 'series',
+      title: 'Predator–prey populations over time',
+      description: 'Separate trails make the lag between prey growth and predator growth visible.',
       framesPerSecond: 30,
       execution: { mode: 'live' },
-      xMin: 0,
-      xMax: 35,
       yMin: 0,
       yMax: 40,
-      trailLength: 240,
-      points: [
-        { x: 'prey', y: 'predators', color: '#4ade80', label: 'Population state', radius: 1.1 },
+      historyLength: 240,
+      lines: [
+        { channel: 'prey', color: '#4ade80', label: 'Prey' },
+        { channel: 'predators', color: '#f472b6', label: 'Predators' },
       ],
     },
     controls: {

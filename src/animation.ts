@@ -34,9 +34,22 @@ export interface SceneAnimation extends AnimationBase {
   yMin: number
   yMax: number
   trailLength: number
-  followX?: string
   showOrigin?: boolean
   points: ScenePoint[]
+}
+
+export interface SeriesLine {
+  channel: string
+  color: string
+  label: string
+}
+
+export interface SeriesAnimation extends AnimationBase {
+  kind: 'series'
+  yMin: number
+  yMax: number
+  historyLength: number
+  lines: SeriesLine[]
 }
 
 export interface WaveAnimation extends AnimationBase {
@@ -55,4 +68,4 @@ export interface CellsAnimation extends AnimationBase {
   color: string
 }
 
-export type AnimationSpec = SceneAnimation | WaveAnimation | CellsAnimation
+export type AnimationSpec = SceneAnimation | SeriesAnimation | WaveAnimation | CellsAnimation

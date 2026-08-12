@@ -4,8 +4,16 @@ import AnimationPlayer from '../AnimationPlayer'
 import type { AnimationFrame, AnimationSpec } from '../animation'
 
 const frames: AnimationFrame[] = [
-  { values: { x: [1], y: [2], sample: [0, 1, 0], cell: [0, 1, 0] } },
-  { values: { x: [2], y: [3], sample: [1, 0, -1], cell: [1, 1, 0] } },
+  {
+    values: {
+      x: [1], y: [2], prey: [10], predators: [5], sample: [0, 1, 0], cell: [0, 1, 0],
+    },
+  },
+  {
+    values: {
+      x: [2], y: [3], prey: [11], predators: [6], sample: [1, 0, -1], cell: [1, 1, 0],
+    },
+  },
 ]
 
 const base = {
@@ -16,6 +24,17 @@ const base = {
 
 describe('animation player', () => {
   it.each<AnimationSpec>([
+    {
+      ...base,
+      kind: 'series',
+      yMin: 0,
+      yMax: 20,
+      historyLength: 20,
+      lines: [
+        { channel: 'prey', color: '#0f0', label: 'Prey' },
+        { channel: 'predators', color: '#f0f', label: 'Predators' },
+      ],
+    },
     {
       ...base,
       kind: 'scene',
@@ -49,6 +68,25 @@ describe('animation player', () => {
     expect(markup).toContain('aria-label="Test animation"')
     expect(markup).toContain('Frame 1 / 2')
     expect(markup).toContain('Restart')
+  })
+
+  it('renders distinct labeled trails for a multi-series chart', () => {
+    const spec: AnimationSpec = {
+      ...base,
+      kind: 'series',
+      yMin: 0,
+      yMax: 20,
+      historyLength: 20,
+      lines: [
+        { channel: 'prey', color: '#0f0', label: 'Prey' },
+        { channel: 'predators', color: '#f0f', label: 'Predators' },
+      ],
+    }
+
+    const markup = renderToStaticMarkup(<AnimationPlayer frames={frames} spec={spec} />)
+    expect(markup.match(/animation-series/g)).toHaveLength(2)
+    expect(markup).toContain('Prey')
+    expect(markup).toContain('Predators')
   })
 
   it('shows an unbounded live stream before later ticks are generated', () => {

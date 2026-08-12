@@ -138,6 +138,18 @@ export class TraceTickSession {
       error: null,
     }
   }
+
+  addToVariable(name: string, amount: number): boolean {
+    if (this.trace === null || !Number.isFinite(amount)) {
+      return false
+    }
+    this.memory.variables.set(name, (this.memory.getVariable(name) ?? 0) + amount)
+    return true
+  }
+
+  getVariable(name: string): number | undefined {
+    return this.memory.getVariable(name)
+  }
 }
 
 export const createTraceTickSession = (

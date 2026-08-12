@@ -11,6 +11,7 @@ const liveSampleFrames: Record<string, number> = {
   'elementary-cellular-automaton': 41,
   'logistic-map': 180,
   'predator-prey': 260,
+  'kicked-oscillator': 180,
 }
 
 const runExample = (example: Example, argumentInput = example.args ?? '') => {
@@ -137,10 +138,14 @@ describe('guided examples', () => {
     }
 
     for (const example of examples) {
-      const argumentIndexes = example.controls?.items.map(control => control.argumentIndex) ?? []
+      const items = example.controls?.items ?? []
+      const argumentControls = items.filter(control => control.kind !== 'trigger')
+      const triggers = items.filter(control => control.kind === 'trigger')
+      const argumentIndexes = argumentControls.map(control => control.argumentIndex)
+      expect(new Set(items.map(control => control.id)).size).toBe(items.length)
       expect(new Set(argumentIndexes).size).toBe(argumentIndexes.length)
 
-      for (const control of example.controls?.items ?? []) {
+      for (const control of argumentControls) {
         expect(readArgumentValue(example.args ?? '', control.argumentIndex, NaN)).toBe(
           control.defaultValue,
         )
@@ -148,6 +153,13 @@ describe('guided examples', () => {
         expect(control.min).toBeLessThanOrEqual(control.defaultValue)
         expect(control.max).toBeGreaterThanOrEqual(control.defaultValue)
         expect(control.step).toBeGreaterThan(0)
+      }
+
+      for (const trigger of triggers) {
+        expect(trigger.variable).toMatch(/^[a-zA-Z_][\w.]*$/)
+        expect(Number.isFinite(trigger.amount)).toBe(true)
+        expect(trigger.amount).not.toBe(0)
+        expect(example.animation?.execution?.mode).toBe('live')
       }
     }
   })
@@ -198,9 +210,31 @@ describe('guided examples', () => {
     })
   }
 
+  for (const example of examples.filter(example =>
+    example.controls?.items.some(control => control.kind === 'trigger'),
+  )) {
+    it(`consumes live actions in ${example.name}`, () => {
+      const session = createTraceTickSession(
+        example.code,
+        example.args ?? '',
+        example.animation?.execution?.memoryChannels,
+      )
+      expect(session.tick().error).toBeNull()
+
+      for (const control of example.controls?.items ?? []) {
+        if (control.kind !== 'trigger') continue
+        expect(session.addToVariable(control.variable, control.amount)).toBe(true)
+        expect(session.tick().error).toBeNull()
+        expect(session.getVariable(control.variable)).toBe(0)
+      }
+    })
+  }
+
   for (const example of examples.filter(example => example.controls !== undefined)) {
     it(`keeps ${example.name} within its declared interactive ranges`, () => {
-      const controls = example.controls?.items ?? []
+      const controls = (example.controls?.items ?? []).filter(
+        control => control.kind !== 'trigger',
+      )
       const combinations = 2 ** controls.length
       const masks = example.animation?.kind === 'scene'
         ? Array.from({ length: combinations }, (_, mask) => mask)

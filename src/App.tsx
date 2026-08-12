@@ -6,7 +6,7 @@ import AnimationPlayer from './AnimationPlayer'
 import Docs from './Docs'
 import InteractiveControls from './InteractiveControls'
 import { writeArgumentValue } from './interactive'
-import type { InteractiveControl } from './interactive'
+import type { InteractiveArgumentControl, InteractiveTriggerControl } from './interactive'
 import { buildExampleHref, buildSandboxHref, parseSandboxUrl } from './sandboxUrl'
 import { createTraceTickSession, runTraceScript } from './traceRunner'
 import type { TraceTickSession } from './traceRunner'
@@ -64,6 +64,7 @@ function App() {
   )
   const [runRevision, setRunRevision] = useState(0)
   const [shareStatus, setShareStatus] = useState('')
+  const [liveSessionReady, setLiveSessionReady] = useState(false)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const autoRunTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const tickSessionRef = useRef<TraceTickSession | null>(null)
@@ -78,6 +79,11 @@ function App() {
     args: canonicalExample !== null && args === (canonicalExample.args ?? '') ? undefined : args,
   }, currentUrl())
 
+  const replaceTickSession = useCallback((session: TraceTickSession | null) => {
+    tickSessionRef.current = session
+    setLiveSessionReady(session !== null)
+  }, [])
+
   const clearScheduledRun = useCallback(() => {
     if (autoRunTimeoutRef.current !== null) {
       clearTimeout(autoRunTimeoutRef.current)
@@ -90,14 +96,14 @@ function App() {
     if (execution?.mode === 'live') {
       const session = createTraceTickSession(code, argumentInput, execution.memoryChannels)
       const firstTick = session.tick()
-      tickSessionRef.current = firstTick.error === null ? session : null
+      replaceTickSession(firstTick.error === null ? session : null)
       setResult(firstTick)
     } else {
-      tickSessionRef.current = null
+      replaceTickSession(null)
       setResult(runTraceScript(code, argumentInput))
     }
     setRunRevision(revision => revision + 1)
-  }, [activeExample.animation?.execution, code])
+  }, [activeExample.animation?.execution, code, replaceTickSession])
 
   const runAnimationTick = useCallback(() => {
     const session = tickSessionRef.current
@@ -107,7 +113,7 @@ function App() {
 
     const tick = session.tick()
     if (tick.error !== null) {
-      tickSessionRef.current = null
+      replaceTickSession(null)
       setResult(current => ({
         output: tick.output,
         logs: [...(current?.logs ?? []), ...tick.logs],
@@ -117,7 +123,7 @@ function App() {
       }))
     }
     return tick.error === null ? tick.animationFrames[0] ?? null : null
-  }, [])
+  }, [replaceTickSession])
 
   const runCode = useCallback(() => {
     clearScheduledRun()
@@ -132,7 +138,7 @@ function App() {
     const restoreLocation = () => {
       const sandbox = resolveSandboxLocation(window.location.search)
       clearScheduledRun()
-      tickSessionRef.current = null
+      replaceTickSession(null)
       setView('playground')
       setSelectedExample(sandbox.selectedExample)
       setCode(sandbox.code)
@@ -143,7 +149,7 @@ function App() {
 
     window.addEventListener('popstate', restoreLocation)
     return () => window.removeEventListener('popstate', restoreLocation)
-  }, [clearScheduledRun])
+  }, [clearScheduledRun, replaceTickSession])
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent<HTMLTextAreaElement>) => {
@@ -168,7 +174,7 @@ function App() {
 
   const loadExample = (index: number) => {
     clearScheduledRun()
-    tickSessionRef.current = null
+    replaceTickSession(null)
     const ex = examples[index]
     window.history.pushState(null, '', buildExampleHref(ex.id, window.location.href))
     setSelectedExample(index)
@@ -196,13 +202,13 @@ function App() {
     }
   }
 
-  const updateControl = (control: InteractiveControl, value: number) => {
+  const updateControl = (control: InteractiveArgumentControl, value: number) => {
     if (activeExample.controls === undefined || !Number.isFinite(value)) {
       return
     }
 
     const nextArgs = writeArgumentValue(args, control, value, activeExample.controls.items)
-    tickSessionRef.current = null
+    replaceTickSession(null)
     setArgs(nextArgs)
     setShareStatus('')
 
@@ -213,6 +219,10 @@ function App() {
         executeCode(nextArgs)
       }, 140)
     }
+  }
+
+  const triggerLiveAction = (control: InteractiveTriggerControl) => {
+    tickSessionRef.current?.addToVariable(control.variable, control.amount)
   }
 
   return (
@@ -356,7 +366,7 @@ function App() {
                 value={code}
                 onChange={event => {
                   clearScheduledRun()
-                  tickSessionRef.current = null
+                  replaceTickSession(null)
                   setCode(event.target.value)
                   setShareStatus('')
                 }}
@@ -377,6 +387,8 @@ function App() {
                 controls={activeExample.controls}
                 exampleId={activeExample.id}
                 onChange={updateControl}
+                onTrigger={triggerLiveAction}
+                liveActionsEnabled={liveSessionReady && result?.error === null}
               />
             )}
 
@@ -392,7 +404,7 @@ function App() {
                 value={args}
                 onChange={event => {
                   clearScheduledRun()
-                  tickSessionRef.current = null
+                  replaceTickSession(null)
                   setArgs(event.target.value)
                   setShareStatus('')
                 }}

@@ -1,7 +1,10 @@
-export interface InteractiveControl {
+interface InteractiveControlBase {
   id: string
   label: string
   description: string
+}
+
+export interface InteractiveArgumentControl extends InteractiveControlBase {
   argumentIndex: number
   kind: 'range' | 'number'
   defaultValue: number
@@ -9,6 +12,15 @@ export interface InteractiveControl {
   max: number
   step: number
 }
+
+export interface InteractiveTriggerControl extends InteractiveControlBase {
+  kind: 'trigger'
+  variable: string
+  amount: number
+  buttonLabel: string
+}
+
+export type InteractiveControl = InteractiveArgumentControl | InteractiveTriggerControl
 
 export interface InteractiveControls {
   description: string
@@ -32,7 +44,7 @@ export function readArgumentValue(
 
 export function writeArgumentValue(
   input: string,
-  control: InteractiveControl,
+  control: InteractiveArgumentControl,
   value: number,
   controls: InteractiveControl[],
 ): string {
@@ -45,7 +57,10 @@ export function writeArgumentValue(
 
   while (tokens.length <= control.argumentIndex) {
     const argumentIndex = tokens.length
-    const configured = controls.find(item => item.argumentIndex === argumentIndex)
+    const configured = controls.find(
+      (item): item is InteractiveArgumentControl =>
+        item.kind !== 'trigger' && item.argumentIndex === argumentIndex,
+    )
     tokens.push(String(configured?.defaultValue ?? 0))
   }
 

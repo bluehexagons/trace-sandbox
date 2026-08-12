@@ -648,7 +648,7 @@ frame++`,
     description: 'Integrate a chaotic differential system and draw its evolving phase-space path.',
     concepts: ['chaos', 'persistent memory', 'differential equations', 'live time stepping', 'phase space'],
     expected: 'A continuous trace of the attractor’s two characteristic lobes.',
-    challenge: 'Change rho from 28 to 20 and compare the long-term behavior.',
+    challenge: 'Let two runs evolve, perturb one, and watch their trajectories diverge.',
     code: `# Lorenz system: the host preserves state between ticks.
 [rhoInput, sigmaInput, timeStepInput]
 initialized == 0 ? frame = 0;
@@ -660,6 +660,11 @@ initialized == 0 ? x = 0.1;
 initialized == 0 ? y = 0;
 initialized == 0 ? z = 0;
 initialized == 0 ? initialized = 1;
+
+perturbX != 0 ? () => {
+  x += perturbX;
+  perturbX = 0
+};
 
 @=x@;
 @=z@;
@@ -725,6 +730,15 @@ frame++`,
           max: 0.01,
           step: 0.001,
         },
+        {
+          id: 'perturb-x',
+          label: 'Perturb state',
+          description: 'Nudge x during the current run to expose sensitive dependence.',
+          kind: 'trigger',
+          variable: 'perturbX',
+          amount: 0.05,
+          buttonLabel: 'Nudge x by 0.05',
+        },
       ],
     },
   },
@@ -735,7 +749,7 @@ frame++`,
     description: 'Evolve a one-dimensional wave and render its current array directly from memory.',
     concepts: ['finite differences', 'memory-backed output', 'double buffering', 'arrays', 'wave propagation'],
     expected: 'A continuous wave stream where the pulse splits, reflects, and loses energy.',
-    challenge: 'Change the 0.2 coupling term to 0.35 and compare the propagation speed.',
+    challenge: 'Wait for the first pulse to spread, then inject another and watch them interfere.',
     code: `[couplingInput, dampingInput, pulseHeightInput]
 initialize() => {
   distance = i - 21;
@@ -755,6 +769,15 @@ copyNext() => {
   previous[i] = current[i];
   current[i] = next[i];
   i++ <= size ? >copyNext() : 0
+};
+
+injectPulse() => {
+  distance = i - 21;
+  distance < 0 ? distance = -distance;
+  current[i] += distance < 5
+    ? pulseHeight * pulseTrigger * (1 - distance / 5)
+    : 0;
+  i++ <= size ? >injectPulse() : 0
 };
 
 advance() => {
@@ -781,6 +804,11 @@ initialized == 0 ? initialized = 1;
 
 # Leave the initial pulse untouched for the first rendered tick.
 frame > 0 ? advance();
+pulseTrigger > 0 ? () => {
+  i = 1;
+  injectPulse();
+  pulseTrigger = 0
+};
 frame++`,
     args: '0.2 0.997 1',
     animation: {
@@ -835,6 +863,15 @@ frame++`,
           max: 1.4,
           step: 0.1,
         },
+        {
+          id: 'pulse',
+          label: 'Center pulse',
+          description: 'Inject another triangular pulse without resetting the running field.',
+          kind: 'trigger',
+          variable: 'pulseTrigger',
+          amount: 1,
+          buttonLabel: 'Trigger pulse',
+        },
       ],
     },
   },
@@ -845,7 +882,7 @@ frame++`,
     description: 'Choose any elementary rule and grow its structure from one live cell.',
     concepts: ['cellular automata', 'memory-backed output', 'double buffering', 'boolean algebra', 'emergence'],
     expected: 'A continuous stream of generations growing from a single live cell.',
-    challenge: 'Compare rules 30, 90, 110, and 184; look for symmetry, repetition, and movement.',
+    challenge: 'Compare rules 30, 90, and 110, then reseed the center during each run.',
     code: `[ruleInput]
 calculateNext() => {
   left = current[i - 1];
@@ -881,6 +918,10 @@ initialized == 0 ? frame = 0;
 initialized == 0 ? initialized = 1;
 
 frame > 0 ? advance();
+seedTrigger > 0 ? () => {
+  current[21] = 1;
+  seedTrigger = 0
+};
 frame++`,
     args: '30',
     animation: {
@@ -910,6 +951,15 @@ frame++`,
           min: 0,
           max: 255,
           step: 1,
+        },
+        {
+          id: 'seed-center',
+          label: 'Seed center',
+          description: 'Turn on the center cell in the current generation.',
+          kind: 'trigger',
+          variable: 'seedTrigger',
+          amount: 1,
+          buttonLabel: 'Seed center cell',
         },
       ],
     },
@@ -987,7 +1037,7 @@ frame++`,
     description: 'Couple two populations and visualize the repeating chase between them.',
     concepts: ['coupled systems', 'persistent memory', 'feedback loops', 'phase portrait', 'Euler integration'],
     expected: 'A continuous phase portrait tracing prey against predator population.',
-    challenge: 'Raise predation pressure, then find initial populations that keep the orbit on screen.',
+    challenge: 'Release prey or predators mid-orbit and compare how each intervention shifts the cycle.',
     code: `[preyInput, predatorInput, predationInput]
 initialized == 0 ? prey = preyInput;
 initialized == 0 ? predators = predatorInput;
@@ -998,6 +1048,15 @@ initialized == 0 ? conversion = 0.1;
 initialized == 0 ? dt = 0.02;
 initialized == 0 ? frame = 0;
 initialized == 0 ? initialized = 1;
+
+preyRelease != 0 ? () => {
+  prey += preyRelease;
+  preyRelease = 0
+};
+predatorRelease != 0 ? () => {
+  predators += predatorRelease;
+  predatorRelease = 0
+};
 
 @=prey@;
 @=predators@;
@@ -1062,6 +1121,123 @@ frame++`,
           min: 0.08,
           max: 0.16,
           step: 0.01,
+        },
+        {
+          id: 'release-prey',
+          label: 'Release prey',
+          description: 'Add two prey to the current ecosystem without restarting it.',
+          kind: 'trigger',
+          variable: 'preyRelease',
+          amount: 2,
+          buttonLabel: 'Release 2 prey',
+        },
+        {
+          id: 'release-predators',
+          label: 'Release predators',
+          description: 'Add one predator and watch the phase trajectory respond.',
+          kind: 'trigger',
+          variable: 'predatorRelease',
+          amount: 1,
+          buttonLabel: 'Release 1 predator',
+        },
+      ],
+    },
+  },
+  {
+    id: 'kicked-oscillator',
+    section: 'animations',
+    name: 'Impulse-driven oscillator',
+    description: 'Kick a damped spring while its position and velocity stream through phase space.',
+    concepts: ['real-time actions', 'impulses', 'phase space', 'damping', 'persistent memory'],
+    expected: 'A decaying phase-space orbit that immediately responds to left and right kicks.',
+    challenge: 'Alternate kicks at the natural rhythm and see how large an orbit you can sustain.',
+    code: `[stiffnessInput, dampingInput]
+initialized == 0 ? stiffness = stiffnessInput;
+initialized == 0 ? damping = dampingInput;
+initialized == 0 ? dt = 0.05;
+initialized == 0 ? position = 8;
+initialized == 0 ? velocity = 0;
+initialized == 0 ? frame = 0;
+initialized == 0 ? initialized = 1;
+
+impulse != 0 ? () => {
+  velocity += impulse;
+  impulse = 0
+};
+
+@=position@;
+@=velocity@;
+
+acceleration = -stiffness * position;
+velocity += acceleration * dt;
+velocity *= damping;
+position += velocity * dt;
+frame++`,
+    args: '0.65 0.997',
+    animation: {
+      kind: 'scene',
+      title: 'Damped oscillator · position/velocity',
+      description: 'Each kick changes velocity instantly, moving the system to a new phase orbit.',
+      framesPerSecond: 30,
+      execution: { mode: 'live' },
+      xMin: -18,
+      xMax: 18,
+      yMin: -12,
+      yMax: 12,
+      trailLength: 240,
+      points: [
+        {
+          x: 'position',
+          y: 'velocity',
+          color: '#fbbf24',
+          label: 'Oscillator state',
+          radius: 1.1,
+        },
+      ],
+    },
+    controls: {
+      description: 'Tune the spring, then inject impulses directly into the running state.',
+      autoRun: true,
+      items: [
+        {
+          id: 'stiffness',
+          label: 'Stiffness',
+          description: 'Stronger springs pull the mass back more quickly.',
+          argumentIndex: 0,
+          kind: 'range',
+          defaultValue: 0.65,
+          min: 0.2,
+          max: 1.2,
+          step: 0.05,
+        },
+        {
+          id: 'damping',
+          label: 'Damping',
+          description: 'Velocity retained on each tick; one removes no energy.',
+          argumentIndex: 1,
+          kind: 'range',
+          defaultValue: 0.997,
+          min: 0.98,
+          max: 1,
+          step: 0.001,
+        },
+        {
+          id: 'kick-left',
+          label: 'Kick left',
+          description: 'Apply a negative velocity impulse to the current orbit.',
+          kind: 'trigger',
+          variable: 'impulse',
+          amount: -3,
+          buttonLabel: '← Kick left',
+        },
+        {
+          id: 'kick-right',
+          label: 'Kick right',
+          description: 'Apply a positive velocity impulse to the current orbit.',
+          kind: 'trigger',
+          variable: 'impulse',
+          amount: 3,
+          buttonLabel: 'Kick right →',
         },
       ],
     },

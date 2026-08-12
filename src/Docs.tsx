@@ -152,7 +152,7 @@ const sections = [
     ),
   },
   {
-    title: 'Interactive Arguments',
+    title: 'Interactive Controls',
     content: (
       <div>
         <p>
@@ -168,9 +168,20 @@ population = growth * population * (1 - population)`}</code></pre>
           <li>Slider limits keep the supplied examples in useful numerical and visual ranges.</li>
         </ul>
         <p>
-          Controls are a sandbox feature backed by ordinary Trace parameters; they do not add new
-          language syntax. The animated orbital, Lorenz, wave, automaton, logistic-map, and
-          predator–prey lessons use them to expose model behavior.
+          Sliders are a sandbox feature backed by ordinary Trace parameters; they do not add new
+          language syntax. Live action buttons instead add a value to a named variable in the
+          running <code>TraceMemory</code>. The script consumes and clears that event on its next
+          tick, so an impulse does not reset any simulation state.
+        </p>
+        <pre><code>{`# The host adds to pulseTrigger when the button is pressed.
+pulseTrigger > 0 ? () => {
+  current[21] += pulseHeight * pulseTrigger;
+  pulseTrigger = 0
+}`}</code></pre>
+        <p>
+          Run a live lesson before using its action buttons. Try injecting pulses into the damped
+          wave, perturbing the Lorenz system, reseeding the automaton, releasing populations, or
+          kicking the impulse-driven oscillator.
         </p>
       </div>
     ),

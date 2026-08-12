@@ -1,11 +1,17 @@
 import { readArgumentValue } from './interactive'
-import type { InteractiveControl, InteractiveControls as ControlsConfig } from './interactive'
+import type {
+  InteractiveArgumentControl,
+  InteractiveControls as ControlsConfig,
+  InteractiveTriggerControl,
+} from './interactive'
 
 interface InteractiveControlsProps {
   args: string
   controls: ControlsConfig
   exampleId: string
-  onChange: (control: InteractiveControl, value: number) => void
+  onChange: (control: InteractiveArgumentControl, value: number) => void
+  onTrigger?: (control: InteractiveTriggerControl) => void
+  liveActionsEnabled?: boolean
 }
 
 export default function InteractiveControls({
@@ -13,7 +19,11 @@ export default function InteractiveControls({
   controls,
   exampleId,
   onChange,
+  onTrigger,
+  liveActionsEnabled = false,
 }: InteractiveControlsProps) {
+  const hasLiveActions = controls.items.some(control => control.kind === 'trigger')
+
   return (
     <section className="interactive-panel" aria-labelledby="interactive-controls-title">
       <div className="interactive-heading">
@@ -21,10 +31,31 @@ export default function InteractiveControls({
           <h3 id="interactive-controls-title">Interactive controls</h3>
           <p>{controls.description}</p>
         </div>
-        {controls.autoRun && <span>Auto-runs after changes</span>}
+        {hasLiveActions
+          ? <span>Sliders restart · Actions run live</span>
+          : controls.autoRun && <span>Auto-runs after changes</span>}
       </div>
       <div className="interactive-grid">
         {controls.items.map(control => {
+          if (control.kind === 'trigger') {
+            return (
+              <div className="interactive-control interactive-trigger" key={control.id}>
+                <div className="interactive-label-row">
+                  <span className="interactive-trigger-label">{control.label}</span>
+                  <span className="interactive-live-label">Live action</span>
+                </div>
+                <p>{control.description}</p>
+                <button
+                  type="button"
+                  onClick={() => onTrigger?.(control)}
+                  disabled={!liveActionsEnabled || onTrigger === undefined}
+                >
+                  {control.buttonLabel}
+                </button>
+              </div>
+            )
+          }
+
           const value = readArgumentValue(args, control.argumentIndex, control.defaultValue)
           const inputId = `control-${exampleId}-${control.id}`
 

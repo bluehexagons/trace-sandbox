@@ -320,7 +320,8 @@ a:hover { text-decoration: underline; }
   gap: 0.5rem;
   justify-content: space-between;
 }
-.interactive-label-row label {
+.interactive-label-row label,
+.interactive-trigger-label {
   font-size: 0.78rem;
   font-weight: 650;
 }
@@ -359,6 +360,32 @@ a:hover { text-decoration: underline; }
 .interactive-number:focus {
   border-color: var(--accent);
   outline: none;
+}
+.interactive-live-label {
+  color: var(--green);
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  text-transform: uppercase;
+}
+.interactive-trigger button {
+  background: rgba(124, 107, 255, 0.2);
+  border: 1px solid rgba(168, 155, 255, 0.4);
+  border-radius: 5px;
+  color: var(--accent2);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.75rem;
+  font-weight: 650;
+  padding: 0.38rem 0.65rem;
+  width: 100%;
+}
+.interactive-trigger button:hover:not(:disabled) {
+  background: rgba(124, 107, 255, 0.3);
+}
+.interactive-trigger button:active:not(:disabled) { transform: translateY(1px); }
+.interactive-trigger button:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
 }
 
 /* ── Labels / hints ─────────────────────────────────────── */

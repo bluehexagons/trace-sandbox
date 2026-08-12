@@ -10,6 +10,7 @@ import {
   currentUrl,
   defaultSandboxSettings,
   customSandboxExample,
+  normalizeFramesPerSecond,
   orderedExampleEntries,
   resolveSandboxLocation,
 } from './sandboxState'
@@ -257,6 +258,9 @@ export function usePlayground() {
     const finiteUpdate = Object.fromEntries(
       Object.entries(update).filter(([, value]) => typeof value !== 'number' || Number.isFinite(value)),
     ) as Partial<SandboxExecutionSettings>
+    if (finiteUpdate.framesPerSecond !== undefined) {
+      finiteUpdate.framesPerSecond = normalizeFramesPerSecond(finiteUpdate.framesPerSecond)
+    }
     clearScheduledRun()
     replaceTickSession(null)
     setResult(null)

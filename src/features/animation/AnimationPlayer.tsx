@@ -24,12 +24,21 @@ export default function AnimationPlayer({ frames, spec, onTick, onRestart }: Ani
   const [liveFrames, setLiveFrames] = useState(frames)
   const [frameIndex, setFrameIndex] = useState(0)
   const [streamFrame, setStreamFrame] = useState(1)
-  const [isPlaying, setIsPlaying] = useState(() =>
-    typeof window === 'undefined' ? false : !window.matchMedia('(prefers-reduced-motion: reduce)').matches,
-  )
+  const [isPlaying, setIsPlaying] = useState(() => {
+    if (typeof window === 'undefined') return false
+    const canPlayLive = spec.execution?.mode === 'live' && onTick !== undefined
+    if (frames.length < 2 && !canPlayLive) return false
+    return !window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  })
   const isLive = spec.execution?.mode === 'live' && onTick !== undefined
   const availableFrames = isLive ? liveFrames : frames
-  const visibleFrameIndex = isLive ? availableFrames.length - 1 : frameIndex
+  const visibleFrameIndex = isLive
+    ? availableFrames.length - 1
+    : Math.min(frameIndex, Math.max(0, availableFrames.length - 1))
+  const canPlay = isLive || availableFrames.length > 1
+  const canRestart = !isLive || onRestart !== undefined
+  const framesPerSecond = Math.min(60, Math.max(1, spec.framesPerSecond))
+  const playing = canPlay && isPlaying
 
   useEffect(() => {
     if (!isLive || !isPlaying) {
@@ -45,10 +54,10 @@ export default function AnimationPlayer({ frames, spec, onTick, onRestart }: Ani
 
       setLiveFrames(current => [...current, nextFrame].slice(-retainedFrameCount(spec)))
       setStreamFrame(current => current + 1)
-    }, 1000 / spec.framesPerSecond)
+    }, 1000 / framesPerSecond)
 
     return () => window.clearInterval(interval)
-  }, [isLive, isPlaying, onTick, spec])
+  }, [framesPerSecond, isLive, isPlaying, onTick, spec])
 
   useEffect(() => {
     if (isLive || !isPlaying || frames.length < 2) {
@@ -63,10 +72,10 @@ export default function AnimationPlayer({ frames, spec, onTick, onRestart }: Ani
         }
         return current + 1
       })
-    }, 1000 / spec.framesPerSecond)
+    }, 1000 / framesPerSecond)
 
     return () => window.clearInterval(interval)
-  }, [frames.length, isLive, isPlaying, spec.framesPerSecond])
+  }, [frames.length, framesPerSecond, isLive, isPlaying])
 
   const restart = () => {
     if (isLive && onRestart !== undefined) {
@@ -74,11 +83,12 @@ export default function AnimationPlayer({ frames, spec, onTick, onRestart }: Ani
       return
     }
     setFrameIndex(0)
-    setIsPlaying(true)
+    setIsPlaying(availableFrames.length > 1)
   }
 
   const togglePlayback = () => {
-    if (isPlaying) {
+    if (!canPlay) return
+    if (playing) {
       setIsPlaying(false)
     } else if (!isLive && frameIndex === availableFrames.length - 1) {
       restart()
@@ -130,16 +140,18 @@ export default function AnimationPlayer({ frames, spec, onTick, onRestart }: Ani
       )}
 
       <div className="animation-controls">
-        <button type="button" onClick={togglePlayback}>
-          {isPlaying ? 'Pause' : 'Play'}
+        <button type="button" onClick={togglePlayback} disabled={!canPlay}>
+          {playing ? 'Pause' : 'Play'}
         </button>
-        <button type="button" onClick={restart}>{isLive ? 'Reset stream' : 'Restart'}</button>
+        <button type="button" onClick={restart} disabled={!canRestart}>
+          {isLive ? 'Reset stream' : 'Restart'}
+        </button>
         {!isLive && (
           <input
             type="range"
             min="0"
             max={availableFrames.length - 1}
-            value={frameIndex}
+            value={visibleFrameIndex}
             onChange={event => {
               setFrameIndex(Number(event.target.value))
               setIsPlaying(false)

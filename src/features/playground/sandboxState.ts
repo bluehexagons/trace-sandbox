@@ -22,6 +22,9 @@ export const defaultSandboxSettings: SandboxExecutionSettings = {
   tickFunction: 'tick',
 }
 
+export const normalizeFramesPerSecond = (value: number) =>
+  Math.min(60, Math.max(1, Number.isFinite(value) ? value : defaultSandboxSettings.framesPerSecond))
+
 const customSeriesColors = ['#a89bff', '#4ade80', '#fbbf24', '#60a5fa', '#f472b6']
 
 export const customSandboxExample: Example = {
@@ -49,7 +52,9 @@ export function resolveSandboxLocation(search: string): ResolvedSandboxLocation 
     : examples.findIndex(example => example.id === parsed.exampleId)
   const sandboxSettings: SandboxExecutionSettings = {
     runMode: parsed.runMode ?? defaultSandboxSettings.runMode,
-    framesPerSecond: parsed.framesPerSecond ?? defaultSandboxSettings.framesPerSecond,
+    framesPerSecond: normalizeFramesPerSecond(
+      parsed.framesPerSecond ?? defaultSandboxSettings.framesPerSecond,
+    ),
     yMin: parsed.yMin ?? defaultSandboxSettings.yMin,
     yMax: parsed.yMax ?? defaultSandboxSettings.yMax,
     setupFunction: parsed.setupFunction ?? defaultSandboxSettings.setupFunction,

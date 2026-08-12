@@ -25,6 +25,13 @@ describe('sandbox state', () => {
     expect(location.args).toBe('2')
   })
 
+  it('normalizes out-of-range live frame rates restored from a URL', () => {
+    expect(resolveSandboxLocation('?code=&run=persistent&fps=120').sandboxSettings.framesPerSecond)
+      .toBe(60)
+    expect(resolveSandboxLocation('?code=&run=persistent&fps=-5').sandboxSettings.framesPerSecond)
+      .toBe(1)
+  })
+
   it('builds live custom output from named channels', () => {
     const animation = buildCustomAnimation(null, {
       output: 3,

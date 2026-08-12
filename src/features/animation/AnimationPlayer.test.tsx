@@ -142,5 +142,22 @@ describe('animation player', () => {
 
     expect(markup).toContain('Frame 1 · Live')
     expect(markup).toContain('Reset stream')
+    expect(markup).toContain('<button type="button" disabled="">Reset stream</button>')
+  })
+
+  it('disables playback controls when only one frame is available', () => {
+    const markup = renderToStaticMarkup(
+      <AnimationPlayer frames={frames.slice(0, 1)} spec={{
+        ...base,
+        kind: 'bars',
+        channel: 'values',
+        min: 0,
+        max: 100,
+        color: '#09f',
+        highlightColor: '#fc0',
+      }} />,
+    )
+
+    expect(markup).toContain('<button type="button" disabled="">Play</button>')
   })
 })

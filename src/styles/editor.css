@@ -1,0 +1,104 @@
+/* ── Labels / hints ─────────────────────────────────────── */
+.section-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-dim);
+}
+.hint {
+  font-size: 0.75rem;
+  color: var(--text-dim);
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+/* ── Editor section ─────────────────────────────────────── */
+.editor-section { display: flex; flex-direction: column; gap: 0.5rem; }
+.editor-toolbar { display: flex; align-items: center; justify-content: space-between; }
+
+.editor {
+  width: 100%;
+  min-height: 220px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  padding: 1rem 1.25rem;
+  resize: vertical;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.editor:focus { border-color: var(--accent); }
+.editor::placeholder { color: var(--text-dim); }
+
+/* ── Args section ───────────────────────────────────────── */
+.args-section { display: flex; flex-direction: column; gap: 0.5rem; }
+.args-input {
+  width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  padding: 0.5rem 1rem;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.args-input:focus { border-color: var(--accent); }
+.args-input::placeholder { color: var(--text-dim); }
+
+/* ── Run row ────────────────────────────────────────────── */
+.run-row {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+}
+.run-row-top {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.7rem;
+}
+.run-row-top .hint {
+  padding: 0 0.2rem;
+}
+.run-btn {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  padding: 0.6rem 2rem;
+  cursor: pointer;
+  transition: opacity 0.15s, transform 0.1s;
+  letter-spacing: 0.02em;
+}
+.run-btn:hover { opacity: 0.9; }
+.run-btn:active { transform: scale(0.97); }
+.sandbox-link,
+.sandbox-copy {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.8125rem;
+  padding: 0.6rem 0.85rem;
+  text-decoration: none;
+}
+.sandbox-link:hover,
+.sandbox-copy:hover { border-color: var(--accent); text-decoration: none; }
+.share-status {
+  color: var(--green);
+  font-size: 0.75rem;
+}
+

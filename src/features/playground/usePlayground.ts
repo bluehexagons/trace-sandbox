@@ -1,87 +1,22 @@
 import { useState, useCallback, useEffect, useMemo, useRef } from 'react'
 import type { KeyboardEvent, MouseEvent as ReactMouseEvent } from 'react'
-import type { Example, ExampleSectionId } from '../examples'
+import type { ExampleSectionId } from '../examples'
 import { examples, exampleSections } from '../examples'
-import type { AnimationSpec } from '../animation/types'
 import type { InteractiveArgumentControl, InteractiveTriggerControl } from './interactive'
 import { readArgumentValue, writeArgumentValue } from './interactive'
 import {
-  buildEmptySandboxHref,
-  buildExampleHref,
-  buildSandboxHref,
-  parseSandboxUrl,
-} from './sandboxUrl'
+  buildCustomAnimation,
+  currentSearch,
+  currentUrl,
+  defaultSandboxSettings,
+  customSandboxExample,
+  orderedExampleEntries,
+  resolveSandboxLocation,
+} from './sandboxState'
+import { buildEmptySandboxHref, buildExampleHref, buildSandboxHref } from './sandboxUrl'
 import { createTraceTickSession, runTraceScript } from '../runner'
 import type { TraceTickSession } from '../runner'
-import type { SandboxExecutionSettings } from './components/SandboxRunOptions'
-
-
-
-const orderedExampleEntries = exampleSections.flatMap(section =>
-  examples
-    .map((example, index) => ({ example, index }))
-    .filter(({ example }) => example.section === section.id),
-)
-
-const defaultSandboxSettings: SandboxExecutionSettings = {
-  runMode: 'once',
-  framesPerSecond: 24,
-  yMin: -10,
-  yMax: 10,
-  setupFunction: 'setup',
-  tickFunction: 'tick',
-}
-
-const customSeriesColors = ['#a89bff', '#4ade80', '#fbbf24', '#60a5fa', '#f472b6']
-
-const customSandboxExample: Example = {
-  id: 'shared-sandbox',
-  section: 'foundations' as const,
-  name: 'Custom sandbox',
-  description: 'An editable Trace script prepopulated from the URL.',
-  concepts: ['shareable URL', 'custom script'],
-  expected: 'The result of the shared script.',
-  challenge: 'Edit the script, then open a new link to share your changes.',
-  code: '',
-}
-
-const resolveSandboxLocation = (search: string) => {
-  const parsed = parseSandboxUrl(search)
-  const exampleIndex = parsed.exampleId === null
-    ? -1
-    : examples.findIndex(example => example.id === parsed.exampleId)
-  const sandboxSettings: SandboxExecutionSettings = {
-    runMode: parsed.runMode ?? defaultSandboxSettings.runMode,
-    framesPerSecond: parsed.framesPerSecond ?? defaultSandboxSettings.framesPerSecond,
-    yMin: parsed.yMin ?? defaultSandboxSettings.yMin,
-    yMax: parsed.yMax ?? defaultSandboxSettings.yMax,
-    setupFunction: parsed.setupFunction ?? defaultSandboxSettings.setupFunction,
-    tickFunction: parsed.tickFunction ?? defaultSandboxSettings.tickFunction,
-  }
-
-  if (parsed.code !== null) {
-    return {
-      selectedExample: exampleIndex === -1 ? null : exampleIndex,
-      code: parsed.code,
-      args: parsed.args ?? (exampleIndex === -1 ? '' : examples[exampleIndex].args ?? ''),
-      sandboxSettings,
-    }
-  }
-
-  const selectedExample = exampleIndex === -1 ? 0 : exampleIndex
-  const example = examples[selectedExample]
-  return {
-    selectedExample,
-    code: example.code,
-    args: parsed.args ?? example.args ?? '',
-    sandboxSettings,
-  }
-}
-
-const currentSearch = () => typeof window === 'undefined' ? '' : window.location.search
-const currentUrl = () => typeof window === 'undefined'
-  ? 'https://example.invalid/'
-  : window.location.href
+import type { SandboxExecutionSettings } from './types'
 
 
 
@@ -146,41 +81,10 @@ export function usePlayground() {
       : undefined,
   }, currentUrl())
   const emptySandboxHref = buildEmptySandboxHref(currentUrl())
-  const customChannelKey = selectedExample === null && result?.error === null
-    ? Object.keys(result.animationFrames[0]?.values ?? {}).join('\u0000')
-    : ''
-  const customAnimation = useMemo<AnimationSpec | undefined>(() => {
-    if (selectedExample !== null || sandboxSettings.runMode === 'once') return undefined
-
-    const channels = customChannelKey === '' ? [] : customChannelKey.split('\u0000')
-    const execution = sandboxSettings.runMode === 'functions'
-      ? {
-          mode: 'live' as const,
-          setupFunction: sandboxSettings.setupFunction,
-          tickFunction: sandboxSettings.tickFunction,
-        }
-      : { mode: 'live' as const }
-
-    return {
-      kind: 'series',
-      title: 'Sandbox live output',
-      description: channels.length === 0
-        ? 'Add named echoes such as @=value@ to draw streaming values.'
-        : 'Each named echo is sampled from persistent Trace memory on every tick.',
-      framesPerSecond: Math.min(60, Math.max(1, sandboxSettings.framesPerSecond)),
-      execution,
-      yMin: sandboxSettings.yMin,
-      yMax: sandboxSettings.yMax > sandboxSettings.yMin
-        ? sandboxSettings.yMax
-        : sandboxSettings.yMin + 1,
-      historyLength: 240,
-      lines: channels.map((channel, index) => ({
-        channel,
-        color: customSeriesColors[index % customSeriesColors.length],
-        label: channel,
-      })),
-    }
-  }, [customChannelKey, sandboxSettings, selectedExample])
+  const customAnimation = useMemo(
+    () => buildCustomAnimation(selectedExample, result, sandboxSettings),
+    [result, sandboxSettings, selectedExample],
+  )
   const activeAnimation = canonicalExample?.animation ?? customAnimation
 
   const replaceTickSession = useCallback((session: TraceTickSession | null) => {

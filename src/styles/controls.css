@@ -1,0 +1,189 @@
+/* ── Interactive lesson controls ────────────────────────── */
+.interactive-panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1rem 1.1rem;
+}
+.interactive-heading {
+  align-items: flex-start;
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+  margin-bottom: 0.85rem;
+}
+.interactive-heading h3 {
+  font-size: 0.9rem;
+  margin-bottom: 0.15rem;
+}
+.interactive-heading p,
+.interactive-heading > span {
+  color: var(--text-dim);
+  font-size: 0.74rem;
+}
+.interactive-heading > span {
+  background: rgba(74, 222, 128, 0.08);
+  border: 1px solid rgba(74, 222, 128, 0.2);
+  border-radius: 999px;
+  color: var(--green);
+  flex-shrink: 0;
+  padding: 0.2rem 0.5rem;
+}
+.interactive-grid {
+  display: grid;
+  gap: 0.65rem;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+}
+.interactive-control {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.7rem;
+}
+.interactive-label-row {
+  align-items: baseline;
+  display: flex;
+  gap: 0.5rem;
+  justify-content: space-between;
+}
+.interactive-label-row label,
+.interactive-trigger-label {
+  font-size: 0.78rem;
+  font-weight: 650;
+}
+.interactive-label-row output {
+  color: var(--accent2);
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+}
+.interactive-control > p {
+  color: var(--text-dim);
+  font-size: 0.68rem;
+  line-height: 1.35;
+  margin: 0.2rem 0 0.6rem;
+  min-height: 1.85em;
+}
+.interactive-inputs {
+  align-items: center;
+  display: flex;
+  gap: 0.6rem;
+}
+.interactive-inputs input[type='range'] {
+  accent-color: var(--accent);
+  flex: 1;
+  min-width: 80px;
+}
+.interactive-number {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  padding: 0.3rem 0.4rem;
+  width: 5.2rem;
+}
+.interactive-number:focus {
+  border-color: var(--accent);
+  outline: none;
+}
+.interactive-live-label {
+  color: var(--green);
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  text-transform: uppercase;
+}
+.interactive-trigger button {
+  background: rgba(124, 107, 255, 0.2);
+  border: 1px solid rgba(168, 155, 255, 0.4);
+  border-radius: 5px;
+  color: var(--accent2);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.75rem;
+  font-weight: 650;
+  padding: 0.38rem 0.65rem;
+  width: 100%;
+}
+.interactive-trigger button:hover:not(:disabled) {
+  background: rgba(124, 107, 255, 0.3);
+}
+.interactive-trigger button:active:not(:disabled) { transform: translateY(1px); }
+.interactive-trigger button:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
+/* ── Custom sandbox execution ───────────────────────────── */
+.sandbox-options {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1rem 1.1rem;
+}
+.sandbox-options-heading {
+  align-items: flex-start;
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+  margin-bottom: 0.8rem;
+}
+.sandbox-options-heading h3 {
+  font-size: 0.9rem;
+  margin-bottom: 0.15rem;
+}
+.sandbox-options-heading p,
+.sandbox-options-note {
+  color: var(--text-dim);
+  font-size: 0.72rem;
+}
+.sandbox-options-heading > span {
+  background: rgba(74, 222, 128, 0.08);
+  border: 1px solid rgba(74, 222, 128, 0.2);
+  border-radius: 999px;
+  color: var(--green);
+  flex-shrink: 0;
+  font-size: 0.68rem;
+  padding: 0.2rem 0.5rem;
+}
+.sandbox-options-grid {
+  display: grid;
+  gap: 0.65rem;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.sandbox-option {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+.sandbox-option-wide { grid-column: 1 / -1; }
+.sandbox-option > span {
+  font-size: 0.72rem;
+  font-weight: 650;
+}
+.sandbox-option input,
+.sandbox-option select {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  min-width: 0;
+  outline: none;
+  padding: 0.42rem 0.5rem;
+  width: 100%;
+}
+.sandbox-option input:focus,
+.sandbox-option select:focus { border-color: var(--accent); }
+.sandbox-option small {
+  color: var(--text-dim);
+  font-size: 0.66rem;
+}
+.sandbox-options-note {
+  border-top: 1px solid var(--border);
+  margin-top: 0.8rem;
+  padding-top: 0.65rem;
+}
+.sandbox-options-note code { color: var(--accent2); }
+

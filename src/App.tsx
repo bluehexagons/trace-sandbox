@@ -3,7 +3,6 @@ import type { MouseEvent as ReactMouseEvent } from 'react'
 import Docs from './features/docs/DocsPage'
 import Playground from './features/playground/Playground'
 import { buildEmptySandboxHref } from './features/playground/sandboxUrl'
-import './App.css'
 
 type View = 'playground' | 'docs'
 

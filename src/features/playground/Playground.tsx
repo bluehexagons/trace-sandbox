@@ -4,7 +4,6 @@ import InteractiveControls from './components/InteractiveControls'
 import SandboxRunOptions from './components/SandboxRunOptions'
 import { buildExampleHref } from './sandboxUrl'
 import { usePlayground } from './usePlayground'
-import './playground.css'
 
 export default function Playground() {
   const {

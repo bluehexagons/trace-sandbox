@@ -1,13 +1,7 @@
 import type { SandboxRunMode } from '../sandboxUrl'
+import type { SandboxExecutionSettings } from '../types'
 
-export interface SandboxExecutionSettings {
-  runMode: SandboxRunMode
-  framesPerSecond: number
-  yMin: number
-  yMax: number
-  setupFunction: string
-  tickFunction: string
-}
+export type { SandboxExecutionSettings } from '../types'
 
 interface SandboxRunOptionsProps {
   settings: SandboxExecutionSettings

@@ -18,6 +18,7 @@ const argumentControls: InteractiveArgumentControl[] = [
     min: 1,
     max: 5,
     step: 0.5,
+    liveVariable: 'speed',
   },
   {
     id: 'count',
@@ -74,7 +75,7 @@ describe('interactive argument controls', () => {
     )
 
     expect(markup).toContain('Interactive controls')
-    expect(markup).toContain('Sliders restart · Actions run live')
+    expect(markup).toContain('Some sliders restart · Actions run live')
     expect(markup).toContain('type="range"')
     expect(markup).toContain('value="3.5"')
     expect(markup).toContain('value="12"')

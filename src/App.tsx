@@ -8,7 +8,7 @@ import InteractiveControls from './InteractiveControls'
 import SandboxRunOptions from './SandboxRunOptions'
 import type { SandboxExecutionSettings } from './SandboxRunOptions'
 import type { AnimationSpec } from './animation'
-import { writeArgumentValue } from './interactive'
+import { readArgumentValue, writeArgumentValue } from './interactive'
 import type { InteractiveArgumentControl, InteractiveTriggerControl } from './interactive'
 import {
   buildEmptySandboxHref,
@@ -371,9 +371,21 @@ function App() {
     }
 
     const nextArgs = writeArgumentValue(args, control, value, activeExample.controls.items)
-    replaceTickSession(null)
+    const liveValue = readArgumentValue(nextArgs, control.argumentIndex, value)
     setArgs(nextArgs)
     setShareStatus('')
+
+    const liveSession = tickSessionRef.current
+    if (
+      activeAnimation?.execution?.mode === 'live' &&
+      liveSession !== null &&
+      control.liveVariable !== undefined &&
+      liveSession.setVariable(control.liveVariable, liveValue)
+    ) {
+      return
+    }
+
+    replaceTickSession(null)
 
     if (activeExample.controls.autoRun) {
       clearScheduledRun()

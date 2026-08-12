@@ -23,6 +23,20 @@ export default function InteractiveControls({
   liveActionsEnabled = false,
 }: InteractiveControlsProps) {
   const hasLiveActions = controls.items.some(control => control.kind === 'trigger')
+  const hasLiveArguments = controls.items.some(
+    control => control.kind !== 'trigger' && control.liveVariable !== undefined,
+  )
+  const hasRestartArguments = controls.items.some(
+    control => control.kind !== 'trigger' && control.liveVariable === undefined,
+  )
+
+  const statusLabel = hasLiveActions
+    ? `${hasRestartArguments ? 'Some sliders restart' : 'Sliders update live'} · Actions run live`
+    : hasLiveArguments
+      ? 'Sliders update live'
+      : controls.autoRun
+        ? 'Auto-runs after changes'
+        : ''
 
   return (
     <section className="interactive-panel" aria-labelledby="interactive-controls-title">
@@ -31,9 +45,7 @@ export default function InteractiveControls({
           <h3 id="interactive-controls-title">Interactive controls</h3>
           <p>{controls.description}</p>
         </div>
-        {hasLiveActions
-          ? <span>Sliders restart · Actions run live</span>
-          : controls.autoRun && <span>Auto-runs after changes</span>}
+        {statusLabel !== '' && <span>{statusLabel}</span>}
       </div>
       <div className="interactive-grid">
         {controls.items.map(control => {
@@ -63,6 +75,9 @@ export default function InteractiveControls({
             <div className="interactive-control" key={control.id}>
               <div className="interactive-label-row">
                 <label htmlFor={inputId}>{control.label}</label>
+                {control.liveVariable !== undefined && (
+                  <span className="interactive-live-label">Live</span>
+                )}
                 <output htmlFor={inputId}>{value}</output>
               </div>
               <p>{control.description}</p>

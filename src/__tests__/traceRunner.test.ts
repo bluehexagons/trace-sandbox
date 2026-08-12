@@ -110,6 +110,20 @@ tick() => { @=value@; value++ };`,
     expect(session.getVariable('setupCalls')).toBe(1)
   })
 
+  it('changes a live variable without rebuilding the persistent session', () => {
+    const session = createTraceTickSession(
+      `setup() => { value = 1 };
+tick() => { @=value@; value++ };`,
+      '',
+      { mode: 'live', setupFunction: 'setup', tickFunction: 'tick' },
+    )
+
+    expect(session.tick().animationFrames[0].values.value).toEqual([1])
+    expect(session.setVariable('value', 20)).toBe(true)
+    expect(session.tick().animationFrames[0].values.value).toEqual([20])
+    expect(session.tick().animationFrames[0].values.value).toEqual([21])
+  })
+
   it('reports a configured live function that is not defined by the script', () => {
     const result = createTraceTickSession('setup() => { 1 };', '', {
       mode: 'live',

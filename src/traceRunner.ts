@@ -222,6 +222,14 @@ export class TraceTickSession {
     return true
   }
 
+  setVariable(name: string, value: number): boolean {
+    if (this.trace === null || !Number.isFinite(value)) {
+      return false
+    }
+    this.memory.variables.set(name, value)
+    return true
+  }
+
   getVariable(name: string): number | undefined {
     return this.memory.getVariable(name)
   }

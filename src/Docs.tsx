@@ -157,7 +157,9 @@ const sections = [
       <div>
         <p>
           Some sandbox lessons expose script arguments as sliders or numeric inputs. Moving a
-          control updates the corresponding argument and starts a fresh run after a short delay.
+          control updates the corresponding argument. Live lessons marked <strong>Live</strong>
+          also write the mapped variable into the current <code>TraceMemory</code>, so the next
+          tick continues from the current state instead of restarting.
         </p>
         <pre><code>{`[growth, seed]
 population = seed;

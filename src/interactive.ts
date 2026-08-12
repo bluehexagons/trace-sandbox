@@ -11,6 +11,8 @@ export interface InteractiveArgumentControl extends InteractiveControlBase {
   min: number
   max: number
   step: number
+  /** Variable to mutate in a running live Trace session instead of restarting it. */
+  liveVariable?: string
 }
 
 export interface InteractiveTriggerControl extends InteractiveControlBase {

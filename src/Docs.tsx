@@ -245,12 +245,14 @@ frame++`}</code></pre>
           <li>An initialization guard sets up state only on the first tick.</li>
           <li><code>@=x@</code> adds one numeric value to channel <code>x</code>.</li>
           <li>Scalar channels use named echoes, while dense output can be read directly from a Trace array.</li>
-          <li>Pause and replay use generated frames; code runs only when playback reaches a new frame.</li>
+          <li>Pause stops execution, resume continues the same memory, and Reset starts fresh.</li>
         </ul>
         <p>
           Live playback is a sandbox convention built on <code>TraceMemory</code>, not additional
           language syntax. The wave and cellular-automaton lessons expose their current arrays as
-          memory-backed channels, avoiding a loop of repeated echo statements.
+          memory-backed channels, avoiding a loop of repeated echo statements. The renderer keeps
+          only the history needed for trails, so the Trace program can continue streaming without
+          accumulating every prior frame in browser memory.
         </p>
       </div>
     ),

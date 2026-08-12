@@ -55,14 +55,14 @@ function App() {
     const tick = session.tick()
     if (tick.error !== null) {
       tickSessionRef.current = null
+      setResult(current => ({
+        output: tick.output,
+        logs: [...(current?.logs ?? []), ...tick.logs],
+        animationFrames: current?.animationFrames ?? [],
+        time: (current?.time ?? 0) + tick.time,
+        error: tick.error,
+      }))
     }
-    setResult(current => ({
-      output: tick.output,
-      logs: [...(current?.logs ?? []), ...tick.logs],
-      animationFrames: current?.animationFrames ?? [],
-      time: (current?.time ?? 0) + tick.time,
-      error: tick.error,
-    }))
     return tick.error === null ? tick.animationFrames[0] ?? null : null
   }, [])
 
@@ -331,6 +331,9 @@ function App() {
                     spec={activeExample.animation}
                     onTick={activeExample.animation.execution?.mode === 'live'
                       ? runAnimationTick
+                      : undefined}
+                    onRestart={activeExample.animation.execution?.mode === 'live'
+                      ? runCode
                       : undefined}
                   />
                 </section>

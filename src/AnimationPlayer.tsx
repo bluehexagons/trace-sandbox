@@ -12,6 +12,7 @@ interface AnimationPlayerProps {
   frames: AnimationFrame[]
   spec: AnimationSpec
   onTick?: () => AnimationFrame | null
+  onRestart?: () => void
 }
 
 const clamp = (value: number, min: number, max: number) =>
@@ -25,7 +26,12 @@ function SceneFrame({
   frames,
   spec,
 }: AnimationPlayerProps & { frameIndex: number; spec: SceneAnimation }) {
-  const toX = (value: number) => ((value - spec.xMin) / (spec.xMax - spec.xMin)) * 100
+  const xSpan = spec.xMax - spec.xMin
+  const followedX = spec.followX === undefined
+    ? spec.xMax
+    : Math.max(spec.xMax, firstValue(frames[frameIndex], spec.followX))
+  const visibleXMin = followedX - xSpan
+  const toX = (value: number) => ((value - visibleXMin) / xSpan) * 100
   const toY = (value: number) => 100 - ((value - spec.yMin) / (spec.yMax - spec.yMin)) * 100
   const trailStart = Math.max(0, frameIndex - spec.trailLength + 1)
   const trail = frames.slice(trailStart, frameIndex + 1)
@@ -142,42 +148,67 @@ function CellsFrame({
   )
 }
 
-export default function AnimationPlayer({ frames, spec, onTick }: AnimationPlayerProps) {
+const retainedFrameCount = (spec: AnimationSpec) => {
+  switch (spec.kind) {
+  case 'scene': return Math.max(1, spec.trailLength)
+  case 'wave': return Math.max(1, spec.trailLength)
+  case 'cells': return Math.max(1, spec.historyRows)
+  }
+}
+
+export default function AnimationPlayer({ frames, spec, onTick, onRestart }: AnimationPlayerProps) {
   const [liveFrames, setLiveFrames] = useState(frames)
   const [frameIndex, setFrameIndex] = useState(0)
+  const [streamFrame, setStreamFrame] = useState(1)
   const [isPlaying, setIsPlaying] = useState(() =>
     typeof window === 'undefined' ? false : !window.matchMedia('(prefers-reduced-motion: reduce)').matches,
   )
-  const availableFrames = onTick === undefined ? frames : liveFrames
-  const totalFrames = spec.execution?.frameCount ?? availableFrames.length
+  const isLive = spec.execution?.mode === 'live' && onTick !== undefined
+  const availableFrames = isLive ? liveFrames : frames
+  const visibleFrameIndex = isLive ? availableFrames.length - 1 : frameIndex
 
   useEffect(() => {
-    if (!isPlaying || totalFrames < 2) {
+    if (!isLive || !isPlaying) {
       return
     }
 
     const interval = window.setInterval(() => {
-      if (frameIndex < availableFrames.length - 1) {
-        setFrameIndex(frameIndex + 1)
+      const nextFrame = onTick()
+      if (nextFrame === null) {
+        setIsPlaying(false)
         return
       }
 
-      if (onTick !== undefined && availableFrames.length < totalFrames) {
-        const nextFrame = onTick()
-        if (nextFrame !== null) {
-          setLiveFrames(current => [...current, nextFrame])
-          setFrameIndex(frameIndex + 1)
-          return
-        }
-      }
-
-      setIsPlaying(false)
+      setLiveFrames(current => [...current, nextFrame].slice(-retainedFrameCount(spec)))
+      setStreamFrame(current => current + 1)
     }, 1000 / spec.framesPerSecond)
 
     return () => window.clearInterval(interval)
-  }, [availableFrames.length, frameIndex, isPlaying, onTick, spec.framesPerSecond, totalFrames])
+  }, [isLive, isPlaying, onTick, spec])
+
+  useEffect(() => {
+    if (isLive || !isPlaying || frames.length < 2) {
+      return
+    }
+
+    const interval = window.setInterval(() => {
+      setFrameIndex(current => {
+        if (current >= frames.length - 1) {
+          setIsPlaying(false)
+          return current
+        }
+        return current + 1
+      })
+    }, 1000 / spec.framesPerSecond)
+
+    return () => window.clearInterval(interval)
+  }, [frames.length, isLive, isPlaying, spec.framesPerSecond])
 
   const restart = () => {
+    if (isLive && onRestart !== undefined) {
+      onRestart()
+      return
+    }
     setFrameIndex(0)
     setIsPlaying(true)
   }
@@ -185,7 +216,7 @@ export default function AnimationPlayer({ frames, spec, onTick }: AnimationPlaye
   const togglePlayback = () => {
     if (isPlaying) {
       setIsPlaying(false)
-    } else if (frameIndex === availableFrames.length - 1 && availableFrames.length >= totalFrames) {
+    } else if (!isLive && frameIndex === availableFrames.length - 1) {
       restart()
     } else {
       setIsPlaying(true)
@@ -200,36 +231,38 @@ export default function AnimationPlayer({ frames, spec, onTick }: AnimationPlaye
           <p>{spec.description}</p>
         </div>
         <span className="animation-frame-count">
-          Frame {frameIndex + 1} / {totalFrames}
+          {isLive ? `Frame ${streamFrame} · Live` : `Frame ${frameIndex + 1} / ${frames.length}`}
         </span>
       </div>
 
       {spec.kind === 'scene' && (
-        <SceneFrame frames={availableFrames} spec={spec} frameIndex={frameIndex} />
+        <SceneFrame frames={availableFrames} spec={spec} frameIndex={visibleFrameIndex} />
       )}
       {spec.kind === 'wave' && (
-        <WaveFrame frames={availableFrames} spec={spec} frameIndex={frameIndex} />
+        <WaveFrame frames={availableFrames} spec={spec} frameIndex={visibleFrameIndex} />
       )}
       {spec.kind === 'cells' && (
-        <CellsFrame frames={availableFrames} spec={spec} frameIndex={frameIndex} />
+        <CellsFrame frames={availableFrames} spec={spec} frameIndex={visibleFrameIndex} />
       )}
 
       <div className="animation-controls">
         <button type="button" onClick={togglePlayback}>
           {isPlaying ? 'Pause' : 'Play'}
         </button>
-        <button type="button" onClick={restart}>Restart</button>
-        <input
-          type="range"
-          min="0"
-          max={availableFrames.length - 1}
-          value={frameIndex}
-          onChange={event => {
-            setFrameIndex(Number(event.target.value))
-            setIsPlaying(false)
-          }}
-          aria-label="Animation frame"
-        />
+        <button type="button" onClick={restart}>{isLive ? 'Reset stream' : 'Restart'}</button>
+        {!isLive && (
+          <input
+            type="range"
+            min="0"
+            max={availableFrames.length - 1}
+            value={frameIndex}
+            onChange={event => {
+              setFrameIndex(Number(event.target.value))
+              setIsPlaying(false)
+            }}
+            aria-label="Animation frame"
+          />
+        )}
       </div>
     </div>
   )

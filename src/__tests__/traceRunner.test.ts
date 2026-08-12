@@ -4,6 +4,15 @@ import type { Example } from '../examples'
 import { readArgumentValue } from '../interactive'
 import { createTraceTickSession, parseArguments, runTraceScript } from '../traceRunner'
 
+const liveSampleFrames: Record<string, number> = {
+  'orbital-system': 144,
+  'lorenz-attractor': 280,
+  'damped-wave': 72,
+  'elementary-cellular-automaton': 41,
+  'logistic-map': 180,
+  'predator-prey': 260,
+}
+
 const runExample = (example: Example, argumentInput = example.args ?? '') => {
   const execution = example.animation?.execution
   if (execution?.mode !== 'live') {
@@ -15,7 +24,8 @@ const runExample = (example: Example, argumentInput = example.args ?? '') => {
   let result = session.tick()
   animationFrames.push(...result.animationFrames)
 
-  for (let frame = 1; frame < execution.frameCount && result.error === null; frame++) {
+  const sampleFrames = liveSampleFrames[example.id] ?? 3
+  for (let frame = 1; frame < sampleFrames && result.error === null; frame++) {
     result = session.tick()
     animationFrames.push(...result.animationFrames)
   }
@@ -76,12 +86,36 @@ describe('trace runner', () => {
     })
   })
 
+  it('resolves script arguments during guarded first-tick initialization', () => {
+    const session = createTraceTickSession(
+      '[input] initialized == 0 ? value = input; initialized == 0 ? initialized = 1; value++',
+      '7',
+    )
+
+    expect(session.tick().output).toBe(8)
+    expect(session.tick().output).toBe(9)
+  })
+
   it('reports a missing memory-backed animation array', () => {
     const result = createTraceTickSession('1', '', [
       { channel: 'samples', array: 'missing' },
     ]).tick()
 
     expect(result.error).toContain('missing Trace array "missing"')
+  })
+
+  it('continues ticking without a configured frame limit', () => {
+    const session = createTraceTickSession(
+      'initialized == 0 ? value = 0; initialized == 0 ? initialized = 1; value++',
+      '',
+    )
+
+    let result = session.tick()
+    for (let tick = 1; tick < 500; tick++) {
+      result = session.tick()
+    }
+
+    expect(result).toMatchObject({ output: 500, error: null })
   })
 
   it('returns parse errors in the playground result shape', () => {
@@ -133,7 +167,7 @@ describe('guided examples', () => {
       }
 
       if (example.animation !== undefined) {
-        expect(result.animationFrames.length).toBe(example.expectedValue)
+        expect(result.animationFrames.length).toBe(liveSampleFrames[example.id])
 
         if (example.animation.kind === 'scene') {
           for (const point of example.animation.points) {
@@ -144,6 +178,23 @@ describe('guided examples', () => {
           expect(result.animationFrames[0].values[example.animation.channel].length).toBeGreaterThan(1)
         }
       }
+    })
+  }
+
+  for (const example of examples.filter(example => example.animation?.execution?.mode === 'live')) {
+    it(`advances ${example.name} between live ticks`, () => {
+      const execution = example.animation?.execution
+      const session = createTraceTickSession(
+        example.code,
+        example.args ?? '',
+        execution?.memoryChannels,
+      )
+
+      const first = session.tick()
+      const second = session.tick()
+      expect(first.error).toBeNull()
+      expect(second.error).toBeNull()
+      expect(second.animationFrames[0]?.values).not.toEqual(first.animationFrames[0]?.values)
     })
   }
 

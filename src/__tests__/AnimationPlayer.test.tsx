@@ -51,7 +51,7 @@ describe('animation player', () => {
     expect(markup).toContain('Restart')
   })
 
-  it('shows the configured live frame count before later ticks are generated', () => {
+  it('shows an unbounded live stream before later ticks are generated', () => {
     const spec: AnimationSpec = {
       ...base,
       kind: 'wave',
@@ -60,13 +60,14 @@ describe('animation player', () => {
       max: 1,
       trailLength: 2,
       color: '#fff',
-      execution: { mode: 'live', frameCount: 20 },
+      execution: { mode: 'live' },
     }
 
     const markup = renderToStaticMarkup(
       <AnimationPlayer frames={frames.slice(0, 1)} spec={spec} onTick={() => null} />,
     )
 
-    expect(markup).toContain('Frame 1 / 20')
+    expect(markup).toContain('Frame 1 · Live')
+    expect(markup).toContain('Reset stream')
   })
 })

@@ -77,12 +77,14 @@ export class TraceTickSession {
   private readonly memory = new TraceMemory()
   private readonly args: number[]
   private readonly parseError: string | null
+  private readonly memoryChannels: readonly MemoryAnimationChannel[]
 
   constructor(
     code: string,
     argumentInput: string,
-    private readonly memoryChannels: readonly MemoryAnimationChannel[] = [],
+    memoryChannels: readonly MemoryAnimationChannel[] = [],
   ) {
+    this.memoryChannels = memoryChannels
     try {
       this.trace = Trace.parse(code)
       this.args = parseArguments(argumentInput)

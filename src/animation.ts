@@ -9,7 +9,6 @@ export interface MemoryAnimationChannel {
 
 export interface LiveAnimationExecution {
   mode: 'live'
-  frameCount: number
   memoryChannels?: MemoryAnimationChannel[]
 }
 
@@ -35,6 +34,7 @@ export interface SceneAnimation extends AnimationBase {
   yMin: number
   yMax: number
   trailLength: number
+  followX?: string
   showOrigin?: boolean
   points: ScenePoint[]
 }

@@ -531,20 +531,27 @@ step()`,
     name: 'Three-body orbital system',
     description: 'Integrate three independent bodies around a gravity well and render their paths.',
     concepts: ['live ticks', 'persistent memory', 'interactive parameters', 'Euler integration', 'gravity'],
-    expected: '144 frames of three differently shaped orbits around a central star.',
+    expected: 'A continuous stream of three differently shaped orbits around a central star.',
     challenge: 'Change body 3’s velocity to 0.7 and watch its orbit become more eccentric.',
     code: `# This script advances one frame each time the host runs it.
 [gravityInput, timeStepInput, outerSpeedInput]
-initialized == 0 ? () => {
-  gravity = gravityInput;
-  dt = timeStepInput;
-  outerSpeed = outerSpeedInput;
-  frame = 0;
-  x1 = 18;  y1 = 0;   vx1 = 0;     vy1 = 1.64;
-  x2 = 0;   y2 = 28;  vx2 = -1.31; vy2 = 0;
-  x3 = -38; y3 = 0;   vx3 = 0;     vy3 = -outerSpeed;
-  initialized = 1
-};
+initialized == 0 ? gravity = gravityInput;
+initialized == 0 ? dt = timeStepInput;
+initialized == 0 ? outerSpeed = outerSpeedInput;
+initialized == 0 ? frame = 0;
+initialized == 0 ? x1 = 18;
+initialized == 0 ? y1 = 0;
+initialized == 0 ? vx1 = 0;
+initialized == 0 ? vy1 = 1.64;
+initialized == 0 ? x2 = 0;
+initialized == 0 ? y2 = 28;
+initialized == 0 ? vx2 = -1.31;
+initialized == 0 ? vy2 = 0;
+initialized == 0 ? x3 = -38;
+initialized == 0 ? y3 = 0;
+initialized == 0 ? vx3 = 0;
+initialized == 0 ? vy3 = -outerSpeed;
+initialized == 0 ? initialized = 1;
 
 @=x1@; @=y1@;
 @=x2@; @=y2@;
@@ -576,13 +583,12 @@ y3 += vy3 * dt;
 
 frame++`,
     args: '48 0.18 1.05',
-    expectedValue: 144,
     animation: {
       kind: 'scene',
       title: 'Orbital system',
       description: 'A symplectic Euler step updates velocity before position on every frame.',
       framesPerSecond: 24,
-      execution: { mode: 'live', frameCount: 144 },
+      execution: { mode: 'live' },
       xMin: -65,
       xMax: 65,
       yMin: -65,
@@ -641,21 +647,19 @@ frame++`,
     name: 'Lorenz strange attractor',
     description: 'Integrate a chaotic differential system and draw its evolving phase-space path.',
     concepts: ['chaos', 'persistent memory', 'differential equations', 'live time stepping', 'phase space'],
-    expected: '280 frames tracing the attractor’s two characteristic lobes.',
+    expected: 'A continuous trace of the attractor’s two characteristic lobes.',
     challenge: 'Change rho from 28 to 20 and compare the long-term behavior.',
     code: `# Lorenz system: the host preserves state between ticks.
 [rhoInput, sigmaInput, timeStepInput]
-initialized == 0 ? () => {
-  frame = 0;
-  dt = timeStepInput;
-  sigma = sigmaInput;
-  rho = rhoInput;
-  beta = 2.6666667;
-  x = 0.1;
-  y = 0;
-  z = 0;
-  initialized = 1
-};
+initialized == 0 ? frame = 0;
+initialized == 0 ? dt = timeStepInput;
+initialized == 0 ? sigma = sigmaInput;
+initialized == 0 ? rho = rhoInput;
+initialized == 0 ? beta = 2.6666667;
+initialized == 0 ? x = 0.1;
+initialized == 0 ? y = 0;
+initialized == 0 ? z = 0;
+initialized == 0 ? initialized = 1;
 
 @=x@;
 @=z@;
@@ -669,13 +673,12 @@ z += dz * dt;
 
 frame++`,
     args: '28 10 0.008',
-    expectedValue: 280,
     animation: {
       kind: 'scene',
       title: 'Lorenz attractor · x/z projection',
       description: 'The trail reveals a deterministic system whose trajectory never exactly repeats.',
       framesPerSecond: 30,
-      execution: { mode: 'live', frameCount: 280 },
+      execution: { mode: 'live' },
       xMin: -35,
       xMax: 35,
       yMin: 0,
@@ -731,7 +734,7 @@ frame++`,
     name: 'Damped wave solver',
     description: 'Evolve a one-dimensional wave and render its current array directly from memory.',
     concepts: ['finite differences', 'memory-backed output', 'double buffering', 'arrays', 'wave propagation'],
-    expected: '72 frames of a pulse splitting, reflecting, and gradually losing energy.',
+    expected: 'A continuous wave stream where the pulse splits, reflects, and loses energy.',
     challenge: 'Change the 0.2 coupling term to 0.35 and compare the propagation speed.',
     code: `[couplingInput, dampingInput, pulseHeightInput]
 initialize() => {
@@ -764,25 +767,22 @@ advance() => {
   copyNext()
 };
 
-initialized == 0 ? () => {
-  coupling = couplingInput;
-  damping = dampingInput;
-  pulseHeight = pulseHeightInput;
-  size = 41;
-  current = [size];
-  previous = [size];
-  next = [size];
-  i = 1;
-  initialize();
-  frame = 0;
-  initialized = 1
-};
+initialized == 0 ? coupling = couplingInput;
+initialized == 0 ? damping = dampingInput;
+initialized == 0 ? pulseHeight = pulseHeightInput;
+initialized == 0 ? size = 41;
+initialized == 0 ? current = [size];
+initialized == 0 ? previous = [size];
+initialized == 0 ? next = [size];
+initialized == 0 ? i = 1;
+initialized == 0 ? initialize();
+initialized == 0 ? frame = 0;
+initialized == 0 ? initialized = 1;
 
 # Leave the initial pulse untouched for the first rendered tick.
 frame > 0 ? advance();
 frame++`,
     args: '0.2 0.997 1',
-    expectedValue: 72,
     animation: {
       kind: 'wave',
       title: 'Finite-difference wave',
@@ -790,7 +790,6 @@ frame++`,
       framesPerSecond: 18,
       execution: {
         mode: 'live',
-        frameCount: 72,
         memoryChannels: [{ channel: 'sample', array: 'current' }],
       },
       channel: 'sample',
@@ -845,7 +844,7 @@ frame++`,
     name: 'Interactive cellular automaton',
     description: 'Choose any elementary rule and grow its structure from one live cell.',
     concepts: ['cellular automata', 'memory-backed output', 'double buffering', 'boolean algebra', 'emergence'],
-    expected: '41 generations growing from a single live cell.',
+    expected: 'A continuous stream of generations growing from a single live cell.',
     challenge: 'Compare rules 30, 90, 110, and 184; look for symmetry, repetition, and movement.',
     code: `[ruleInput]
 calculateNext() => {
@@ -873,20 +872,17 @@ advance() => {
   copyNext()
 };
 
-initialized == 0 ? () => {
-  rule = ruleInput;
-  size = 41;
-  current = [size];
-  next = [size];
-  current[21] = 1;
-  frame = 0;
-  initialized = 1
-};
+initialized == 0 ? rule = ruleInput;
+initialized == 0 ? size = 41;
+initialized == 0 ? current = [size];
+initialized == 0 ? next = [size];
+initialized == 0 ? current[21] = 1;
+initialized == 0 ? frame = 0;
+initialized == 0 ? initialized = 1;
 
 frame > 0 ? advance();
 frame++`,
     args: '30',
-    expectedValue: 41,
     animation: {
       kind: 'cells',
       title: 'Elementary cellular automaton',
@@ -894,7 +890,6 @@ frame++`,
       framesPerSecond: 12,
       execution: {
         mode: 'live',
-        frameCount: 41,
         memoryChannels: [{ channel: 'cell', array: 'current' }],
       },
       channel: 'cell',
@@ -925,15 +920,13 @@ frame++`,
     name: 'Interactive logistic map',
     description: 'Turn one growth parameter and watch a population settle, oscillate, or become chaotic.',
     concepts: ['discrete dynamics', 'persistent memory', 'feedback', 'period doubling', 'chaos'],
-    expected: '180 iterations plotting population against time.',
+    expected: 'A continuous stream plotting population against iteration.',
     challenge: 'Move growth slowly from 3.0 toward 4.0 and look for each period-doubling transition.',
     code: `[growthInput, seedInput]
-initialized == 0 ? () => {
-  growth = growthInput;
-  population = seedInput;
-  frame = 0;
-  initialized = 1
-};
+initialized == 0 ? growth = growthInput;
+initialized == 0 ? population = seedInput;
+initialized == 0 ? frame = 0;
+initialized == 0 ? initialized = 1;
 
 iteration = frame;
 @=iteration@;
@@ -942,15 +935,15 @@ iteration = frame;
 population = growth * population * (1 - population);
 frame++`,
     args: '3.82 0.2',
-    expectedValue: 180,
     animation: {
       kind: 'scene',
       title: 'Logistic map · population over time',
       description: 'The same equation produces equilibrium, cycles, or chaos as growth changes.',
       framesPerSecond: 30,
-      execution: { mode: 'live', frameCount: 180 },
+      execution: { mode: 'live' },
       xMin: 0,
       xMax: 180,
+      followX: 'iteration',
       yMin: 0,
       yMax: 1,
       trailLength: 180,
@@ -993,20 +986,18 @@ frame++`,
     name: 'Predator–prey phase portrait',
     description: 'Couple two populations and visualize the repeating chase between them.',
     concepts: ['coupled systems', 'persistent memory', 'feedback loops', 'phase portrait', 'Euler integration'],
-    expected: '260 frames tracing prey against predator population.',
+    expected: 'A continuous phase portrait tracing prey against predator population.',
     challenge: 'Raise predation pressure, then find initial populations that keep the orbit on screen.',
     code: `[preyInput, predatorInput, predationInput]
-initialized == 0 ? () => {
-  prey = preyInput;
-  predators = predatorInput;
-  predation = predationInput;
-  preyGrowth = 1;
-  predatorDeath = 1.2;
-  conversion = 0.1;
-  dt = 0.02;
-  frame = 0;
-  initialized = 1
-};
+initialized == 0 ? prey = preyInput;
+initialized == 0 ? predators = predatorInput;
+initialized == 0 ? predation = predationInput;
+initialized == 0 ? preyGrowth = 1;
+initialized == 0 ? predatorDeath = 1.2;
+initialized == 0 ? conversion = 0.1;
+initialized == 0 ? dt = 0.02;
+initialized == 0 ? frame = 0;
+initialized == 0 ? initialized = 1;
 
 @=prey@;
 @=predators@;
@@ -1020,13 +1011,12 @@ predators < 0 ? predators = 0;
 
 frame++`,
     args: '10 5 0.1',
-    expectedValue: 260,
     animation: {
       kind: 'scene',
       title: 'Predator–prey phase portrait',
       description: 'Neither axis is time: the trail shows how both populations co-evolve.',
       framesPerSecond: 30,
-      execution: { mode: 'live', frameCount: 260 },
+      execution: { mode: 'live' },
       xMin: 0,
       xMax: 35,
       yMin: 0,

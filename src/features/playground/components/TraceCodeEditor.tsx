@@ -11,7 +11,6 @@ interface TraceCodeEditorProps {
   ariaLabel: string
 }
 
-
 export default function TraceCodeEditor({
   value,
   onChange,

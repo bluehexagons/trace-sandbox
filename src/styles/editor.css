@@ -45,6 +45,7 @@
   padding: 1rem 0.75rem 1rem 0.5rem;
   color: var(--text-dim);
   font-size: 0.8125rem;
+  line-height: 1.5rem;
   text-align: right;
   user-select: none;
 }

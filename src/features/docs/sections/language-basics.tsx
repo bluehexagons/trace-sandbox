@@ -175,8 +175,8 @@ population = growth * population * (1 - population)`}</code></pre>
       </p>
       <pre><code>{`# The host adds to pulseTrigger when the button is pressed.
 pulseTrigger > 0 ? () => {
-current[21] += pulseHeight * pulseTrigger;
-pulseTrigger = 0
+  current[21] += pulseHeight * pulseTrigger;
+  pulseTrigger = 0
 }`}</code></pre>
       <p>
         Run a live lesson before using its action buttons. Try injecting pulses into the damped

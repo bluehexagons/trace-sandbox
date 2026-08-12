@@ -56,14 +56,14 @@ export const executionAndDebugging = [
         running initialization code or pre-rendering the animation.
       </p>
       <pre><code>{`setup() => {
-frame = 0;
-x = 0
+  frame = 0;
+  x = 0
 };
 
 tick() => {
-@=x@;       # Add x to this tick's frame
-x += 2;
-frame++
+  @=x@;       # Add x to this tick's frame
+  x += 2;
+  frame++
 };`}</code></pre>
       <h4>Live Frame Protocol</h4>
       <ul>

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import type {
   AnimationFrame,
   AnimationSpec,
+  BarsAnimation,
   CellsAnimation,
   SceneAnimation,
   SeriesAnimation,
@@ -87,6 +88,19 @@ function SeriesFrame({
       {[25, 50, 75].map(y => (
         <line key={y} className="animation-grid-line" x1="0" x2="100" y1={y} y2={y} />
       ))}
+      {(spec.references ?? []).map(reference => (
+        <line
+          key={reference.label}
+          className="animation-reference"
+          x1="0"
+          x2="100"
+          y1={toY(reference.value)}
+          y2={toY(reference.value)}
+          style={{ stroke: reference.color }}
+        >
+          <title>{reference.label}</title>
+        </line>
+      ))}
       {spec.lines.map(line => {
         const points = history
           .map((frame, index) =>
@@ -114,6 +128,45 @@ function SeriesFrame({
               </circle>
             )}
           </g>
+        )
+      })}
+    </svg>
+  )
+}
+
+function BarsFrame({
+  frameIndex,
+  frames,
+  spec,
+}: AnimationPlayerProps & { frameIndex: number; spec: BarsAnimation }) {
+  const frame = frames[frameIndex]
+  const values = frame.values[spec.channel] ?? []
+  const highlighted = spec.highlightChannel === undefined
+    ? 0
+    : Math.trunc(firstValue(frame, spec.highlightChannel))
+  const barWidth = values.length === 0 ? 100 : 100 / values.length
+  const heightFor = (value: number) =>
+    ((clamp(value, spec.min, spec.max) - spec.min) / (spec.max - spec.min)) * 96
+
+  return (
+    <svg className="animation-canvas" viewBox="0 0 100 100" role="img" aria-label={spec.title}>
+      <rect className="animation-background" width="100" height="100" rx="2" />
+      {values.map((value, index) => {
+        const height = heightFor(value)
+        const itemIndex = index + 1
+        const isHighlighted = itemIndex === highlighted || itemIndex === highlighted + 1
+        return (
+          <rect
+            key={itemIndex}
+            className="animation-bar"
+            x={index * barWidth + barWidth * 0.08}
+            y={98 - height}
+            width={barWidth * 0.84}
+            height={height}
+            fill={isHighlighted ? spec.highlightColor : spec.color}
+          >
+            <title>{`Item ${itemIndex}: ${value}`}</title>
+          </rect>
         )
       })}
     </svg>
@@ -202,6 +255,7 @@ const retainedFrameCount = (spec: AnimationSpec) => {
   case 'series': return Math.max(1, spec.historyLength)
   case 'wave': return Math.max(1, spec.trailLength)
   case 'cells': return Math.max(1, spec.historyRows)
+  case 'bars': return 1
   }
 }
 
@@ -296,10 +350,16 @@ export default function AnimationPlayer({ frames, spec, onTick, onRestart }: Ani
       {spec.kind === 'series' && (
         <SeriesFrame frames={availableFrames} spec={spec} frameIndex={visibleFrameIndex} />
       )}
+      {spec.kind === 'bars' && (
+        <BarsFrame frames={availableFrames} spec={spec} frameIndex={visibleFrameIndex} />
+      )}
 
       {(spec.kind === 'scene' || spec.kind === 'series') && (
         <div className="animation-legend" aria-label="Animation legend">
-          {(spec.kind === 'scene' ? spec.points : spec.lines).map(item => (
+          {(spec.kind === 'scene'
+            ? spec.points
+            : [...spec.lines, ...(spec.references ?? [])]
+          ).map(item => (
             <span key={item.label}>
               <i style={{ backgroundColor: item.color }} />
               {item.label}

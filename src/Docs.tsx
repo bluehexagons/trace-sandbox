@@ -180,8 +180,8 @@ pulseTrigger > 0 ? () => {
 }`}</code></pre>
         <p>
           Run a live lesson before using its action buttons. Try injecting pulses into the damped
-          wave, perturbing the Lorenz system, reseeding the automaton, releasing populations, or
-          kicking the impulse-driven oscillator.
+          wave, perturbing the Lorenz system, reshuffling the bubble sort, resetting the π
+          experiment, releasing populations, or kicking the spring.
         </p>
       </div>
     ),
@@ -279,7 +279,9 @@ frame++`}</code></pre>
           <li><code>@=x@</code> adds one numeric value to channel <code>x</code>.</li>
           <li>Scalar channels use named echoes, while dense output can be read directly from a Trace array.</li>
           <li>Time-series charts draw one labeled trail per channel, such as prey and predators.</li>
-          <li>Phase-space scenes combine two channels into one state trail, such as position/velocity.</li>
+          <li>Reference lines distinguish a target constant, such as π, from measured output.</li>
+          <li>State-space scenes combine two channels into one trail, such as an orbit’s x/y position.</li>
+          <li>Bar charts turn a memory-backed array into a live algorithm visualization.</li>
           <li>Pause stops execution, resume continues the same memory, and Reset starts fresh.</li>
         </ul>
         <p>

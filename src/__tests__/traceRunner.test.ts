@@ -12,6 +12,8 @@ const liveSampleFrames: Record<string, number> = {
   'logistic-map': 180,
   'predator-prey': 260,
   'kicked-oscillator': 180,
+  'sorting-visualizer': 120,
+  'monte-carlo-pi': 120,
 }
 
 const runExample = (example: Example, argumentInput = example.args ?? '') => {
@@ -274,6 +276,11 @@ describe('guided examples', () => {
               expect(value).toBeLessThanOrEqual(example.animation.yMax)
             }
           } else if (example.animation?.kind === 'wave') {
+            for (const value of frame.values[example.animation.channel]) {
+              expect(value).toBeGreaterThanOrEqual(example.animation.min)
+              expect(value).toBeLessThanOrEqual(example.animation.max)
+            }
+          } else if (example.animation?.kind === 'bars') {
             for (const value of frame.values[example.animation.channel]) {
               expect(value).toBeGreaterThanOrEqual(example.animation.min)
               expect(value).toBeLessThanOrEqual(example.animation.max)

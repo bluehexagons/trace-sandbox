@@ -44,12 +44,19 @@ export interface SeriesLine {
   label: string
 }
 
+export interface SeriesReference {
+  value: number
+  color: string
+  label: string
+}
+
 export interface SeriesAnimation extends AnimationBase {
   kind: 'series'
   yMin: number
   yMax: number
   historyLength: number
   lines: SeriesLine[]
+  references?: SeriesReference[]
 }
 
 export interface WaveAnimation extends AnimationBase {
@@ -68,4 +75,19 @@ export interface CellsAnimation extends AnimationBase {
   color: string
 }
 
-export type AnimationSpec = SceneAnimation | SeriesAnimation | WaveAnimation | CellsAnimation
+export interface BarsAnimation extends AnimationBase {
+  kind: 'bars'
+  channel: string
+  min: number
+  max: number
+  color: string
+  highlightColor: string
+  highlightChannel?: string
+}
+
+export type AnimationSpec =
+  | SceneAnimation
+  | SeriesAnimation
+  | WaveAnimation
+  | CellsAnimation
+  | BarsAnimation

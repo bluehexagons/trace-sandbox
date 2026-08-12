@@ -81,6 +81,17 @@
   stroke-width: 0.7;
 }
 
+.animation-reference {
+  fill: none;
+  opacity: 0.85;
+  stroke-dasharray: 2 1.5;
+  stroke-width: 0.4;
+}
+
+.animation-bar {
+  shape-rendering: geometricPrecision;
+}
+
 .animation-legend {
   align-items: center;
   border-top: 1px solid var(--border);

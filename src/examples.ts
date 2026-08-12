@@ -1142,11 +1142,11 @@ frame++`,
   {
     id: 'kicked-oscillator',
     section: 'animations',
-    name: 'Impulse-driven oscillator',
-    description: 'Kick a damped spring while its position and velocity stream through phase space.',
-    concepts: ['real-time actions', 'impulses', 'phase space', 'damping', 'persistent memory'],
-    expected: 'A decaying phase-space orbit that immediately responds to left and right kicks.',
-    challenge: 'Alternate kicks at the natural rhythm and see how large an orbit you can sustain.',
+    name: 'Kicked spring response',
+    description: 'Kick a damped spring and compare its position with the velocity that drives it.',
+    concepts: ['real-time actions', 'impulses', 'harmonic motion', 'phase lag', 'damping'],
+    expected: 'A kick jumps velocity immediately; position stays continuous, then follows with a delayed oscillation.',
+    challenge: 'Kick at the natural rhythm to add energy, then kick against it to stop the motion.',
     code: `[stiffnessInput, dampingInput]
 initialized == 0 ? stiffness = stiffnessInput;
 initialized == 0 ? damping = dampingInput;
@@ -1171,24 +1171,17 @@ position += velocity * dt;
 frame++`,
     args: '0.65 0.997',
     animation: {
-      kind: 'scene',
-      title: 'Damped oscillator · position/velocity',
-      description: 'Each kick changes velocity instantly, moving the system to a new phase orbit.',
+      kind: 'series',
+      title: 'Kicked spring · position and velocity',
+      description: 'A kick creates an immediate velocity jump; position remains continuous and responds afterward.',
       framesPerSecond: 30,
       execution: { mode: 'live' },
-      xMin: -18,
-      xMax: 18,
       yMin: -12,
       yMax: 12,
-      trailLength: 240,
-      points: [
-        {
-          x: 'position',
-          y: 'velocity',
-          color: '#fbbf24',
-          label: 'Oscillator state',
-          radius: 1.1,
-        },
+      historyLength: 240,
+      lines: [
+        { channel: 'position', color: '#60a5fa', label: 'Position' },
+        { channel: 'velocity', color: '#fbbf24', label: 'Velocity' },
       ],
     },
     controls: {
@@ -1234,6 +1227,182 @@ frame++`,
           variable: 'impulse',
           amount: 3,
           buttonLabel: 'Kick right →',
+        },
+      ],
+    },
+  },
+  {
+    id: 'sorting-visualizer',
+    section: 'animations',
+    name: 'Live bubble sort',
+    description: 'Watch one neighboring comparison per tick and reshuffle the array without restarting the host.',
+    concepts: ['sorting algorithms', 'loop invariants', 'memory-backed output', 'real-time actions', 'algorithm visualization'],
+    expected: 'Highlighted pairs trade places until every bar is ordered from shortest to tallest.',
+    challenge: 'Shuffle halfway through a pass, or change the comparison to build a descending sort.',
+    code: `[sizeInput]
+fillRandom() => {
+  values[i] = 1~100;
+  i++ <= size ? >fillRandom() : 0
+};
+
+initialized == 0 ? size = sizeInput;
+initialized == 0 ? values = [size];
+initialized == 0 ? i = 1;
+initialized == 0 ? fillRandom();
+initialized == 0 ? scan = 1;
+initialized == 0 ? swapped = 0;
+initialized == 0 ? sorted = 0;
+initialized == 0 ? initialized = 1;
+
+shuffleTrigger > 0 ? () => {
+  i = 1;
+  fillRandom();
+  scan = 1;
+  swapped = 0;
+  sorted = 0;
+  shuffleTrigger = 0
+};
+
+highlight = sorted ? 0 : scan;
+@=highlight@;
+
+sorted == 0 ? () => {
+  left = values[scan];
+  right = values[scan + 1];
+  left > right ? () => {
+    values[scan] = right;
+    values[scan + 1] = left;
+    swapped = 1
+  };
+  scan++;
+  scan >= size ? () => {
+    swapped == 0 ? sorted = 1;
+    scan = 1;
+    swapped = 0
+  }
+};
+sorted`,
+    args: '24',
+    animation: {
+      kind: 'bars',
+      title: 'Bubble sort · one comparison per tick',
+      description: 'Gold marks the pair being compared; each complete pass moves large values to the right.',
+      framesPerSecond: 15,
+      execution: {
+        mode: 'live',
+        memoryChannels: [{ channel: 'values', array: 'values' }],
+      },
+      channel: 'values',
+      min: 0,
+      max: 100,
+      color: '#60a5fa',
+      highlightColor: '#fbbf24',
+      highlightChannel: 'highlight',
+    },
+    controls: {
+      description: 'Choose the problem size, then interrupt the running algorithm with a new permutation.',
+      autoRun: true,
+      items: [
+        {
+          id: 'size',
+          label: 'Array size',
+          description: 'Number of values sorted by the running Trace program.',
+          argumentIndex: 0,
+          kind: 'range',
+          defaultValue: 24,
+          min: 8,
+          max: 40,
+          step: 1,
+        },
+        {
+          id: 'shuffle',
+          label: 'Shuffle array',
+          description: 'Replace every value and restart the sort inside the same memory environment.',
+          kind: 'trigger',
+          variable: 'shuffleTrigger',
+          amount: 1,
+          buttonLabel: 'Shuffle array',
+        },
+      ],
+    },
+  },
+  {
+    id: 'monte-carlo-pi',
+    section: 'animations',
+    name: 'Monte Carlo π estimator',
+    description: 'Estimate π from random points in a square and watch statistical noise settle over time.',
+    concepts: ['Monte Carlo methods', 'probability', 'convergence', 'persistent memory', 'real-time actions'],
+    expected: 'The live estimate wanders at first, then settles near the dashed π reference line.',
+    challenge: 'Compare small and large batches, then reset both and see which estimate stabilizes first.',
+    code: `[batchInput]
+initialized == 0 ? batchSize = batchInput;
+initialized == 0 ? inside = 0;
+initialized == 0 ? total = 0;
+initialized == 0 ? frame = 0;
+initialized == 0 ? initialized = 1;
+
+resetTrigger > 0 ? () => {
+  inside = 0;
+  total = 0;
+  resetTrigger = 0
+};
+
+sampleBatch() => {
+  x = 0~1;
+  y = 0~1;
+  radiusSquared = x * x + y * y;
+  radiusSquared <= 1 ? inside++;
+  total++;
+  sample++;
+  sample < batchSize ? >sampleBatch() : 0
+};
+
+sample = 0;
+sampleBatch();
+estimate = 4 * inside / total;
+@=estimate@;
+@=total@;
+frame++`,
+    args: '25',
+    animation: {
+      kind: 'series',
+      title: 'Monte Carlo estimate of π',
+      description: 'Each tick adds random samples; the dashed line is π, not another estimate.',
+      framesPerSecond: 15,
+      execution: { mode: 'live' },
+      yMin: 0,
+      yMax: 4,
+      historyLength: 240,
+      lines: [
+        { channel: 'estimate', color: '#a78bfa', label: 'Running estimate' },
+      ],
+      references: [
+        { value: 3.141592653589793, color: '#fbbf24', label: 'π reference' },
+      ],
+    },
+    controls: {
+      description: 'Batch size controls how much new evidence arrives on each animation tick.',
+      autoRun: true,
+      items: [
+        {
+          id: 'batch-size',
+          label: 'Samples per tick',
+          description: 'Larger batches converge faster but hide more of the early randomness.',
+          argumentIndex: 0,
+          kind: 'range',
+          defaultValue: 25,
+          min: 1,
+          max: 100,
+          step: 1,
+        },
+        {
+          id: 'reset-estimate',
+          label: 'Reset estimate',
+          description: 'Discard the accumulated sample counts and begin a fresh experiment.',
+          kind: 'trigger',
+          variable: 'resetTrigger',
+          amount: 1,
+          buttonLabel: 'Reset experiment',
         },
       ],
     },

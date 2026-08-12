@@ -7,11 +7,13 @@ const frames: AnimationFrame[] = [
   {
     values: {
       x: [1], y: [2], prey: [10], predators: [5], sample: [0, 1, 0], cell: [0, 1, 0],
+      values: [30, 10, 20], highlight: [1],
     },
   },
   {
     values: {
       x: [2], y: [3], prey: [11], predators: [6], sample: [1, 0, -1], cell: [1, 1, 0],
+      values: [10, 20, 30], highlight: [2],
     },
   },
 ]
@@ -61,6 +63,16 @@ describe('animation player', () => {
       historyRows: 2,
       color: '#fff',
     },
+    {
+      ...base,
+      kind: 'bars',
+      channel: 'values',
+      min: 0,
+      max: 100,
+      color: '#09f',
+      highlightColor: '#fc0',
+      highlightChannel: 'highlight',
+    },
   ])('renders $kind output as an accessible SVG with playback controls', spec => {
     const markup = renderToStaticMarkup(<AnimationPlayer frames={frames} spec={spec} />)
 
@@ -81,12 +93,35 @@ describe('animation player', () => {
         { channel: 'prey', color: '#0f0', label: 'Prey' },
         { channel: 'predators', color: '#f0f', label: 'Predators' },
       ],
+      references: [
+        { value: 12, color: '#fc0', label: 'Target' },
+      ],
     }
 
     const markup = renderToStaticMarkup(<AnimationPlayer frames={frames} spec={spec} />)
     expect(markup.match(/animation-series/g)).toHaveLength(2)
     expect(markup).toContain('Prey')
     expect(markup).toContain('Predators')
+    expect(markup).toContain('animation-reference')
+    expect(markup).toContain('Target')
+  })
+
+  it('renders a memory array as bars and highlights the active pair', () => {
+    const spec: AnimationSpec = {
+      ...base,
+      kind: 'bars',
+      channel: 'values',
+      min: 0,
+      max: 100,
+      color: '#09f',
+      highlightColor: '#fc0',
+      highlightChannel: 'highlight',
+    }
+
+    const markup = renderToStaticMarkup(<AnimationPlayer frames={frames} spec={spec} />)
+    expect(markup.match(/animation-bar/g)).toHaveLength(3)
+    expect(markup.match(/fill="#fc0"/g)).toHaveLength(2)
+    expect(markup).toContain('Item 1: 30')
   })
 
   it('shows an unbounded live stream before later ticks are generated', () => {

@@ -9,18 +9,18 @@ export const logisticMapExample: Example = {
   expected: 'A continuous stream plotting population against iteration.',
   challenge: 'Move growth slowly from 3.0 toward 4.0 and look for each period-doubling transition.',
   code: `setup(growthInput, seedInput) => {
-growth = growthInput;
-population = seedInput;
-frame = 0
+  growth = growthInput;
+  population = seedInput;
+  frame = 0
 };
 
 tick() => {
-iteration = frame;
-@=iteration@;
-@=population@;
+  iteration = frame;
+  @=iteration@;
+  @=population@;
 
-population = growth * population * (1 - population);
-frame++
+  population = growth * population * (1 - population);
+  frame++
 };`,
   args: '3.82 0.2',
   animation: {

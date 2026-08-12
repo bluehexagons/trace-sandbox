@@ -10,46 +10,46 @@ export const experimentsExamples: Example[] = [
   expected: 'A continuous stream of generations growing from a single live cell.',
   challenge: 'Compare rules 30, 90, and 110, then reseed the center during each run.',
   code: `calculateNext() => {
-left = current[i - 1];
-center = current[i];
-right = current[i + 1];
-neighborhood = left * 4 + center * 2 + right;
-bit = 2 ** neighborhood;
-next[i] = rule %% (bit * 2) >= bit;
-i++ < size ? >calculateNext() : 0
+  left = current[i - 1];
+  center = current[i];
+  right = current[i + 1];
+  neighborhood = left * 4 + center * 2 + right;
+  bit = 2 ** neighborhood;
+  next[i] = rule %% (bit * 2) >= bit;
+  i++ < size ? >calculateNext() : 0
 };
 
 copyNext() => {
-current[i] = next[i];
-i++ <= size ? >copyNext() : 0
+  current[i] = next[i];
+  i++ <= size ? >copyNext() : 0
 };
 
 advance() => {
-# Keep the edges dead; arr[0] is the array size, not a cell.
-next[1] = 0;
-next[size] = 0;
-i = 2;
-calculateNext();
-i = 1;
-copyNext()
+  # Keep the edges dead; arr[0] is the array size, not a cell.
+  next[1] = 0;
+  next[size] = 0;
+  i = 2;
+  calculateNext();
+  i = 1;
+  copyNext()
 };
 
 setup(ruleInput) => {
-rule = ruleInput;
-size = 41;
-current = [size];
-next = [size];
-current[21] = 1;
-frame = 0
+  rule = ruleInput;
+  size = 41;
+  current = [size];
+  next = [size];
+  current[21] = 1;
+  frame = 0
 };
 
 tick() => {
-frame > 0 ? advance();
-seedTrigger > 0 ? () => {
-current[21] = 1;
-seedTrigger = 0
-};
-frame++
+  frame > 0 ? advance();
+  seedTrigger > 0 ? () => {
+    current[21] = 1;
+    seedTrigger = 0
+  };
+  frame++
 };`,
   args: '30',
   animation: {
@@ -104,49 +104,49 @@ frame++
   expected: 'Highlighted pairs trade places until every bar is ordered from shortest to tallest.',
   challenge: 'Shuffle halfway through a pass, or change the comparison to build a descending sort.',
   code: `fillRandom() => {
-values[i] = 1~100;
-i++ <= size ? >fillRandom() : 0
+  values[i] = 1~100;
+  i++ <= size ? >fillRandom() : 0
 };
 
 setup(sizeInput) => {
-size = sizeInput;
-values = [size];
-i = 1;
-fillRandom();
-scan = 1;
-swapped = 0;
-sorted = 0
+  size = sizeInput;
+  values = [size];
+  i = 1;
+  fillRandom();
+  scan = 1;
+  swapped = 0;
+  sorted = 0
 };
 
 tick() => {
-shuffleTrigger > 0 ? () => {
-i = 1;
-fillRandom();
-scan = 1;
-swapped = 0;
-sorted = 0;
-shuffleTrigger = 0
-};
+  shuffleTrigger > 0 ? () => {
+    i = 1;
+    fillRandom();
+    scan = 1;
+    swapped = 0;
+    sorted = 0;
+    shuffleTrigger = 0
+  };
 
-highlight = sorted ? 0 : scan;
-@=highlight@;
+  highlight = sorted ? 0 : scan;
+  @=highlight@;
 
-sorted == 0 ? () => {
-left = values[scan];
-right = values[scan + 1];
-left > right ? () => {
-  values[scan] = right;
-  values[scan + 1] = left;
-  swapped = 1
-};
-scan++;
-scan >= size ? () => {
-  swapped == 0 ? sorted = 1;
-  scan = 1;
-  swapped = 0
-}
-};
-sorted
+  sorted == 0 ? () => {
+    left = values[scan];
+    right = values[scan + 1];
+    left > right ? () => {
+      values[scan] = right;
+      values[scan + 1] = left;
+      swapped = 1
+    };
+    scan++;
+    scan >= size ? () => {
+      swapped == 0 ? sorted = 1;
+      scan = 1;
+      swapped = 0
+    }
+  };
+  sorted
 };`,
   args: '24',
   animation: {
@@ -203,35 +203,35 @@ sorted
   expected: 'The live estimate wanders at first, then settles near the dashed π reference line.',
   challenge: 'Compare small and large batches, then reset both and see which estimate stabilizes first.',
   code: `setup(batchInput) => {
-batchSize = batchInput;
-inside = 0;
-total = 0;
-frame = 0
+  batchSize = batchInput;
+  inside = 0;
+  total = 0;
+  frame = 0
 };
 
 sampleBatch() => {
-x = 0~1;
-y = 0~1;
-radiusSquared = x * x + y * y;
-radiusSquared <= 1 ? inside++;
-total++;
-sample++;
-sample < batchSize ? >sampleBatch() : 0
+  x = 0~1;
+  y = 0~1;
+  radiusSquared = x * x + y * y;
+  radiusSquared <= 1 ? inside++;
+  total++;
+  sample++;
+  sample < batchSize ? >sampleBatch() : 0
 };
 
 tick() => {
-resetTrigger > 0 ? () => {
-inside = 0;
-total = 0;
-resetTrigger = 0
-};
+  resetTrigger > 0 ? () => {
+    inside = 0;
+    total = 0;
+    resetTrigger = 0
+  };
 
-sample = 0;
-sampleBatch();
-estimate = 4 * inside / total;
-@=estimate@;
-@=total@;
-frame++
+  sample = 0;
+  sampleBatch();
+  estimate = 4 * inside / total;
+  @=estimate@;
+  @=total@;
+  frame++
 };`,
   args: '25',
   animation: {

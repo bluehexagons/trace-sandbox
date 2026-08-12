@@ -10,57 +10,57 @@ export const orbitalSystemExample: Example = {
   challenge: 'Change body 3’s target velocity while it is orbiting and watch the path adapt.',
   code: `# The host calls setup() once, then tick() for every frame.
 setup(gravityInput, timeStepInput, outerSpeedInput) => {
-gravity = gravityInput;
-dt = timeStepInput;
-outerSpeed = outerSpeedInput;
-frame = 0;
-x1 = 18;
-y1 = 0;
-vx1 = 0;
-vy1 = 1.64;
-x2 = 0;
-y2 = 28;
-vx2 = -1.31;
-vy2 = 0;
-x3 = -38;
-y3 = 0;
-vx3 = 0;
-vy3 = -outerSpeed
+  gravity = gravityInput;
+  dt = timeStepInput;
+  outerSpeed = outerSpeedInput;
+  frame = 0;
+  x1 = 18;
+  y1 = 0;
+  vx1 = 0;
+  vy1 = 1.64;
+  x2 = 0;
+  y2 = 28;
+  vx2 = -1.31;
+  vy2 = 0;
+  x3 = -38;
+  y3 = 0;
+  vx3 = 0;
+  vy3 = -outerSpeed
 };
 
 tick() => {
-@=x1@; @=y1@;
-@=x2@; @=y2@;
-@=x3@; @=y3@;
+  @=x1@; @=y1@;
+  @=x2@; @=y2@;
+  @=x3@; @=y3@;
 
-# The live slider changes the target speed without resetting the orbit.
-vy3 += (-outerSpeed - vy3) * 0.1;
+  # The live slider changes the target speed without resetting the orbit.
+  vy3 += (-outerSpeed - vy3) * 0.1;
 
-radiusSquared1 = x1 * x1 + y1 * y1;
-radius1 = radiusSquared1 ** 0.5;
-force1 = gravity / (radiusSquared1 * radius1);
-vx1 -= x1 * force1 * dt;
-vy1 -= y1 * force1 * dt;
-x1 += vx1 * dt;
-y1 += vy1 * dt;
+  radiusSquared1 = x1 * x1 + y1 * y1;
+  radius1 = radiusSquared1 ** 0.5;
+  force1 = gravity / (radiusSquared1 * radius1);
+  vx1 -= x1 * force1 * dt;
+  vy1 -= y1 * force1 * dt;
+  x1 += vx1 * dt;
+  y1 += vy1 * dt;
 
-radiusSquared2 = x2 * x2 + y2 * y2;
-radius2 = radiusSquared2 ** 0.5;
-force2 = gravity / (radiusSquared2 * radius2);
-vx2 -= x2 * force2 * dt;
-vy2 -= y2 * force2 * dt;
-x2 += vx2 * dt;
-y2 += vy2 * dt;
+  radiusSquared2 = x2 * x2 + y2 * y2;
+  radius2 = radiusSquared2 ** 0.5;
+  force2 = gravity / (radiusSquared2 * radius2);
+  vx2 -= x2 * force2 * dt;
+  vy2 -= y2 * force2 * dt;
+  x2 += vx2 * dt;
+  y2 += vy2 * dt;
 
-radiusSquared3 = x3 * x3 + y3 * y3;
-radius3 = radiusSquared3 ** 0.5;
-force3 = gravity / (radiusSquared3 * radius3);
-vx3 -= x3 * force3 * dt;
-vy3 -= y3 * force3 * dt;
-x3 += vx3 * dt;
-y3 += vy3 * dt;
+  radiusSquared3 = x3 * x3 + y3 * y3;
+  radius3 = radiusSquared3 ** 0.5;
+  force3 = gravity / (radiusSquared3 * radius3);
+  vx3 -= x3 * force3 * dt;
+  vy3 -= y3 * force3 * dt;
+  x3 += vx3 * dt;
+  y3 += vy3 * dt;
 
-frame++
+  frame++
 };`,
   args: '48 0.18 1.05',
   animation: {

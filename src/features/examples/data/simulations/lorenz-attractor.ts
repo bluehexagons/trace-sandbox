@@ -10,33 +10,33 @@ export const lorenzAttractorExample: Example = {
   challenge: 'Let two runs evolve, perturb one, and watch their trajectories diverge.',
   code: `# Setup and stepping are separate host-callable functions.
 setup(rhoInput, sigmaInput, timeStepInput) => {
-frame = 0;
-dt = timeStepInput;
-sigma = sigmaInput;
-rho = rhoInput;
-beta = 2.6666667;
-x = 0.1;
-y = 0;
-z = 0
+  frame = 0;
+  dt = timeStepInput;
+  sigma = sigmaInput;
+  rho = rhoInput;
+  beta = 2.6666667;
+  x = 0.1;
+  y = 0;
+  z = 0
 };
 
 tick() => {
-perturbX != 0 ? () => {
-x += perturbX;
-perturbX = 0
-};
+  perturbX != 0 ? () => {
+    x += perturbX;
+    perturbX = 0
+  };
 
-@=x@;
-@=z@;
+  @=x@;
+  @=z@;
 
-dx = sigma * (y - x);
-dy = x * (rho - z) - y;
-dz = x * y - beta * z;
-x += dx * dt;
-y += dy * dt;
-z += dz * dt;
+  dx = sigma * (y - x);
+  dy = x * (rho - z) - y;
+  dz = x * y - beta * z;
+  x += dx * dt;
+  y += dy * dt;
+  z += dz * dt;
 
-frame++
+  frame++
 };`,
   args: '28 10 0.008',
   animation: {

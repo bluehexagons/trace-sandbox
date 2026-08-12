@@ -2,6 +2,7 @@ import { examples, exampleSections } from '../examples'
 import { AnimationPlayer } from '../animation'
 import InteractiveControls from './components/InteractiveControls'
 import SandboxRunOptions from './components/SandboxRunOptions'
+import TraceCodeEditor from './components/TraceCodeEditor'
 import { buildExampleHref } from './sandboxUrl'
 import { usePlayground } from './usePlayground'
 
@@ -254,13 +255,12 @@ export default function Playground() {
                 <span className="hint">
                   {activeAnimation
                     ? activeAnimation.execution?.mode === 'live'
-                      ? 'Ctrl+Enter · tick() runs once per playback tick'
-                      : 'Ctrl+Enter · @frame@ + named echoes render above'
-                    : 'Ctrl+Enter to run'}
+                      ? 'Tab indent · Ctrl+Enter · tick() runs once per playback tick'
+                      : 'Tab indent · Ctrl+Enter · @frame@ + named echoes render above'
+                    : 'Tab indent · Ctrl+Enter to run'}
                 </span>
               </div>
-              <textarea
-                className="editor"
+              <TraceCodeEditor
                 value={code}
                 onChange={event => {
                   clearScheduledRun()
@@ -269,13 +269,9 @@ export default function Playground() {
                   setShareStatus('')
                 }}
                 onKeyDown={handleKeyDown}
-                spellCheck={false}
-                autoComplete="off"
-                autoCorrect="off"
-                autoCapitalize="off"
                 placeholder="Enter trace code here…"
-                aria-label="trace script editor"
                 rows={Math.min(26, Math.max(9, code.split('\n').length + 1))}
+                ariaLabel="trace script editor"
               />
             </section>
 

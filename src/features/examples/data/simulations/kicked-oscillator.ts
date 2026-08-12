@@ -9,28 +9,28 @@ export const kickedOscillatorExample: Example = {
   expected: 'A kick jumps velocity immediately; position stays continuous, then follows with a delayed oscillation.',
   challenge: 'Kick at the natural rhythm to add energy, then kick against it to stop the motion.',
   code: `setup(stiffnessInput, dampingInput) => {
-stiffness = stiffnessInput;
-damping = dampingInput;
-dt = 0.05;
-position = 8;
-velocity = 0;
-frame = 0
+  stiffness = stiffnessInput;
+  damping = dampingInput;
+  dt = 0.05;
+  position = 8;
+  velocity = 0;
+  frame = 0
 };
 
 tick() => {
-impulse != 0 ? () => {
-velocity += impulse;
-impulse = 0
-};
+  impulse != 0 ? () => {
+    velocity += impulse;
+    impulse = 0
+  };
 
-@=position@;
-@=velocity@;
+  @=position@;
+  @=velocity@;
 
-acceleration = -stiffness * position;
-velocity += acceleration * dt;
-velocity *= damping;
-position += velocity * dt;
-frame++
+  acceleration = -stiffness * position;
+  velocity += acceleration * dt;
+  velocity *= damping;
+  position += velocity * dt;
+  frame++
 };`,
   args: '0.65 0.997',
   animation: {

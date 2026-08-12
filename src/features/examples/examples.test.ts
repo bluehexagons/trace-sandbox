@@ -71,6 +71,27 @@ describe('guided examples', () => {
     }
   })
 
+  it('keeps nested Trace blocks indented for readability', () => {
+    for (const example of examples) {
+      let depth = 0
+
+      for (const line of example.code.split('\n')) {
+        if (line.trim() === '') continue
+
+        const closesBlock = /^\s*}/.test(line)
+        const expectedDepth = closesBlock ? depth - 1 : depth
+        const indentation = line.match(/^\s*/)?.[0].length ?? 0
+        expect(indentation, `${example.id}: ${line}`).toBeGreaterThanOrEqual(
+          Math.max(0, expectedDepth) * 2,
+        )
+
+        depth += (line.match(/{/g)?.length ?? 0) - (line.match(/}/g)?.length ?? 0)
+      }
+
+      expect(depth, `${example.id} has unbalanced blocks`).toBe(0)
+    }
+  })
+
   for (const example of examples) {
     it(`runs ${example.name}`, () => {
       const result = runExample(example)

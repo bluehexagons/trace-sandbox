@@ -186,6 +186,24 @@ export function usePlayground() {
         requestAnimationFrame(() => {
           el.selectionStart = el.selectionEnd = start + 2
         })
+        return
+      }
+      if (e.key === 'Enter' && !e.shiftKey && !e.altKey && !e.ctrlKey && !e.metaKey) {
+        e.preventDefault()
+        const el = e.currentTarget
+        const start = el.selectionStart
+        const lineStart = code.lastIndexOf('\n', start - 1) + 1
+        const currentLine = code.slice(lineStart, start)
+        const leadingWhitespace = currentLine.match(/^\s*/)?.[0] ?? ''
+        const indentation = /{\s*$/.test(currentLine)
+          ? `${leadingWhitespace}  `
+          : leadingWhitespace
+        const next = code.substring(0, start) + `\n${indentation}` + code.substring(el.selectionEnd)
+        setCode(next)
+        requestAnimationFrame(() => {
+          const cursor = start + indentation.length + 1
+          el.selectionStart = el.selectionEnd = cursor
+        })
       }
     },
     [code, runCode],

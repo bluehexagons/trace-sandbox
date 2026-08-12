@@ -18,23 +18,83 @@
 .editor-section { display: flex; flex-direction: column; gap: 0.5rem; }
 .editor-toolbar { display: flex; align-items: center; justify-content: space-between; }
 
-.editor {
-  width: 100%;
+.editor-shell {
+  display: grid;
+  grid-template-columns: 3.25rem minmax(0, 1fr);
   min-height: 220px;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  color: var(--text);
+  overflow: hidden;
+  transition: border-color 0.15s;
+}
+.editor-shell:focus-within { border-color: var(--accent); }
+
+.editor-gutter,
+.editor-highlight,
+.editor-input {
   font-family: var(--font-mono);
   font-size: 0.9375rem;
   line-height: 1.6;
-  padding: 1rem 1.25rem;
-  resize: vertical;
-  outline: none;
-  transition: border-color 0.15s;
+  tab-size: 2;
+  white-space: pre;
 }
-.editor:focus { border-color: var(--accent); }
-.editor::placeholder { color: var(--text-dim); }
+
+.editor-gutter {
+  overflow: hidden;
+  padding: 1rem 0.75rem 1rem 0.5rem;
+  color: var(--text-dim);
+  font-size: 0.8125rem;
+  text-align: right;
+  user-select: none;
+}
+.editor-gutter span { display: block; }
+
+.editor-code {
+  position: relative;
+  min-width: 0;
+}
+.editor-highlight,
+.editor-input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  min-height: 220px;
+  margin: 0;
+  padding: 1rem 1.25rem;
+  overflow: auto;
+}
+.editor-highlight {
+  pointer-events: none;
+  color: var(--text);
+  overflow: hidden;
+}
+.editor-highlight code { font: inherit; }
+.editor-input {
+  z-index: 1;
+  border: 0;
+  background: transparent;
+  color: transparent;
+  caret-color: var(--text);
+  outline: none;
+  resize: none;
+  -webkit-text-fill-color: transparent;
+}
+.editor-input::placeholder {
+  color: var(--text-dim);
+  -webkit-text-fill-color: var(--text-dim);
+}
+.editor-input::selection { background: rgba(124, 107, 255, 0.32); }
+
+.syntax-comment { color: #77809f; font-style: italic; }
+.syntax-echo { color: #fbbf24; }
+.syntax-string { color: #86efac; }
+.syntax-number { color: #fca5a5; }
+.syntax-keyword,
+.syntax-operator { color: #c4b5fd; }
+.syntax-function { color: #67e8f9; }
+.syntax-variable { color: var(--text); }
 
 /* ── Args section ───────────────────────────────────────── */
 .args-section { display: flex; flex-direction: column; gap: 0.5rem; }
@@ -101,4 +161,3 @@
   color: var(--green);
   font-size: 0.75rem;
 }
-

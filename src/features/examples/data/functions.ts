@@ -10,7 +10,7 @@ export const functionsExamples: Example[] = [
   expected: '5 — the hypotenuse of a 3–4–5 triangle.',
   challenge: 'Add an area(a, b) function and call it with the same arguments.',
   code: `hypotenuse(a, b) => {
-(a ** 2 + b ** 2) ** 0.5
+  (a ** 2 + b ** 2) ** 0.5
 };
 
 hypotenuse(3, 4)`,
@@ -26,8 +26,8 @@ hypotenuse(3, 4)`,
   challenge: 'Change the program to count by twos without changing the limit.',
   code: `count = 0;
 () => {
-count++;
-count < 10 ? () : count
+  count++;
+  count < 10 ? () : count
 };
 count`,
   expectedValue: 10,
@@ -41,12 +41,12 @@ count`,
   expected: '720, or 6 factorial.',
   challenge: 'Try factorial(10, 1), then remove > and compare what the two versions mean.',
   code: `factorial(n, accumulator) => {
-n <= 1 ? accumulator : () => {
-  # Evaluate both values before the call: parameters are shared globals.
-  nextN = n - 1;
-  nextAccumulator = accumulator * n;
-  >factorial(nextN, nextAccumulator)
-}
+  n <= 1 ? accumulator : () => {
+    # Evaluate both values before the call: parameters are shared globals.
+    nextN = n - 1;
+    nextAccumulator = accumulator * n;
+    >factorial(nextN, nextAccumulator)
+  }
 };
 
 factorial(6, 1)`,
@@ -80,8 +80,8 @@ apply(square, doubled)`,
 i = 1;
 
 while(i <= 5, () => {
-total += i;
-i++
+  total += i;
+  i++
 });
 
 total`,

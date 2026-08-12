@@ -9,37 +9,37 @@ export const predatorPreyExample: Example = {
   expected: 'Two offset population trails showing predators following changes in prey.',
   challenge: 'Release prey or predators mid-orbit and compare how each intervention shifts the cycle.',
   code: `setup(preyInput, predatorInput, predationInput) => {
-prey = preyInput;
-predators = predatorInput;
-predation = predationInput;
-preyGrowth = 1;
-predatorDeath = 1.2;
-conversion = 0.1;
-dt = 0.02;
-frame = 0
+  prey = preyInput;
+  predators = predatorInput;
+  predation = predationInput;
+  preyGrowth = 1;
+  predatorDeath = 1.2;
+  conversion = 0.1;
+  dt = 0.02;
+  frame = 0
 };
 
 tick() => {
-preyRelease != 0 ? () => {
-prey += preyRelease;
-preyRelease = 0
-};
-predatorRelease != 0 ? () => {
-predators += predatorRelease;
-predatorRelease = 0
-};
+  preyRelease != 0 ? () => {
+    prey += preyRelease;
+    preyRelease = 0
+  };
+  predatorRelease != 0 ? () => {
+    predators += predatorRelease;
+    predatorRelease = 0
+  };
 
-@=prey@;
-@=predators@;
+  @=prey@;
+  @=predators@;
 
-preyChange = preyGrowth * prey - predation * prey * predators;
-predatorChange = conversion * prey * predators - predatorDeath * predators;
-prey += preyChange * dt;
-predators += predatorChange * dt;
-prey < 0 ? prey = 0;
-predators < 0 ? predators = 0;
+  preyChange = preyGrowth * prey - predation * prey * predators;
+  predatorChange = conversion * prey * predators - predatorDeath * predators;
+  prey += preyChange * dt;
+  predators += predatorChange * dt;
+  prey < 0 ? prey = 0;
+  predators < 0 ? predators = 0;
 
-frame++
+  frame++
 };`,
   args: '10 5 0.1',
   animation: {

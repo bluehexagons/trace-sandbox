@@ -9,66 +9,66 @@ export const dampedWaveExample: Example = {
   expected: 'A continuous wave stream where the pulse splits, reflects, and loses energy.',
   challenge: 'Wait for the first pulse to spread, then inject another and watch them interfere.',
   code: `initialize() => {
-distance = i - 21;
-distance < 0 ? distance = -distance;
-current[i] = distance < 5 ? pulseHeight * (1 - distance / 5) : 0;
-previous[i] = current[i];
-i++ <= size ? >initialize() : 0
+  distance = i - 21;
+  distance < 0 ? distance = -distance;
+  current[i] = distance < 5 ? pulseHeight * (1 - distance / 5) : 0;
+  previous[i] = current[i];
+  i++ <= size ? >initialize() : 0
 };
 
 calculateNext() => {
-laplacian = current[i - 1] - 2 * current[i] + current[i + 1];
-next[i] = (2 * current[i] - previous[i] + coupling * laplacian) * damping;
-i++ < size ? >calculateNext() : 0
+  laplacian = current[i - 1] - 2 * current[i] + current[i + 1];
+  next[i] = (2 * current[i] - previous[i] + coupling * laplacian) * damping;
+  i++ < size ? >calculateNext() : 0
 };
 
 copyNext() => {
-previous[i] = current[i];
-current[i] = next[i];
-i++ <= size ? >copyNext() : 0
+  previous[i] = current[i];
+  current[i] = next[i];
+  i++ <= size ? >copyNext() : 0
 };
 
 injectPulse() => {
-distance = i - 21;
-distance < 0 ? distance = -distance;
-current[i] += distance < 5
-  ? pulseHeight * pulseTrigger * (1 - distance / 5)
-  : 0;
-i++ <= size ? >injectPulse() : 0
+  distance = i - 21;
+  distance < 0 ? distance = -distance;
+  current[i] += distance < 5
+    ? pulseHeight * pulseTrigger * (1 - distance / 5)
+    : 0;
+  i++ <= size ? >injectPulse() : 0
 };
 
 advance() => {
-# Index 0 stores array size, so boundaries are fixed explicitly.
-next[1] = 0;
-next[size] = 0;
-i = 2;
-calculateNext();
-i = 1;
-copyNext()
+  # Index 0 stores array size, so boundaries are fixed explicitly.
+  next[1] = 0;
+  next[size] = 0;
+  i = 2;
+  calculateNext();
+  i = 1;
+  copyNext()
 };
 
 setup(couplingInput, dampingInput, pulseHeightInput) => {
-coupling = couplingInput;
-damping = dampingInput;
-pulseHeight = pulseHeightInput;
-size = 41;
-current = [size];
-previous = [size];
-next = [size];
-i = 1;
-initialize();
-frame = 0
+  coupling = couplingInput;
+  damping = dampingInput;
+  pulseHeight = pulseHeightInput;
+  size = 41;
+  current = [size];
+  previous = [size];
+  next = [size];
+  i = 1;
+  initialize();
+  frame = 0
 };
 
 tick() => {
-# Leave the initial pulse untouched for the first rendered tick.
-frame > 0 ? advance();
-pulseTrigger > 0 ? () => {
-i = 1;
-injectPulse();
-pulseTrigger = 0
-};
-frame++
+  # Leave the initial pulse untouched for the first rendered tick.
+  frame > 0 ? advance();
+  pulseTrigger > 0 ? () => {
+    i = 1;
+    injectPulse();
+    pulseTrigger = 0
+  };
+  frame++
 };`,
   args: '0.2 0.997 1',
   animation: {

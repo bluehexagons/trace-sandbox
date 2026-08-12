@@ -58,8 +58,8 @@ total = 0;
 i = 1;
 
 &0 > 0 ? () => {
-total += &i;
-i++ <= &0 ? >() : total
+  total += &i;
+  i++ <= &0 ? >() : total
 } : 0`,
   args: '3 5 8 9',
   expectedValue: 25,
@@ -92,13 +92,13 @@ readings[1] + readings[2] + readings[3] + readings[4]`,
   code: `values = [5];
 
 fill() => {
-values[i] = i * 2;
-i++ <= values[0] ? >fill() : 0
+  values[i] = i * 2;
+  i++ <= values[0] ? >fill() : 0
 };
 
 addAll() => {
-total += values[j];
-j++ <= values[0] ? >addAll() : total
+  total += values[j];
+  j++ <= values[0] ? >addAll() : total
 };
 
 i = 1;

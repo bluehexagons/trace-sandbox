@@ -14,12 +14,12 @@ inputLeft = a;
 inputRight = b;
 
 gcd(left, right) => {
-right == 0 ? left : () => {
-  # Compute the pair before calling because parameters are shared globals.
-  nextLeft = right;
-  nextRight = left %% right;
-  >gcd(nextLeft, nextRight)
-}
+  right == 0 ? left : () => {
+    # Compute the pair before calling because parameters are shared globals.
+    nextLeft = right;
+    nextRight = left %% right;
+    >gcd(nextLeft, nextRight)
+  }
 };
 
 gcd(inputLeft, inputRight)`,
@@ -39,16 +39,16 @@ count = &0;
 values = [count];
 i = 1;
 &0 > 0 ? () => {
-values[i] = &i;
-i++ <= &0 ? >() : values[0]
+  values[i] = &i;
+  i++ <= &0 ? >() : values[0]
 };
 
 scan() => {
-current = values[j];
-total += current;
-current < minimum ? minimum = current;
-current > maximum ? maximum = current;
-j++ <= values[0] ? >scan() : total / values[0]
+  current = values[j];
+  total += current;
+  current < minimum ? minimum = current;
+  current > maximum ? maximum = current;
+  j++ <= values[0] ? >scan() : total / values[0]
 };
 
 minimum = values[1];
@@ -78,31 +78,31 @@ eventCount = &0;
 events = [eventCount];
 i = 1;
 &0 > 0 ? () => {
-events[i] = &i;
-i++ <= &0 ? >() : events[0]
+  events[i] = &i;
+  i++ <= &0 ? >() : events[0]
 };
 
 handle(event) => {
-event == 1 ? credit++;
-event == 2 && credit >= 2 && stock > 0 ? () => {
-  credit -= 2;
-  stock--;
-  dispensed++
-};
-event == 3 ? () => {
-  refunded += credit;
-  credit = 0
-};
-@=event@;
-@=credit@;
-@=stock@
+  event == 1 ? credit++;
+  event == 2 && credit >= 2 && stock > 0 ? () => {
+    credit -= 2;
+    stock--;
+    dispensed++
+  };
+  event == 3 ? () => {
+    refunded += credit;
+    credit = 0
+  };
+  @=event@;
+  @=credit@;
+  @=stock@
 };
 
 processEvents() => {
-handle(events[position]);
-position++ <= events[0]
-  ? >processEvents()
-  : dispensed * 100 + refunded
+  handle(events[position]);
+  position++ <= events[0]
+    ? >processEvents()
+    : dispensed * 100 + refunded
 };
 
 credit = 0;
@@ -133,30 +133,30 @@ memory[10] = 0;
 memory[20] = 6;
 
 step() => {
-opcode = memory[ip];
-opcode == 0 ? running = 0;
-opcode == 1 ? () => {
-  accumulator = memory[ip + 1];
-  ip += 2
-};
-opcode == 2 ? () => {
-  address = memory[ip + 1];
-  accumulator *= memory[address];
-  ip += 2
-};
-opcode == 3 ? () => {
-  address = memory[ip + 1];
-  memory[address] -= 1;
-  ip += 2
-};
-opcode == 4 ? () => {
-  address = memory[ip + 1];
-  target = memory[ip + 2];
-  memory[address] > 0 ? ip = target : ip += 3
-};
-@=opcode@;
-@=accumulator@;
-running ? >step() : accumulator
+  opcode = memory[ip];
+  opcode == 0 ? running = 0;
+  opcode == 1 ? () => {
+    accumulator = memory[ip + 1];
+    ip += 2
+  };
+  opcode == 2 ? () => {
+    address = memory[ip + 1];
+    accumulator *= memory[address];
+    ip += 2
+  };
+  opcode == 3 ? () => {
+    address = memory[ip + 1];
+    memory[address] -= 1;
+    ip += 2
+  };
+  opcode == 4 ? () => {
+    address = memory[ip + 1];
+    target = memory[ip + 2];
+    memory[address] > 0 ? ip = target : ip += 3
+  };
+  @=opcode@;
+  @=accumulator@;
+  running ? >step() : accumulator
 };
 
 ip = 1;

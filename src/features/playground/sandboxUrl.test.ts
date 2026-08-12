@@ -4,7 +4,7 @@ import {
   buildExampleHref,
   buildSandboxHref,
   parseSandboxUrl,
-} from '../sandboxUrl'
+} from './sandboxUrl'
 
 const baseUrl = 'https://example.test/trace-sandbox/?old=value#output'
 

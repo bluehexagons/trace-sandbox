@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest'
 import { examples, exampleSections } from '../examples'
 import type { Example } from '../examples'
-import { readArgumentValue } from '../interactive'
-import { createTraceTickSession, parseArguments, runTraceScript } from '../traceRunner'
+import { readArgumentValue } from '../playground/interactive'
+import { createTraceTickSession, parseArguments, runTraceScript } from './index'
 
 const liveSampleFrames: Record<string, number> = {
   'orbital-system': 144,

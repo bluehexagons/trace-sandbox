@@ -1,7 +1,7 @@
 import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
-import AnimationPlayer from '../AnimationPlayer'
-import type { AnimationFrame, AnimationSpec } from '../animation'
+import AnimationPlayer from './AnimationPlayer'
+import type { AnimationFrame, AnimationSpec } from './types'
 
 const frames: AnimationFrame[] = [
   {

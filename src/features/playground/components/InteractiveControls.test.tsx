@@ -1,6 +1,6 @@
 import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it, vi } from 'vitest'
-import InteractiveControls from '../InteractiveControls'
+import InteractiveControls from './InteractiveControls'
 import { readArgumentValue, writeArgumentValue } from '../interactive'
 import type {
   InteractiveArgumentControl,

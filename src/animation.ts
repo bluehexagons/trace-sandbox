@@ -10,6 +10,8 @@ export interface MemoryAnimationChannel {
 export interface LiveAnimationExecution {
   mode: 'live'
   memoryChannels?: MemoryAnimationChannel[]
+  setupFunction?: string
+  tickFunction?: string
 }
 
 interface AnimationBase {

@@ -196,11 +196,20 @@ pulseTrigger > 0 ? () => {
         </p>
         <pre><code>{`?example=logistic-map`}</code></pre>
         <p>
+          <strong>Empty sandbox</strong> opens the stable blank URL <code>?code=</code>. Custom
+          sandboxes can run once, repeat the whole script with persistent memory, or register
+          functions and call <code>setup(...)</code> once followed by <code>tick()</code> per frame.
+        </p>
+        <p>
           Use <strong>Open in new sandbox</strong> below the editor to create a URL containing the
           current script and arguments. Opening it prepopulates a fresh sandbox without running
           the shared code automatically.
         </p>
         <pre><code>{`?code=value%20%3D%205%3B%20value%20*%202&args=10%2020`}</code></pre>
+        <p>
+          Live execution settings, playback speed, and chart bounds are included when a custom
+          sandbox link is copied, so its streaming behavior is reproducible.
+        </p>
         <p>
           A shared script can include an <code>example</code> parameter to retain that lesson’s
           interactive controls and animation renderer.
@@ -259,23 +268,25 @@ pulseTrigger > 0 ? () => {
     content: (
       <div>
         <p>
-          Animated lessons run their Trace code once per playback tick. Each run shares one
-          persistent memory environment, so variables and arrays continue from the preceding
-          frame instead of pre-rendering the whole animation up front.
+          Animated lessons evaluate their function definitions once, call <code>setup()</code>,
+          then call <code>tick()</code> in the same persistent memory environment for each frame.
+          Variables and arrays therefore continue from the preceding frame without repeatedly
+          running initialization code or pre-rendering the animation.
         </p>
-        <pre><code>{`initialized == 0 ? () => {
+        <pre><code>{`setup() => {
   frame = 0;
-  x = 0;
-  initialized = 1
+  x = 0
 };
 
-@=x@;       # Add x to this tick's frame
-x += 2;
-frame++`}</code></pre>
+tick() => {
+  @=x@;       # Add x to this tick's frame
+  x += 2;
+  frame++
+};`}</code></pre>
         <h4>Live Frame Protocol</h4>
         <ul>
-          <li>The host executes the edited script once for every playback tick.</li>
-          <li>An initialization guard sets up state only on the first tick.</li>
+          <li>The host registers the script’s functions, calls its configured setup function once, and its tick function repeatedly.</li>
+          <li>Setup and tick calls share one <code>TraceMemory</code> instance.</li>
           <li><code>@=x@</code> adds one numeric value to channel <code>x</code>.</li>
           <li>Scalar channels use named echoes, while dense output can be read directly from a Trace array.</li>
           <li>Time-series charts draw one labeled trail per channel, such as prey and predators.</li>
@@ -285,11 +296,12 @@ frame++`}</code></pre>
           <li>Pause stops execution, resume continues the same memory, and Reset starts fresh.</li>
         </ul>
         <p>
-          Live playback is a sandbox convention built on <code>TraceMemory</code>, not additional
-          language syntax. The wave and cellular-automaton lessons expose their current arrays as
-          memory-backed channels, avoiding a loop of repeated echo statements. The renderer keeps
-          only the history needed for trails, so the Trace program can continue streaming without
-          accumulating every prior frame in browser memory.
+          Live playback and the choice of setup/tick function names are sandbox conventions built
+          on <code>TraceMemory</code>, not additional language syntax. The wave,
+          cellular-automaton, and sorting lessons expose current arrays as memory-backed channels,
+          avoiding repeated echo loops. The renderer keeps only the history needed for trails, so
+          the Trace program can continue streaming without accumulating every prior frame in
+          browser memory.
         </p>
       </div>
     ),

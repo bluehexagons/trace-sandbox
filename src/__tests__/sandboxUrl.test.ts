@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest'
-import { buildExampleHref, buildSandboxHref, parseSandboxUrl } from '../sandboxUrl'
+import {
+  buildEmptySandboxHref,
+  buildExampleHref,
+  buildSandboxHref,
+  parseSandboxUrl,
+} from '../sandboxUrl'
 
 const baseUrl = 'https://example.test/trace-sandbox/?old=value#output'
 
@@ -21,6 +26,12 @@ describe('sandbox URLs', () => {
       exampleId: 'logistic-map',
       code: '# λ population\nvalue = 3.8;\nvalue',
       args: '3.8 0.2',
+      runMode: null,
+      framesPerSecond: null,
+      yMin: null,
+      yMax: null,
+      setupFunction: null,
+      tickFunction: null,
     })
   })
 
@@ -29,12 +40,31 @@ describe('sandbox URLs', () => {
       exampleId: null,
       code: '',
       args: null,
+      runMode: null,
+      framesPerSecond: null,
+      yMin: null,
+      yMax: null,
+      setupFunction: null,
+      tickFunction: null,
     })
     expect(parseSandboxUrl('')).toEqual({
       exampleId: null,
       code: null,
       args: null,
+      runMode: null,
+      framesPerSecond: null,
+      yMin: null,
+      yMax: null,
+      setupFunction: null,
+      tickFunction: null,
     })
+  })
+
+  it('builds a stable empty sandbox link', () => {
+    const href = buildEmptySandboxHref(baseUrl)
+
+    expect(href).toBe('/trace-sandbox/?code=')
+    expect(parseSandboxUrl(new URL(href, baseUrl).search).code).toBe('')
   })
 
   it('preserves an explicitly empty argument list', () => {
@@ -42,5 +72,26 @@ describe('sandbox URLs', () => {
 
     expect(href).toBe('/trace-sandbox/?example=logistic-map&args=')
     expect(parseSandboxUrl(new URL(href, baseUrl).search).args).toBe('')
+  })
+
+  it('round-trips custom live execution settings', () => {
+    const href = buildSandboxHref({
+      code: 'setup() => { x = 1 }; tick() => { @=x@; x++ };',
+      runMode: 'functions',
+      framesPerSecond: 24,
+      yMin: -5,
+      yMax: 20,
+      setupFunction: 'setup',
+      tickFunction: 'tick',
+    }, baseUrl)
+
+    expect(parseSandboxUrl(new URL(href, baseUrl).search)).toMatchObject({
+      runMode: 'functions',
+      framesPerSecond: 24,
+      yMin: -5,
+      yMax: 20,
+      setupFunction: 'setup',
+      tickFunction: 'tick',
+    })
   })
 })

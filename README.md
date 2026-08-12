@@ -11,11 +11,12 @@ An interactive playground for the experimental [**trace**](https://github.com/bl
 - **In-browser REPL** — write and run trace scripts instantly, no install needed.
 - **Guided learning path** — 29 editable lessons progress from expressions and control flow to arrays, higher-order functions, and debugging.
 - **Larger systems** — complete examples include Euclid's algorithm, a statistics scanner, an event-driven vending machine, and a tiny factorial virtual machine.
-- **Live animated output** — simulations execute one Trace tick at playback speed in persistent memory instead of pre-rendering every frame.
+- **Live animated output** — simulations call explicit setup and tick functions in persistent memory instead of repeating initialization or pre-rendering every frame.
 - **Memory-backed channels** — waveform, cellular, and algorithm output is read directly from Trace arrays without repetitive echo loops.
 - **Interactive parameters** — sliders and numeric inputs rerun selected lessons so model behavior can be explored without rewriting code.
 - **Real-time actions** — inject wave pulses, perturb chaotic state, reshuffle a sort, reset an experiment, and kick a spring without resetting live memory.
 - **Shareable URLs** — link directly to any lesson or open the current code and arguments in a prepopulated new sandbox.
+- **Configurable sandbox** — start from a stable blank URL, then run once, repeat the full script in persistent memory, or call explicit setup/tick functions with shared streaming charts.
 - **Lesson notes** — every example identifies its concepts, expected result, and a follow-up experiment.
 - **Argument support** — pass space-separated numbers to scripts that use `[...]` parameter lists.
 - **Echo output** — `@…@` log statements show up in a console panel below the result.

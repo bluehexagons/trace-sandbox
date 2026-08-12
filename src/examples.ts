@@ -28,9 +28,14 @@ export const exampleSections = [
     description: 'Put the pieces together in algorithms, simulations, and an interpreter.',
   },
   {
-    id: 'animations',
-    title: '6. Animated output',
-    description: 'Emit frame channels and tune live parameters to explore visual systems.',
+    id: 'simulations',
+    title: '6. Dynamic systems',
+    description: 'Explore motion, feedback, chaos, and waves in continuously running models.',
+  },
+  {
+    id: 'experiments',
+    title: '7. Algorithms & experiments',
+    description: 'Visualize computation, emergence, and randomized mathematical evidence.',
   },
 ] as const
 
@@ -527,32 +532,33 @@ step()`,
   },
   {
     id: 'orbital-system',
-    section: 'animations',
+    section: 'simulations',
     name: 'Three-body orbital system',
     description: 'Integrate three independent bodies around a gravity well and render their paths.',
     concepts: ['live ticks', 'persistent memory', 'interactive parameters', 'Euler integration', 'gravity'],
     expected: 'A continuous stream of three differently shaped orbits around a central star.',
     challenge: 'Change body 3’s velocity to 0.7 and watch its orbit become more eccentric.',
-    code: `# This script advances one frame each time the host runs it.
-[gravityInput, timeStepInput, outerSpeedInput]
-initialized == 0 ? gravity = gravityInput;
-initialized == 0 ? dt = timeStepInput;
-initialized == 0 ? outerSpeed = outerSpeedInput;
-initialized == 0 ? frame = 0;
-initialized == 0 ? x1 = 18;
-initialized == 0 ? y1 = 0;
-initialized == 0 ? vx1 = 0;
-initialized == 0 ? vy1 = 1.64;
-initialized == 0 ? x2 = 0;
-initialized == 0 ? y2 = 28;
-initialized == 0 ? vx2 = -1.31;
-initialized == 0 ? vy2 = 0;
-initialized == 0 ? x3 = -38;
-initialized == 0 ? y3 = 0;
-initialized == 0 ? vx3 = 0;
-initialized == 0 ? vy3 = -outerSpeed;
-initialized == 0 ? initialized = 1;
+    code: `# The host calls setup() once, then tick() for every frame.
+setup(gravityInput, timeStepInput, outerSpeedInput) => {
+  gravity = gravityInput;
+  dt = timeStepInput;
+  outerSpeed = outerSpeedInput;
+  frame = 0;
+  x1 = 18;
+  y1 = 0;
+  vx1 = 0;
+  vy1 = 1.64;
+  x2 = 0;
+  y2 = 28;
+  vx2 = -1.31;
+  vy2 = 0;
+  x3 = -38;
+  y3 = 0;
+  vx3 = 0;
+  vy3 = -outerSpeed
+};
 
+tick() => {
 @=x1@; @=y1@;
 @=x2@; @=y2@;
 @=x3@; @=y3@;
@@ -581,14 +587,15 @@ vy3 -= y3 * force3 * dt;
 x3 += vx3 * dt;
 y3 += vy3 * dt;
 
-frame++`,
+frame++
+};`,
     args: '48 0.18 1.05',
     animation: {
       kind: 'scene',
       title: 'Orbital system',
       description: 'A symplectic Euler step updates velocity before position on every frame.',
       framesPerSecond: 24,
-      execution: { mode: 'live' },
+      execution: { mode: 'live', setupFunction: 'setup', tickFunction: 'tick' },
       xMin: -65,
       xMax: 65,
       yMin: -65,
@@ -643,24 +650,25 @@ frame++`,
   },
   {
     id: 'lorenz-attractor',
-    section: 'animations',
+    section: 'simulations',
     name: 'Lorenz strange attractor',
     description: 'Integrate a chaotic differential system and draw its evolving phase-space path.',
     concepts: ['chaos', 'persistent memory', 'differential equations', 'live time stepping', 'phase space'],
     expected: 'A continuous trace of the attractor’s two characteristic lobes.',
     challenge: 'Let two runs evolve, perturb one, and watch their trajectories diverge.',
-    code: `# Lorenz system: the host preserves state between ticks.
-[rhoInput, sigmaInput, timeStepInput]
-initialized == 0 ? frame = 0;
-initialized == 0 ? dt = timeStepInput;
-initialized == 0 ? sigma = sigmaInput;
-initialized == 0 ? rho = rhoInput;
-initialized == 0 ? beta = 2.6666667;
-initialized == 0 ? x = 0.1;
-initialized == 0 ? y = 0;
-initialized == 0 ? z = 0;
-initialized == 0 ? initialized = 1;
+    code: `# Setup and stepping are separate host-callable functions.
+setup(rhoInput, sigmaInput, timeStepInput) => {
+  frame = 0;
+  dt = timeStepInput;
+  sigma = sigmaInput;
+  rho = rhoInput;
+  beta = 2.6666667;
+  x = 0.1;
+  y = 0;
+  z = 0
+};
 
+tick() => {
 perturbX != 0 ? () => {
   x += perturbX;
   perturbX = 0
@@ -676,14 +684,15 @@ x += dx * dt;
 y += dy * dt;
 z += dz * dt;
 
-frame++`,
+frame++
+};`,
     args: '28 10 0.008',
     animation: {
       kind: 'scene',
       title: 'Lorenz attractor · x/z projection',
       description: 'The trail reveals a deterministic system whose trajectory never exactly repeats.',
       framesPerSecond: 30,
-      execution: { mode: 'live' },
+      execution: { mode: 'live', setupFunction: 'setup', tickFunction: 'tick' },
       xMin: -35,
       xMax: 35,
       yMin: 0,
@@ -744,14 +753,13 @@ frame++`,
   },
   {
     id: 'damped-wave',
-    section: 'animations',
+    section: 'simulations',
     name: 'Damped wave solver',
     description: 'Evolve a one-dimensional wave and render its current array directly from memory.',
     concepts: ['finite differences', 'memory-backed output', 'double buffering', 'arrays', 'wave propagation'],
     expected: 'A continuous wave stream where the pulse splits, reflects, and loses energy.',
     challenge: 'Wait for the first pulse to spread, then inject another and watch them interfere.',
-    code: `[couplingInput, dampingInput, pulseHeightInput]
-initialize() => {
+    code: `initialize() => {
   distance = i - 21;
   distance < 0 ? distance = -distance;
   current[i] = distance < 5 ? pulseHeight * (1 - distance / 5) : 0;
@@ -790,18 +798,20 @@ advance() => {
   copyNext()
 };
 
-initialized == 0 ? coupling = couplingInput;
-initialized == 0 ? damping = dampingInput;
-initialized == 0 ? pulseHeight = pulseHeightInput;
-initialized == 0 ? size = 41;
-initialized == 0 ? current = [size];
-initialized == 0 ? previous = [size];
-initialized == 0 ? next = [size];
-initialized == 0 ? i = 1;
-initialized == 0 ? initialize();
-initialized == 0 ? frame = 0;
-initialized == 0 ? initialized = 1;
+setup(couplingInput, dampingInput, pulseHeightInput) => {
+  coupling = couplingInput;
+  damping = dampingInput;
+  pulseHeight = pulseHeightInput;
+  size = 41;
+  current = [size];
+  previous = [size];
+  next = [size];
+  i = 1;
+  initialize();
+  frame = 0
+};
 
+tick() => {
 # Leave the initial pulse untouched for the first rendered tick.
 frame > 0 ? advance();
 pulseTrigger > 0 ? () => {
@@ -809,7 +819,8 @@ pulseTrigger > 0 ? () => {
   injectPulse();
   pulseTrigger = 0
 };
-frame++`,
+frame++
+};`,
     args: '0.2 0.997 1',
     animation: {
       kind: 'wave',
@@ -819,6 +830,8 @@ frame++`,
       execution: {
         mode: 'live',
         memoryChannels: [{ channel: 'sample', array: 'current' }],
+        setupFunction: 'setup',
+        tickFunction: 'tick',
       },
       channel: 'sample',
       min: -1.5,
@@ -877,14 +890,13 @@ frame++`,
   },
   {
     id: 'elementary-cellular-automaton',
-    section: 'animations',
+    section: 'experiments',
     name: 'Interactive cellular automaton',
     description: 'Choose any elementary rule and grow its structure from one live cell.',
     concepts: ['cellular automata', 'memory-backed output', 'double buffering', 'boolean algebra', 'emergence'],
     expected: 'A continuous stream of generations growing from a single live cell.',
     challenge: 'Compare rules 30, 90, and 110, then reseed the center during each run.',
-    code: `[ruleInput]
-calculateNext() => {
+    code: `calculateNext() => {
   left = current[i - 1];
   center = current[i];
   right = current[i + 1];
@@ -909,20 +921,23 @@ advance() => {
   copyNext()
 };
 
-initialized == 0 ? rule = ruleInput;
-initialized == 0 ? size = 41;
-initialized == 0 ? current = [size];
-initialized == 0 ? next = [size];
-initialized == 0 ? current[21] = 1;
-initialized == 0 ? frame = 0;
-initialized == 0 ? initialized = 1;
+setup(ruleInput) => {
+  rule = ruleInput;
+  size = 41;
+  current = [size];
+  next = [size];
+  current[21] = 1;
+  frame = 0
+};
 
+tick() => {
 frame > 0 ? advance();
 seedTrigger > 0 ? () => {
   current[21] = 1;
   seedTrigger = 0
 };
-frame++`,
+frame++
+};`,
     args: '30',
     animation: {
       kind: 'cells',
@@ -932,6 +947,8 @@ frame++`,
       execution: {
         mode: 'live',
         memoryChannels: [{ channel: 'cell', array: 'current' }],
+        setupFunction: 'setup',
+        tickFunction: 'tick',
       },
       channel: 'cell',
       historyRows: 41,
@@ -966,31 +983,33 @@ frame++`,
   },
   {
     id: 'logistic-map',
-    section: 'animations',
+    section: 'simulations',
     name: 'Interactive logistic map',
     description: 'Turn one growth parameter and watch a population settle, oscillate, or become chaotic.',
     concepts: ['discrete dynamics', 'persistent memory', 'feedback', 'period doubling', 'chaos'],
     expected: 'A continuous stream plotting population against iteration.',
     challenge: 'Move growth slowly from 3.0 toward 4.0 and look for each period-doubling transition.',
-    code: `[growthInput, seedInput]
-initialized == 0 ? growth = growthInput;
-initialized == 0 ? population = seedInput;
-initialized == 0 ? frame = 0;
-initialized == 0 ? initialized = 1;
+    code: `setup(growthInput, seedInput) => {
+  growth = growthInput;
+  population = seedInput;
+  frame = 0
+};
 
+tick() => {
 iteration = frame;
 @=iteration@;
 @=population@;
 
 population = growth * population * (1 - population);
-frame++`,
+frame++
+};`,
     args: '3.82 0.2',
     animation: {
       kind: 'series',
       title: 'Logistic map · population over time',
       description: 'The same equation produces equilibrium, cycles, or chaos as growth changes.',
       framesPerSecond: 30,
-      execution: { mode: 'live' },
+      execution: { mode: 'live', setupFunction: 'setup', tickFunction: 'tick' },
       yMin: 0,
       yMax: 1,
       historyLength: 180,
@@ -1029,23 +1048,24 @@ frame++`,
   },
   {
     id: 'predator-prey',
-    section: 'animations',
+    section: 'simulations',
     name: 'Predator–prey populations',
     description: 'Compare two population histories as their coupled boom-and-bust cycle unfolds.',
     concepts: ['coupled systems', 'persistent memory', 'feedback loops', 'time series', 'Euler integration'],
     expected: 'Two offset population trails showing predators following changes in prey.',
     challenge: 'Release prey or predators mid-orbit and compare how each intervention shifts the cycle.',
-    code: `[preyInput, predatorInput, predationInput]
-initialized == 0 ? prey = preyInput;
-initialized == 0 ? predators = predatorInput;
-initialized == 0 ? predation = predationInput;
-initialized == 0 ? preyGrowth = 1;
-initialized == 0 ? predatorDeath = 1.2;
-initialized == 0 ? conversion = 0.1;
-initialized == 0 ? dt = 0.02;
-initialized == 0 ? frame = 0;
-initialized == 0 ? initialized = 1;
+    code: `setup(preyInput, predatorInput, predationInput) => {
+  prey = preyInput;
+  predators = predatorInput;
+  predation = predationInput;
+  preyGrowth = 1;
+  predatorDeath = 1.2;
+  conversion = 0.1;
+  dt = 0.02;
+  frame = 0
+};
 
+tick() => {
 preyRelease != 0 ? () => {
   prey += preyRelease;
   preyRelease = 0
@@ -1065,14 +1085,15 @@ predators += predatorChange * dt;
 prey < 0 ? prey = 0;
 predators < 0 ? predators = 0;
 
-frame++`,
+frame++
+};`,
     args: '10 5 0.1',
     animation: {
       kind: 'series',
       title: 'Predator–prey populations over time',
       description: 'Separate trails make the lag between prey growth and predator growth visible.',
       framesPerSecond: 30,
-      execution: { mode: 'live' },
+      execution: { mode: 'live', setupFunction: 'setup', tickFunction: 'tick' },
       yMin: 0,
       yMax: 40,
       historyLength: 240,
@@ -1141,21 +1162,22 @@ frame++`,
   },
   {
     id: 'kicked-oscillator',
-    section: 'animations',
+    section: 'simulations',
     name: 'Kicked spring response',
     description: 'Kick a damped spring and compare its position with the velocity that drives it.',
     concepts: ['real-time actions', 'impulses', 'harmonic motion', 'phase lag', 'damping'],
     expected: 'A kick jumps velocity immediately; position stays continuous, then follows with a delayed oscillation.',
     challenge: 'Kick at the natural rhythm to add energy, then kick against it to stop the motion.',
-    code: `[stiffnessInput, dampingInput]
-initialized == 0 ? stiffness = stiffnessInput;
-initialized == 0 ? damping = dampingInput;
-initialized == 0 ? dt = 0.05;
-initialized == 0 ? position = 8;
-initialized == 0 ? velocity = 0;
-initialized == 0 ? frame = 0;
-initialized == 0 ? initialized = 1;
+    code: `setup(stiffnessInput, dampingInput) => {
+  stiffness = stiffnessInput;
+  damping = dampingInput;
+  dt = 0.05;
+  position = 8;
+  velocity = 0;
+  frame = 0
+};
 
+tick() => {
 impulse != 0 ? () => {
   velocity += impulse;
   impulse = 0
@@ -1168,14 +1190,15 @@ acceleration = -stiffness * position;
 velocity += acceleration * dt;
 velocity *= damping;
 position += velocity * dt;
-frame++`,
+frame++
+};`,
     args: '0.65 0.997',
     animation: {
       kind: 'series',
       title: 'Kicked spring · position and velocity',
       description: 'A kick creates an immediate velocity jump; position remains continuous and responds afterward.',
       framesPerSecond: 30,
-      execution: { mode: 'live' },
+      execution: { mode: 'live', setupFunction: 'setup', tickFunction: 'tick' },
       yMin: -12,
       yMax: 12,
       historyLength: 240,
@@ -1233,27 +1256,28 @@ frame++`,
   },
   {
     id: 'sorting-visualizer',
-    section: 'animations',
+    section: 'experiments',
     name: 'Live bubble sort',
     description: 'Watch one neighboring comparison per tick and reshuffle the array without restarting the host.',
     concepts: ['sorting algorithms', 'loop invariants', 'memory-backed output', 'real-time actions', 'algorithm visualization'],
     expected: 'Highlighted pairs trade places until every bar is ordered from shortest to tallest.',
     challenge: 'Shuffle halfway through a pass, or change the comparison to build a descending sort.',
-    code: `[sizeInput]
-fillRandom() => {
+    code: `fillRandom() => {
   values[i] = 1~100;
   i++ <= size ? >fillRandom() : 0
 };
 
-initialized == 0 ? size = sizeInput;
-initialized == 0 ? values = [size];
-initialized == 0 ? i = 1;
-initialized == 0 ? fillRandom();
-initialized == 0 ? scan = 1;
-initialized == 0 ? swapped = 0;
-initialized == 0 ? sorted = 0;
-initialized == 0 ? initialized = 1;
+setup(sizeInput) => {
+  size = sizeInput;
+  values = [size];
+  i = 1;
+  fillRandom();
+  scan = 1;
+  swapped = 0;
+  sorted = 0
+};
 
+tick() => {
 shuffleTrigger > 0 ? () => {
   i = 1;
   fillRandom();
@@ -1281,7 +1305,8 @@ sorted == 0 ? () => {
     swapped = 0
   }
 };
-sorted`,
+sorted
+};`,
     args: '24',
     animation: {
       kind: 'bars',
@@ -1291,6 +1316,8 @@ sorted`,
       execution: {
         mode: 'live',
         memoryChannels: [{ channel: 'values', array: 'values' }],
+        setupFunction: 'setup',
+        tickFunction: 'tick',
       },
       channel: 'values',
       min: 0,
@@ -1328,23 +1355,17 @@ sorted`,
   },
   {
     id: 'monte-carlo-pi',
-    section: 'animations',
+    section: 'experiments',
     name: 'Monte Carlo π estimator',
     description: 'Estimate π from random points in a square and watch statistical noise settle over time.',
     concepts: ['Monte Carlo methods', 'probability', 'convergence', 'persistent memory', 'real-time actions'],
     expected: 'The live estimate wanders at first, then settles near the dashed π reference line.',
     challenge: 'Compare small and large batches, then reset both and see which estimate stabilizes first.',
-    code: `[batchInput]
-initialized == 0 ? batchSize = batchInput;
-initialized == 0 ? inside = 0;
-initialized == 0 ? total = 0;
-initialized == 0 ? frame = 0;
-initialized == 0 ? initialized = 1;
-
-resetTrigger > 0 ? () => {
+    code: `setup(batchInput) => {
+  batchSize = batchInput;
   inside = 0;
   total = 0;
-  resetTrigger = 0
+  frame = 0
 };
 
 sampleBatch() => {
@@ -1357,19 +1378,27 @@ sampleBatch() => {
   sample < batchSize ? >sampleBatch() : 0
 };
 
+tick() => {
+resetTrigger > 0 ? () => {
+  inside = 0;
+  total = 0;
+  resetTrigger = 0
+};
+
 sample = 0;
 sampleBatch();
 estimate = 4 * inside / total;
 @=estimate@;
 @=total@;
-frame++`,
+frame++
+};`,
     args: '25',
     animation: {
       kind: 'series',
       title: 'Monte Carlo estimate of π',
       description: 'Each tick adds random samples; the dashed line is π, not another estimate.',
       framesPerSecond: 15,
-      execution: { mode: 'live' },
+      execution: { mode: 'live', setupFunction: 'setup', tickFunction: 'tick' },
       yMin: 0,
       yMax: 4,
       historyLength: 240,

@@ -22,7 +22,7 @@ const runExample = (example: Example, argumentInput = example.args ?? '') => {
     return runTraceScript(example.code, argumentInput)
   }
 
-  const session = createTraceTickSession(example.code, argumentInput, execution.memoryChannels)
+  const session = createTraceTickSession(example.code, argumentInput, execution)
   const animationFrames = []
   let result = session.tick()
   animationFrames.push(...result.animationFrames)
@@ -74,7 +74,7 @@ describe('trace runner', () => {
     const session = createTraceTickSession(
       'initialized == 0 ? () => { output = [2]; output[2] = 3; initialized = 1 }; output[1] += output[2]; output[1]',
       '',
-      [{ channel: 'samples', array: 'output' }],
+      { mode: 'live', memoryChannels: [{ channel: 'samples', array: 'output' }] },
     )
 
     expect(session.tick()).toMatchObject({
@@ -89,6 +89,37 @@ describe('trace runner', () => {
     })
   })
 
+  it('registers a live script once, runs setup once, and calls only its tick function afterward', () => {
+    const session = createTraceTickSession(
+      `setup(start) => { value = start; setupCalls++ };
+tick() => { @=value@; value++ };`,
+      '7e0',
+      { mode: 'live', setupFunction: 'setup', tickFunction: 'tick' },
+    )
+
+    expect(session.tick()).toMatchObject({
+      output: 8,
+      animationFrames: [{ values: { value: [7] } }],
+      error: null,
+    })
+    expect(session.tick()).toMatchObject({
+      output: 9,
+      animationFrames: [{ values: { value: [8] } }],
+      error: null,
+    })
+    expect(session.getVariable('setupCalls')).toBe(1)
+  })
+
+  it('reports a configured live function that is not defined by the script', () => {
+    const result = createTraceTickSession('setup() => { 1 };', '', {
+      mode: 'live',
+      setupFunction: 'setup',
+      tickFunction: 'missing',
+    }).tick()
+
+    expect(result.error).toBe('Live tick function "missing" is not defined.')
+  })
+
   it('resolves script arguments during guarded first-tick initialization', () => {
     const session = createTraceTickSession(
       '[input] initialized == 0 ? value = input; initialized == 0 ? initialized = 1; value++',
@@ -100,9 +131,10 @@ describe('trace runner', () => {
   })
 
   it('reports a missing memory-backed animation array', () => {
-    const result = createTraceTickSession('1', '', [
-      { channel: 'samples', array: 'missing' },
-    ]).tick()
+    const result = createTraceTickSession('1', '', {
+      mode: 'live',
+      memoryChannels: [{ channel: 'samples', array: 'missing' }],
+    }).tick()
 
     expect(result.error).toContain('missing Trace array "missing"')
   })
@@ -205,7 +237,7 @@ describe('guided examples', () => {
       const session = createTraceTickSession(
         example.code,
         example.args ?? '',
-        execution?.memoryChannels,
+        execution,
       )
 
       const first = session.tick()
@@ -223,7 +255,7 @@ describe('guided examples', () => {
       const session = createTraceTickSession(
         example.code,
         example.args ?? '',
-        example.animation?.execution?.memoryChannels,
+        example.animation?.execution,
       )
       expect(session.tick().error).toBeNull()
 

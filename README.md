@@ -38,6 +38,10 @@ npm test
 npm run build
 ```
 
+The build and `npm run typecheck` use TypeScript 7. The TypeScript 6 compatibility
+package remains installed for `typescript-eslint`, which does not yet support the
+TypeScript 7 compiler API.
+
 ## CI / Deployment
 
 | Workflow | Trigger | What it does |

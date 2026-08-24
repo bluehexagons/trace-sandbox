@@ -1,2 +1,2 @@
-export { examples, exampleSections } from './catalog'
-export type { Example, ExampleSectionId } from './types'
+export { examples, exampleSections } from './catalog';
+export type { Example, ExampleSectionId } from './types';

@@ -34,6 +34,6 @@ export const exampleSections = [
     title: '7. Algorithms & experiments',
     description: 'Visualize computation, emergence, and randomized mathematical evidence.',
   },
-] as const
+] as const;
 
-export type ExampleSectionId = (typeof exampleSections)[number]['id']
+export type ExampleSectionId = (typeof exampleSections)[number]['id'];

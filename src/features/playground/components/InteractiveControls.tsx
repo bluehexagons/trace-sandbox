@@ -1,17 +1,17 @@
-import { readArgumentValue } from '../interactive'
+import { readArgumentValue } from '../interactive';
 import type {
   InteractiveArgumentControl,
   InteractiveControls as ControlsConfig,
   InteractiveTriggerControl,
-} from '../interactive'
+} from '../interactive';
 
 interface InteractiveControlsProps {
-  args: string
-  controls: ControlsConfig
-  exampleId: string
-  onChange: (control: InteractiveArgumentControl, value: number) => void
-  onTrigger?: (control: InteractiveTriggerControl) => void
-  liveActionsEnabled?: boolean
+  args: string;
+  controls: ControlsConfig;
+  exampleId: string;
+  onChange: (control: InteractiveArgumentControl, value: number) => void;
+  onTrigger?: (control: InteractiveTriggerControl) => void;
+  liveActionsEnabled?: boolean;
 }
 
 export default function InteractiveControls({
@@ -22,13 +22,13 @@ export default function InteractiveControls({
   onTrigger,
   liveActionsEnabled = false,
 }: InteractiveControlsProps) {
-  const hasLiveActions = controls.items.some(control => control.kind === 'trigger')
+  const hasLiveActions = controls.items.some((control) => control.kind === 'trigger');
   const hasLiveArguments = controls.items.some(
-    control => control.kind !== 'trigger' && control.liveVariable !== undefined,
-  )
+    (control) => control.kind !== 'trigger' && control.liveVariable !== undefined,
+  );
   const hasRestartArguments = controls.items.some(
-    control => control.kind !== 'trigger' && control.liveVariable === undefined,
-  )
+    (control) => control.kind !== 'trigger' && control.liveVariable === undefined,
+  );
 
   const statusLabel = hasLiveActions
     ? `${hasRestartArguments ? 'Some sliders restart' : 'Sliders update live'} · Actions run live`
@@ -36,7 +36,7 @@ export default function InteractiveControls({
       ? 'Sliders update live'
       : controls.autoRun
         ? 'Auto-runs after changes'
-        : ''
+        : '';
 
   return (
     <section className="interactive-panel" aria-labelledby="interactive-controls-title">
@@ -48,7 +48,7 @@ export default function InteractiveControls({
         {statusLabel !== '' && <span>{statusLabel}</span>}
       </div>
       <div className="interactive-grid">
-        {controls.items.map(control => {
+        {controls.items.map((control) => {
           if (control.kind === 'trigger') {
             return (
               <div className="interactive-control interactive-trigger" key={control.id}>
@@ -65,11 +65,11 @@ export default function InteractiveControls({
                   {control.buttonLabel}
                 </button>
               </div>
-            )
+            );
           }
 
-          const value = readArgumentValue(args, control.argumentIndex, control.defaultValue)
-          const inputId = `control-${exampleId}-${control.id}`
+          const value = readArgumentValue(args, control.argumentIndex, control.defaultValue);
+          const inputId = `control-${exampleId}-${control.id}`;
 
           return (
             <div className="interactive-control" key={control.id}>
@@ -90,7 +90,7 @@ export default function InteractiveControls({
                     max={control.max}
                     step={control.step}
                     value={value}
-                    onChange={event => onChange(control, event.currentTarget.valueAsNumber)}
+                    onChange={(event) => onChange(control, event.currentTarget.valueAsNumber)}
                   />
                 )}
                 <input
@@ -101,14 +101,16 @@ export default function InteractiveControls({
                   max={control.max}
                   step={control.step}
                   value={value}
-                  onChange={event => onChange(control, event.currentTarget.valueAsNumber)}
-                  aria-label={control.kind === 'range' ? `${control.label} numeric value` : undefined}
+                  onChange={(event) => onChange(control, event.currentTarget.valueAsNumber)}
+                  aria-label={
+                    control.kind === 'range' ? `${control.label} numeric value` : undefined
+                  }
                 />
               </div>
             </div>
-          )
+          );
         })}
       </div>
     </section>
-  )
+  );
 }

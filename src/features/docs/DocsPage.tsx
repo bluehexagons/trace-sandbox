@@ -1,18 +1,16 @@
-import { languageBasics } from './sections/language-basics'
-import { executionAndDebugging } from './sections/execution-and-debugging'
-import { runtimeAndApi } from './sections/runtime-and-api'
+import { languageBasics } from './sections/language-basics';
+import { executionAndDebugging } from './sections/execution-and-debugging';
+import { runtimeAndApi } from './sections/runtime-and-api';
 
-const sections = [
-  ...languageBasics,
-  ...executionAndDebugging,
-  ...runtimeAndApi,
-]
+const sections = [...languageBasics, ...executionAndDebugging, ...runtimeAndApi];
 
 export default function DocsPage() {
   return (
     <div className="docs">
       <header className="docs-header">
-        <h1><span className="logo-accent">trace</span> language docs</h1>
+        <h1>
+          <span className="logo-accent">trace</span> language docs
+        </h1>
         <p className="docs-version">Latest Version</p>
       </header>
       <div className="docs-content">
@@ -24,5 +22,5 @@ export default function DocsPage() {
         ))}
       </div>
     </div>
-  )
+  );
 }

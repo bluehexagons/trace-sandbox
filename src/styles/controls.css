@@ -108,7 +108,9 @@
 .interactive-trigger button:hover:not(:disabled) {
   background: rgba(124, 107, 255, 0.3);
 }
-.interactive-trigger button:active:not(:disabled) { transform: translateY(1px); }
+.interactive-trigger button:active:not(:disabled) {
+  transform: translateY(1px);
+}
 .interactive-trigger button:disabled {
   cursor: not-allowed;
   opacity: 0.4;
@@ -156,7 +158,9 @@
   flex-direction: column;
   gap: 0.35rem;
 }
-.sandbox-option-wide { grid-column: 1 / -1; }
+.sandbox-option-wide {
+  grid-column: 1 / -1;
+}
 .sandbox-option > span {
   font-size: 0.72rem;
   font-weight: 650;
@@ -175,7 +179,9 @@
   width: 100%;
 }
 .sandbox-option input:focus,
-.sandbox-option select:focus { border-color: var(--accent); }
+.sandbox-option select:focus {
+  border-color: var(--accent);
+}
 .sandbox-option small {
   color: var(--text-dim);
   font-size: 0.66rem;
@@ -185,5 +191,6 @@
   margin-top: 0.8rem;
   padding-top: 0.65rem;
 }
-.sandbox-options-note code { color: var(--accent2); }
-
+.sandbox-options-note code {
+  color: var(--accent2);
+}

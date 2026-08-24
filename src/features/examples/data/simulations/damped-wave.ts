@@ -1,11 +1,17 @@
-import type { Example } from '../../types'
+import type { Example } from '../../types';
 
 export const dampedWaveExample: Example = {
   id: 'damped-wave',
   section: 'simulations',
   name: 'Damped wave solver',
   description: 'Evolve a one-dimensional wave and render its current array directly from memory.',
-  concepts: ['finite differences', 'memory-backed output', 'double buffering', 'arrays', 'wave propagation'],
+  concepts: [
+    'finite differences',
+    'memory-backed output',
+    'double buffering',
+    'arrays',
+    'wave propagation',
+  ],
   expected: 'A continuous wave stream where the pulse splits, reflects, and loses energy.',
   challenge: 'Wait for the first pulse to spread, then inject another and watch them interfere.',
   code: `initialize() => {
@@ -74,7 +80,8 @@ tick() => {
   animation: {
     kind: 'wave',
     title: 'Finite-difference wave',
-    description: 'Each polyline reads 41 samples from the current array; older frames fade behind it.',
+    description:
+      'Each polyline reads 41 samples from the current array; older frames fade behind it.',
     framesPerSecond: 18,
     execution: {
       mode: 'live',
@@ -89,7 +96,8 @@ tick() => {
     color: '#38bdf8',
   },
   controls: {
-    description: 'Change propagation, damping, and the initial pulse, then watch the field respond.',
+    description:
+      'Change propagation, damping, and the initial pulse, then watch the field respond.',
     autoRun: true,
     items: [
       {
@@ -139,4 +147,4 @@ tick() => {
       },
     ],
   },
-}
+};

@@ -1,11 +1,17 @@
-import type { Example } from '../../types'
+import type { Example } from '../../types';
 
 export const lorenzAttractorExample: Example = {
   id: 'lorenz-attractor',
   section: 'simulations',
   name: 'Lorenz strange attractor',
   description: 'Integrate a chaotic differential system and draw its evolving phase-space path.',
-  concepts: ['chaos', 'persistent memory', 'differential equations', 'live time stepping', 'phase space'],
+  concepts: [
+    'chaos',
+    'persistent memory',
+    'differential equations',
+    'live time stepping',
+    'phase space',
+  ],
   expected: 'A continuous trace of the attractor’s two characteristic lobes.',
   challenge: 'Let two runs evolve, perturb one, and watch their trajectories diverge.',
   code: `# Setup and stepping are separate host-callable functions.
@@ -50,9 +56,7 @@ tick() => {
     yMin: 0,
     yMax: 75,
     trailLength: 220,
-    points: [
-      { x: 'x', y: 'z', color: '#a89bff', label: 'System state', radius: 1.1 },
-    ],
+    points: [{ x: 'x', y: 'z', color: '#a89bff', label: 'System state', radius: 1.1 }],
   },
   controls: {
     description: 'Explore how system constants change the attractor and its sensitivity.',
@@ -105,4 +109,4 @@ tick() => {
       },
     ],
   },
-}
+};

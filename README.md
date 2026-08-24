@@ -34,20 +34,20 @@ npm run dev
 # Run tests
 npm test
 
+# Run lint and formatting checks
+npm run lint
+npm run format:check
+
 # Build for production
 npm run build
 ```
 
-The build and `npm run typecheck` use TypeScript 7. The TypeScript 6 compatibility
-package remains installed for `typescript-eslint`, which does not yet support the
-TypeScript 7 compiler API.
-
 ## CI / Deployment
 
-| Workflow | Trigger | What it does |
-|---|---|---|
-| **CI** (`.github/workflows/ci.yml`) | Push/PR to `main` | Lint, type-check, build, and test |
-| **Deploy** (`.github/workflows/deploy.yml`) | Push to `main` | Build and deploy to GitHub Pages |
+| Workflow                                    | Trigger           | What it does                      |
+| ------------------------------------------- | ----------------- | --------------------------------- |
+| **CI** (`.github/workflows/ci.yml`)         | Push/PR to `main` | Lint, type-check, build, and test |
+| **Deploy** (`.github/workflows/deploy.yml`) | Push to `main`    | Build and deploy to GitHub Pages  |
 
 To enable GitHub Pages for this repository, go to **Settings → Pages** and choose **GitHub Actions** as the source.
 

@@ -1,13 +1,20 @@
-import type { Example } from '../../types'
+import type { Example } from '../../types';
 
 export const predatorPreyExample: Example = {
   id: 'predator-prey',
   section: 'simulations',
   name: 'Predator–prey populations',
   description: 'Compare two population histories as their coupled boom-and-bust cycle unfolds.',
-  concepts: ['coupled systems', 'persistent memory', 'feedback loops', 'time series', 'Euler integration'],
+  concepts: [
+    'coupled systems',
+    'persistent memory',
+    'feedback loops',
+    'time series',
+    'Euler integration',
+  ],
   expected: 'Two offset population trails showing predators following changes in prey.',
-  challenge: 'Release prey or predators mid-orbit and compare how each intervention shifts the cycle.',
+  challenge:
+    'Release prey or predators mid-orbit and compare how each intervention shifts the cycle.',
   code: `setup(preyInput, predatorInput, predationInput) => {
   prey = preyInput;
   predators = predatorInput;
@@ -116,4 +123,4 @@ tick() => {
       },
     ],
   },
-}
+};

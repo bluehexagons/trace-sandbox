@@ -1,10 +1,11 @@
-import type { Example } from '../../types'
+import type { Example } from '../../types';
 
 export const logisticMapExample: Example = {
   id: 'logistic-map',
   section: 'simulations',
   name: 'Interactive logistic map',
-  description: 'Turn one growth parameter and watch a population settle, oscillate, or become chaotic.',
+  description:
+    'Turn one growth parameter and watch a population settle, oscillate, or become chaotic.',
   concepts: ['discrete dynamics', 'persistent memory', 'feedback', 'period doubling', 'chaos'],
   expected: 'A continuous stream plotting population against iteration.',
   challenge: 'Move growth slowly from 3.0 toward 4.0 and look for each period-doubling transition.',
@@ -32,9 +33,7 @@ tick() => {
     yMin: 0,
     yMax: 1,
     historyLength: 180,
-    lines: [
-      { channel: 'population', color: '#f472b6', label: 'Population' },
-    ],
+    lines: [{ channel: 'population', color: '#f472b6', label: 'Population' }],
   },
   controls: {
     description: 'Small growth changes can completely reorganize the long-term trajectory.',
@@ -66,4 +65,4 @@ tick() => {
       },
     ],
   },
-}
+};

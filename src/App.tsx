@@ -1,31 +1,31 @@
-import { useEffect, useState } from 'react'
-import type { MouseEvent as ReactMouseEvent } from 'react'
-import Docs from './features/docs/DocsPage'
-import Playground from './features/playground/Playground'
-import { buildEmptySandboxHref } from './features/playground/sandboxUrl'
+import { useEffect, useState } from 'react';
+import type { MouseEvent as ReactMouseEvent } from 'react';
+import Docs from './features/docs/DocsPage';
+import Playground from './features/playground/Playground';
+import { buildEmptySandboxHref } from './features/playground/sandboxUrl';
 
-type View = 'playground' | 'docs'
+type View = 'playground' | 'docs';
 
-const currentUrl = () => typeof window === 'undefined'
-  ? 'https://example.invalid/'
-  : window.location.href
+const currentUrl = () =>
+  typeof window === 'undefined' ? 'https://example.invalid/' : window.location.href;
 
 export default function App() {
-  const [view, setView] = useState<View>('playground')
-  const emptySandboxHref = buildEmptySandboxHref(currentUrl())
+  const [view, setView] = useState<View>('playground');
+  const emptySandboxHref = buildEmptySandboxHref(currentUrl());
 
   useEffect(() => {
-    const showPlayground = () => setView('playground')
-    window.addEventListener('popstate', showPlayground)
-    return () => window.removeEventListener('popstate', showPlayground)
-  }, [])
+    const showPlayground = () => setView('playground');
+    window.addEventListener('popstate', showPlayground);
+    return () => window.removeEventListener('popstate', showPlayground);
+  }, []);
 
   const followEmptySandboxLink = (event: ReactMouseEvent<HTMLAnchorElement>) => {
-    if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return
-    event.preventDefault()
-    window.history.pushState(null, '', emptySandboxHref)
-    window.dispatchEvent(new PopStateEvent('popstate'))
-  }
+    if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey)
+      return;
+    event.preventDefault();
+    window.history.pushState(null, '', emptySandboxHref);
+    window.dispatchEvent(new PopStateEvent('popstate'));
+  };
 
   return (
     <div className="app">
@@ -49,7 +49,9 @@ export default function App() {
             >
               Playground
             </button>
-            <a href={emptySandboxHref} onClick={followEmptySandboxLink}>Empty sandbox</a>
+            <a href={emptySandboxHref} onClick={followEmptySandboxLink}>
+              Empty sandbox
+            </a>
             <a
               href="https://github.com/bluehexagons/trace-sandbox"
               target="_blank"
@@ -76,5 +78,5 @@ export default function App() {
         </p>
       </footer>
     </div>
-  )
+  );
 }

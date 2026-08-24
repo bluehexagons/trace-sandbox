@@ -5,8 +5,12 @@
   min-height: 100vh;
 }
 
-.playground-view { display: contents; }
-.playground-view.is-hidden { display: none; }
+.playground-view {
+  display: contents;
+}
+.playground-view.is-hidden {
+  display: none;
+}
 
 /* ── Header ─────────────────────────────────────────────── */
 .header {
@@ -31,15 +35,21 @@
   letter-spacing: -0.02em;
   font-family: var(--font-mono);
 }
-.logo-accent { color: var(--accent); }
+.logo-accent {
+  color: var(--accent);
+}
 .header-links {
   display: flex;
   gap: 1.5rem;
   font-size: 0.875rem;
   color: var(--text-dim);
 }
-.header-links a { color: var(--text-dim); }
-.header-links a:hover { color: var(--text); }
+.header-links a {
+  color: var(--text-dim);
+}
+.header-links a:hover {
+  color: var(--text);
+}
 .header-btn {
   background: none;
   border: none;
@@ -50,8 +60,12 @@
   padding: 0;
   transition: color 0.15s;
 }
-.header-btn:hover { color: var(--text); }
-.header-btn.active { color: var(--accent2); }
+.header-btn:hover {
+  color: var(--text);
+}
+.header-btn.active {
+  color: var(--accent2);
+}
 
 /* ── Main ───────────────────────────────────────────────── */
 .main {
@@ -214,8 +228,14 @@
   transition: background 0.1s;
   width: 100%;
 }
-.example-btn:hover { background: var(--surface2); text-decoration: none; }
-.example-btn.active { background: var(--surface2); box-shadow: inset 2px 0 0 var(--accent); }
+.example-btn:hover {
+  background: var(--surface2);
+  text-decoration: none;
+}
+.example-btn.active {
+  background: var(--surface2);
+  box-shadow: inset 2px 0 0 var(--accent);
+}
 .example-name {
   align-items: center;
   display: flex;

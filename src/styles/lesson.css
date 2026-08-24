@@ -9,9 +9,7 @@
 
 /* ── Active lesson ──────────────────────────────────────── */
 .lesson-card {
-  background:
-    linear-gradient(135deg, rgba(124, 107, 255, 0.12), transparent 55%),
-    var(--surface);
+  background: linear-gradient(135deg, rgba(124, 107, 255, 0.12), transparent 55%), var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 1.1rem 1.25rem;
@@ -92,4 +90,3 @@
 .lesson-notes strong {
   color: var(--text);
 }
-

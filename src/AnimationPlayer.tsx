@@ -1,1 +1,1 @@
-export { default } from './features/animation/AnimationPlayer'
+export { default } from './features/animation/AnimationPlayer';

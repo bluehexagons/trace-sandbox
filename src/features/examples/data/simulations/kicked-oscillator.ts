@@ -1,4 +1,4 @@
-import type { Example } from '../../types'
+import type { Example } from '../../types';
 
 export const kickedOscillatorExample: Example = {
   id: 'kicked-oscillator',
@@ -6,7 +6,8 @@ export const kickedOscillatorExample: Example = {
   name: 'Kicked spring response',
   description: 'Kick a damped spring and compare its position with the velocity that drives it.',
   concepts: ['real-time actions', 'impulses', 'harmonic motion', 'phase lag', 'damping'],
-  expected: 'A kick jumps velocity immediately; position stays continuous, then follows with a delayed oscillation.',
+  expected:
+    'A kick jumps velocity immediately; position stays continuous, then follows with a delayed oscillation.',
   challenge: 'Kick at the natural rhythm to add energy, then kick against it to stop the motion.',
   code: `setup(stiffnessInput, dampingInput) => {
   stiffness = stiffnessInput;
@@ -36,7 +37,8 @@ tick() => {
   animation: {
     kind: 'series',
     title: 'Kicked spring · position and velocity',
-    description: 'A kick creates an immediate velocity jump; position remains continuous and responds afterward.',
+    description:
+      'A kick creates an immediate velocity jump; position remains continuous and responds afterward.',
     framesPerSecond: 30,
     execution: { mode: 'live', setupFunction: 'setup', tickFunction: 'tick' },
     yMin: -12,
@@ -95,4 +97,4 @@ tick() => {
       },
     ],
   },
-}
+};

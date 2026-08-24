@@ -1,4 +1,4 @@
-export { default as AnimationPlayer } from './AnimationPlayer'
+export { default as AnimationPlayer } from './AnimationPlayer';
 export type {
   AnimationFrame,
   AnimationSpec,
@@ -12,4 +12,4 @@ export type {
   SeriesLine,
   SeriesReference,
   WaveAnimation,
-} from './types'
+} from './types';

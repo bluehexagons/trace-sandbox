@@ -1,11 +1,17 @@
-import type { Example } from '../../types'
+import type { Example } from '../../types';
 
 export const orbitalSystemExample: Example = {
   id: 'orbital-system',
   section: 'simulations',
   name: 'Three-body orbital system',
   description: 'Integrate three independent bodies around a gravity well and render their paths.',
-  concepts: ['live ticks', 'persistent memory', 'interactive parameters', 'Euler integration', 'gravity'],
+  concepts: [
+    'live ticks',
+    'persistent memory',
+    'interactive parameters',
+    'Euler integration',
+    'gravity',
+  ],
   expected: 'A continuous stream of three differently shaped orbits around a central star.',
   challenge: 'Change body 3’s target velocity while it is orbiting and watch the path adapt.',
   code: `# The host calls setup() once, then tick() for every frame.
@@ -123,4 +129,4 @@ tick() => {
       },
     ],
   },
-}
+};

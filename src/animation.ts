@@ -1,1 +1,1 @@
-export * from './features/animation/types'
+export * from './features/animation/types';

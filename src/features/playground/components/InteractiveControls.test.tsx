@@ -1,11 +1,11 @@
-import { renderToStaticMarkup } from 'react-dom/server'
-import { describe, expect, it, vi } from 'vitest'
-import InteractiveControls from './InteractiveControls'
-import { readArgumentValue, writeArgumentValue } from '../interactive'
+import { renderToStaticMarkup } from 'react-dom/server';
+import { describe, expect, it, vi } from 'vitest';
+import InteractiveControls from './InteractiveControls';
+import { readArgumentValue, writeArgumentValue } from '../interactive';
 import type {
   InteractiveArgumentControl,
   InteractiveControls as ControlsConfig,
-} from '../interactive'
+} from '../interactive';
 
 const argumentControls: InteractiveArgumentControl[] = [
   {
@@ -31,7 +31,7 @@ const argumentControls: InteractiveArgumentControl[] = [
     max: 20,
     step: 1,
   },
-]
+];
 
 const controls: ControlsConfig = {
   description: 'Tune the model.',
@@ -48,19 +48,21 @@ const controls: ControlsConfig = {
       buttonLabel: 'Trigger pulse',
     },
   ],
-}
+};
 
 describe('interactive argument controls', () => {
   it('reads finite arguments and falls back for missing values', () => {
-    expect(readArgumentValue('3.5', 0, 2)).toBe(3.5)
-    expect(readArgumentValue('3.5', 1, 10)).toBe(10)
-  })
+    expect(readArgumentValue('3.5', 0, 2)).toBe(3.5);
+    expect(readArgumentValue('3.5', 1, 10)).toBe(10);
+  });
 
   it('updates one argument, fills configured defaults, and clamps the result', () => {
-    expect(writeArgumentValue('', argumentControls[1], 30, controls.items)).toBe('2 20')
-    expect(writeArgumentValue('3 10 99', argumentControls[0], 4.5, controls.items)).toBe('4.5 10 99')
-    expect(writeArgumentValue('3 10', argumentControls[0], NaN, controls.items)).toBe('3 10')
-  })
+    expect(writeArgumentValue('', argumentControls[1], 30, controls.items)).toBe('2 20');
+    expect(writeArgumentValue('3 10 99', argumentControls[0], 4.5, controls.items)).toBe(
+      '4.5 10 99',
+    );
+    expect(writeArgumentValue('3 10', argumentControls[0], NaN, controls.items)).toBe('3 10');
+  });
 
   it('renders range and numeric inputs with the current argument values', () => {
     const markup = renderToStaticMarkup(
@@ -72,14 +74,14 @@ describe('interactive argument controls', () => {
         onTrigger={vi.fn()}
         liveActionsEnabled
       />,
-    )
+    );
 
-    expect(markup).toContain('Interactive controls')
-    expect(markup).toContain('Some sliders restart · Actions run live')
-    expect(markup).toContain('type="range"')
-    expect(markup).toContain('value="3.5"')
-    expect(markup).toContain('value="12"')
-    expect(markup).toContain('Trigger pulse')
-    expect(markup).not.toContain('disabled')
-  })
-})
+    expect(markup).toContain('Interactive controls');
+    expect(markup).toContain('Some sliders restart · Actions run live');
+    expect(markup).toContain('type="range"');
+    expect(markup).toContain('value="3.5"');
+    expect(markup).toContain('value="12"');
+    expect(markup).toContain('Trigger pulse');
+    expect(markup).not.toContain('disabled');
+  });
+});

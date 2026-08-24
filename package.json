@@ -17,7 +17,7 @@
   "dependencies": {
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
-    "trace": "github:bluehexagons/trace#bfe04bf18a7d6c7097a4b19f0ed673de84aabbc0"
+    "trace": "https://codeload.github.com/bluehexagons/trace/tar.gz/refs/tags/v0.1.1"
   },
   "devDependencies": {
     "@types/node": "^26.2.0",
@@ -30,5 +30,9 @@
     "typescript": "^7.0.2",
     "vite": "^8.2.2",
     "vitest": "^4.1.11"
+  },
+  "engines": {
+    "node": ">=26.4.0",
+    "npm": ">=11.18.0"
   }
 }

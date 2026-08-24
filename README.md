@@ -24,6 +24,8 @@ An interactive playground for the experimental [**trace**](https://github.com/bl
 
 ## Development
 
+Development requires Node.js 26.4 or newer and npm 11.18 or newer.
+
 ```bash
 # Install dependencies
 npm install

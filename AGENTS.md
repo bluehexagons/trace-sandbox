@@ -18,12 +18,12 @@ commands so `.nvmrc` selects the newest installed release.
   production build.
 - `npm run dev`: start the loopback Vite server on port 5173.
 
-Run `npm run check` before pushing. Keep Vite on loopback. Prefer T3 Code's
-collaborative environment-port preview for browser checks; if it is unavailable,
-verify `infra-tools agent doctor --capability browser --json` before using the
-VM-origin Playwright fallback. Routine browser evidence stays in infra-tools'
-private bounded storage. Put explicitly requested captures under ignored
-`local-artifacts/`.
+Run `npm run check` before pushing. Keep Vite on loopback and use VM-origin
+Playwright after `infra-tools agent doctor --capability browser --json`
+succeeds. T3's environment-port target is not a tunnel to VM loopback; use the
+collaborative preview only when the connected client can already reach the
+application. Routine browser evidence stays in infra-tools' private bounded
+storage. Put explicitly requested captures under ignored `local-artifacts/`.
 
 For an infra-tools static publication, build with a route-appropriate
 `VITE_BASE` such as `./`; the default production base remains

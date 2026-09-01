@@ -38,10 +38,12 @@ npm run check
 ```
 
 On an infra-tools agent VM, run `nvm use` first so the project selects an
-installed Node 26+ release. Keep Vite on loopback and use T3 Code's
-environment-port preview for collaborative browser testing. Routine managed
-browser evidence stays outside the repository; put explicitly requested
-captures under ignored `local-artifacts/`.
+installed Node 26+ release. Keep Vite on loopback and use VM-origin Playwright
+for repeatable browser testing. T3 Code's environment-port target does not
+tunnel to VM loopback; use its collaborative preview only when the connected
+client can already reach the application. Routine managed browser evidence
+stays outside the repository; put explicitly requested captures under ignored
+`local-artifacts/`.
 
 The production base defaults to `/trace-sandbox/` for GitHub Pages. Set
 `VITE_BASE=./` when building a portable static snapshot for another managed

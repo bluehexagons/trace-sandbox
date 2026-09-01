@@ -33,16 +33,19 @@ npm install
 # Start dev server
 npm run dev
 
-# Run tests
-npm test
-
-# Run lint and formatting checks
-npm run lint
-npm run format:check
-
-# Build for production
-npm run build
+# Run the complete local gate
+npm run check
 ```
+
+On an infra-tools agent VM, run `nvm use` first so the project selects an
+installed Node 26+ release. Keep Vite on loopback and use T3 Code's
+environment-port preview for collaborative browser testing. Routine managed
+browser evidence stays outside the repository; put explicitly requested
+captures under ignored `local-artifacts/`.
+
+The production base defaults to `/trace-sandbox/` for GitHub Pages. Set
+`VITE_BASE=./` when building a portable static snapshot for another managed
+path.
 
 ## CI / Deployment
 

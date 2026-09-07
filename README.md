@@ -66,6 +66,11 @@ To enable GitHub Pages for this repository, go to **Settings → Pages** and cho
 
 The trace interpreter is imported from the `trace` npm package (GitHub: bluehexagons/trace).
 
+Runs use Trace's default allocation budget of 1,048,576 numeric cells, including
+array headers, retained arrays, and argument stacks. Oversized allocations
+produce a normal playground error. This is an array budget, not a complete
+browser heap or untrusted-code isolation boundary.
+
 ## License
 
 MIT — see [LICENSE](./LICENSE).

@@ -134,4 +134,14 @@ tick() => { @=value@; value++ };`,
     });
     expect(runTraceScript('1 > < 2', '').error).toContain('offset');
   });
+
+  it('reports oversized allocations without interrupting subsequent scripts or ticks', () => {
+    const code = 'a = [1000000000000]';
+    for (const result of [runTraceScript(code, ''), createTraceTickSession(code, '').tick()]) {
+      expect(result.output).toBeNull();
+      expect(result.error).toContain('array allocation limit');
+    }
+    expect(runTraceScript('6 * 7', '').output).toBe(42);
+    expect(createTraceTickSession('6 * 7', '').tick().output).toBe(42);
+  });
 });

@@ -37,7 +37,7 @@ npm run dev
 npm run check
 ```
 
-On an infra-tools agent VM, run `nvm use` first so the project selects an
+On a Basaltwater agent VM, run `nvm use` first so the project selects an
 installed Node 26+ release. Keep Vite on loopback and use VM-origin Playwright
 for repeatable browser testing. T3 Code's environment-port target does not
 tunnel to VM loopback; use its collaborative preview only when the connected

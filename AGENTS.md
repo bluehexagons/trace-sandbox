@@ -9,7 +9,7 @@ compatibility when changing playground state.
 
 ## Environment and validation
 
-The standard Linux host is an infra-tools-managed agent VM. This repository
+The standard Linux host is a Basaltwater-managed agent VM. This repository
 requires Node 26.4+ and npm 11.18+; run `nvm use` from the checkout before npm
 commands so `.nvmrc` selects the newest installed release.
 
@@ -19,13 +19,13 @@ commands so `.nvmrc` selects the newest installed release.
 - `npm run dev`: start the loopback Vite server on port 5173.
 
 Run `npm run check` before pushing. Keep Vite on loopback and use VM-origin
-Playwright after `infra-tools agent doctor --capability browser --json`
+Playwright after `basaltw agent doctor --capability browser --json`
 succeeds. T3's environment-port target is not a tunnel to VM loopback; use the
 collaborative preview only when the connected client can already reach the
-application. Routine browser evidence stays in infra-tools' private bounded
+application. Routine browser evidence stays in Basaltwater's private bounded
 storage. Put explicitly requested captures under ignored `local-artifacts/`.
 
-For an infra-tools static publication, build with a route-appropriate
+For a Basaltwater static publication, build with a route-appropriate
 `VITE_BASE` such as `./`; the default production base remains
 `/trace-sandbox/` for GitHub Pages. Do not bind Vite to `0.0.0.0` or create an
 ad hoc proxy.

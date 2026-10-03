@@ -11,7 +11,9 @@ compatibility when changing playground state.
 
 The standard Linux host is a Basaltwater-managed agent VM. This repository
 requires Node 26.4+ and npm 11.18+; run `nvm use` from the checkout before npm
-commands so `.nvmrc` selects the newest installed release.
+commands so `.nvmrc` selects the development major. On Basaltwater,
+`basaltw node exec -- npm run check` selects it without changing the host
+default; `basaltw node install` installs a missing pin.
 
 - `npm ci`: install dependencies.
 - `npm run check`: run lint, formatting, tests, type-checking, and the

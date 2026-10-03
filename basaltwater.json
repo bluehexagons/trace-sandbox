@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "components": [
+    {
+      "name": "site",
+      "type": "static",
+      "domain": "{{domain}}",
+      "output": "dist",
+      "build": ["npm ci", "VITE_BASE=./ npm run build"]
+    }
+  ],
+  "ci": {
+    "install": [{ "argv": ["npm", "ci"] }],
+    "build": [{ "argv": ["npm", "run", "build"], "env": { "VITE_BASE": "./" } }],
+    "test": [{ "argv": ["npm", "run", "check"], "env": { "VITE_BASE": "./" } }]
+  }
+}

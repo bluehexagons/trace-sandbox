@@ -28,13 +28,22 @@ Development requires Node.js 26.4 or newer and npm 11.18 or newer.
 
 ```bash
 # Install dependencies
-npm install
+npm ci
 
 # Start dev server
 npm run dev
 
 # Run the complete local gate
 npm run check
+```
+
+`npm test` runs once with two workers and compact dots; failures retain their
+names and error details. Pass a file or `-t` name filter for a focused rerun,
+`--reporter=verbose` for every case name, or `--maxWorkers=1` to serialize files.
+
+```bash
+npm test -- src/features/playground/sandboxUrl.test.ts --reporter=verbose
+npm test -- --reporter=dot --reporter=json --outputFile=local-artifacts/tests.json
 ```
 
 On a Basaltwater agent VM, run `nvm use` first so the project selects an

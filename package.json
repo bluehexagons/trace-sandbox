@@ -18,7 +18,7 @@
   "dependencies": {
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
-    "trace": "https://codeload.github.com/bluehexagons/trace/tar.gz/refs/tags/v0.1.3"
+    "trace": "https://codeload.github.com/bluehexagons/trace/tar.gz/refs/tags/v0.1.4"
   },
   "devDependencies": {
     "@types/node": "^26.6.6",

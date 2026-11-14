@@ -185,6 +185,16 @@ export function usePlayground() {
     return () => window.removeEventListener('popstate', restoreLocation);
   }, [clearScheduledRun, expandSection, replaceTickSession]);
 
+  const updateCode = useCallback(
+    (next: string) => {
+      clearScheduledRun();
+      replaceTickSession(null);
+      setCode(next);
+      setShareStatus('');
+    },
+    [clearScheduledRun, replaceTickSession],
+  );
+
   const handleKeyDown = useCallback(
     (e: KeyboardEvent<HTMLTextAreaElement>) => {
       if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
@@ -197,7 +207,7 @@ export function usePlayground() {
         const start = el.selectionStart;
         const end = el.selectionEnd;
         const next = code.substring(0, start) + '  ' + code.substring(end);
-        setCode(next);
+        updateCode(next);
         requestAnimationFrame(() => {
           el.selectionStart = el.selectionEnd = start + 2;
         });
@@ -215,14 +225,14 @@ export function usePlayground() {
           : leadingWhitespace;
         const next =
           code.substring(0, start) + `\n${indentation}` + code.substring(el.selectionEnd);
-        setCode(next);
+        updateCode(next);
         requestAnimationFrame(() => {
           const cursor = start + indentation.length + 1;
           el.selectionStart = el.selectionEnd = cursor;
         });
       }
     },
-    [code, runCode],
+    [code, runCode, updateCode],
   );
 
   const loadExample = (index: number) => {
@@ -365,7 +375,7 @@ export function usePlayground() {
     sandboxSettings,
     selectedExample,
     setArgs,
-    setCode,
+    updateCode,
     setShareStatus,
     shareHref,
     shareStatus,

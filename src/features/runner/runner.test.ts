@@ -29,6 +29,18 @@ describe('trace runner', () => {
     expect(result.logs).toEqual([]);
   });
 
+  it.each(['constructor', 'toString', '__proto__'])(
+    'collects the %s channel in recorded and live frames',
+    (channel) => {
+      const code = `@frame@; ${channel}=3; @=${channel}@; ${channel}=4; @=${channel}@`;
+      for (const result of [runTraceScript(code, ''), createTraceTickSession(code, '').tick()]) {
+        expect(result.error).toBeNull();
+        expect(Object.hasOwn(result.animationFrames[0].values, channel)).toBe(true);
+        expect(result.animationFrames[0].values[channel]).toEqual([3, 4]);
+      }
+    },
+  );
+
   it('runs one tick at a time with persistent state and memory-backed channels', () => {
     const session = createTraceTickSession(
       'initialized == 0 ? () => { output = [2]; output[2] = 3; initialized = 1 }; output[1] += output[2]; output[1]',

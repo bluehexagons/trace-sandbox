@@ -61,7 +61,7 @@ export class TraceTickSession {
     }
 
     const logs: string[] = [];
-    const frame: AnimationFrame = { values: {} };
+    const frame: AnimationFrame = { values: Object.create(null) };
     attachTraceLogger(this.trace, logs, [frame], true);
 
     let runtimeMs = 0;

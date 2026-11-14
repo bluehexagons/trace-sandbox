@@ -33,7 +33,7 @@ export default function Playground() {
     sandboxSettings,
     selectedExample,
     setArgs,
-    setCode,
+    updateCode,
     setShareStatus,
     shareHref,
     shareStatus,
@@ -260,12 +260,7 @@ export default function Playground() {
           </div>
           <TraceCodeEditor
             value={code}
-            onChange={(event) => {
-              clearScheduledRun();
-              replaceTickSession(null);
-              setCode(event.target.value);
-              setShareStatus('');
-            }}
+            onChange={(event) => updateCode(event.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="Enter trace code here…"
             rows={Math.min(26, Math.max(9, code.split('\n').length + 1))}

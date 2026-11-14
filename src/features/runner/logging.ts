@@ -12,7 +12,7 @@ export const attachTraceLogger = (
     const value = messages[2];
 
     if (messages.length === 2 && channel === 'frame') {
-      if (!oneFramePerRun) animationFrames.push({ values: {} });
+      if (!oneFramePerRun) animationFrames.push({ values: Object.create(null) });
       return;
     }
 

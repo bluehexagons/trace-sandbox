@@ -86,6 +86,34 @@ export const currentSearch = () => (typeof window === 'undefined' ? '' : window.
 export const currentUrl = () =>
   typeof window === 'undefined' ? 'https://example.invalid/' : window.location.href;
 
+// Keep channel discovery separate from the player's bounded frame history.
+export function discoverLiveChannels(
+  current: PlaygroundResult | null,
+  tick: PlaygroundResult,
+): PlaygroundResult | null {
+  if (current === null || current.error !== null || tick.error !== null) return current;
+  const incoming = tick.animationFrames[0]?.values ?? {};
+  const known = current.animationFrames[0]?.values ?? {};
+  const added = Object.keys(incoming).filter((channel) => !Object.hasOwn(known, channel));
+  if (added.length === 0) return current;
+  const values: Record<string, number[]> = Object.assign(Object.create(null), known);
+  for (const channel of added) values[channel] = incoming[channel];
+  return { ...current, animationFrames: [{ values }] };
+}
+
+const normalizeYRange = (yMin: number, yMax: number) => {
+  if (yMax <= yMin) yMax = yMin + Math.max(1, Math.abs(yMin) * Number.EPSILON * 2);
+  if (
+    !Number.isFinite(yMin) ||
+    !Number.isFinite(yMax) ||
+    yMax <= yMin ||
+    !Number.isFinite(yMax - yMin)
+  ) {
+    return { yMin: defaultSandboxSettings.yMin, yMax: defaultSandboxSettings.yMax };
+  }
+  return { yMin, yMax };
+};
+
 export function buildCustomAnimation(
   selectedExample: number | null,
   result: PlaygroundResult | null,
@@ -93,11 +121,8 @@ export function buildCustomAnimation(
 ): AnimationSpec | undefined {
   if (selectedExample !== null || settings.runMode === 'once') return undefined;
 
-  const customChannelKey =
-    result?.error === null
-      ? Object.keys(result.animationFrames[0]?.values ?? {}).join('\u0000')
-      : '';
-  const channels = customChannelKey === '' ? [] : customChannelKey.split('\u0000');
+  const channels =
+    result?.error === null ? Object.keys(result.animationFrames[0]?.values ?? {}) : [];
   const execution =
     settings.runMode === 'functions'
       ? {
@@ -114,10 +139,9 @@ export function buildCustomAnimation(
       channels.length === 0
         ? 'Add named echoes such as @=value@ to draw streaming values.'
         : 'Each named echo is sampled from persistent Trace memory on every tick.',
-    framesPerSecond: Math.min(60, Math.max(1, settings.framesPerSecond)),
+    framesPerSecond: normalizeFramesPerSecond(settings.framesPerSecond),
     execution,
-    yMin: settings.yMin,
-    yMax: settings.yMax > settings.yMin ? settings.yMax : settings.yMin + 1,
+    ...normalizeYRange(settings.yMin, settings.yMax),
     historyLength: 240,
     lines: channels.map((channel, index) => ({
       channel,

@@ -6,6 +6,7 @@ import type { InteractiveArgumentControl, InteractiveTriggerControl } from './in
 import { readArgumentValue, writeArgumentValue } from './interactive';
 import {
   buildCustomAnimation,
+  discoverLiveChannels,
   currentSearch,
   currentUrl,
   defaultSandboxSettings,
@@ -149,6 +150,8 @@ export function usePlayground() {
         time: (current?.time ?? 0) + tick.time,
         error: tick.error,
       }));
+    } else {
+      setResult((current) => discoverLiveChannels(current, tick));
     }
     return tick.error === null ? (tick.animationFrames[0] ?? null) : null;
   }, [replaceTickSession]);

@@ -2,6 +2,15 @@ import { describe, expect, it } from 'vitest';
 import { createTraceTickSession, parseArguments, runTraceScript } from './index';
 
 describe('trace runner', () => {
+  it('collects nested callback echoes in recorded and live channels', () => {
+    const code = '@frame@; i=0; while(i<2,{@=i@;i++})';
+    for (const result of [runTraceScript(code, ''), createTraceTickSession(code, '').tick()]) {
+      expect(result.error).toBeNull();
+      expect(result.animationFrames).toEqual([{ values: { i: [0, 1] } }]);
+      expect(result.logs).toEqual([]);
+    }
+  });
+
   it('parses whitespace-separated finite numeric arguments', () => {
     expect(parseArguments('  1\t2.5\n-3  ')).toEqual([1, 2.5, -3]);
   });
